@@ -12,7 +12,21 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@astrojs/sitemap": "3.7.4",
+    "@eslint/js": "10.0.1",
     "astro": "7.3.3",
-    "typescript": "6.0.3"
+    "cspell": "10.3.3",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-astro": "3.2.1",
+    "eslint-plugin-jsx-a11y-x": "0.2.0",
+    "html-validate": "11.16.0",
+    "postcss-html": "2.0.0",
+    "prettier": "3.9.8",
+    "prettier-plugin-astro": "1.0.1",
+    "stylelint": "17.15.0",
+    "stylelint-config-html": "2.0.0",
+    "stylelint-config-standard": "40.0.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.0"
   }
 }
