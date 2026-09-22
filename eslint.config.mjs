@@ -28,6 +28,18 @@ export default [
     },
   },
   {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        module: "readonly",
+        exports: "readonly",
+        require: "readonly",
+        process: "readonly",
+      }
+    }
+  },
+  {
     rules: {
       "no-eval": "error",
       "no-implied-eval": "error",
