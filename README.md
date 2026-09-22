@@ -144,6 +144,21 @@ Astro is the best-fit tool for this portfolio—not a universal winner for every
 | Next.js or Gatsby static export | Strong | Moderate | Strong | Strong | Strong | React-centered runtime and dependency cost do not improve this content-first site |
 | Runtime SSR / CMS | Variable | Variable | Strong | Strong | Weak | Reject: adds servers, cold paths, cost risk, and availability dependencies |
 
+### Development toolchain
+
+Local development and GitHub Actions use Node.js 24.21.0 LTS. Production remains runtime-free: Cloudflare Pages serves the static `dist/` artifact and does not execute Node.js.
+
+Node.js recommends supported LTS releases for production-oriented tooling; Node 24 is the current LTS line, while Node 26 remains Current until October 2026 ([Node.js release schedule](https://nodejs.org/en/about/previous-releases)).
+
+| Manager | Strength | Weakness here | Decision |
+| --- | --- | --- | --- |
+| npm | Bundled with Node and has the lowest onboarding friction | Hoisted dependencies and less efficient shared storage | Good fallback |
+| **pnpm** | Strict dependency visibility, content-addressed storage, fast CI caching, and controlled install scripts | Contributors may need to install it once | **Selected** |
+| Yarn Modern | Strong constraints and zero-install support | Plug'n'Play adds editor and compatibility complexity unnecessary for one site | Reject |
+| Bun | Very fast installer and runtime | Introduces a second runtime ecosystem without improving the final static output | Reject |
+
+pnpm prevents undeclared dependency access and reuses packages through a content-addressed store ([pnpm motivation](https://pnpm.io/motivation)). Yarn documents that Plug'n'Play can require editor SDKs and package extensions ([Yarn install modes](https://yarnpkg.com/features/linkers)). Bun is capable, but installer speed for this small static build does not outweigh Node ecosystem compatibility.
+
 ### Selected stack
 
 | Layer | Choice | Reason |
@@ -154,7 +169,8 @@ Astro is the best-fit tool for this portfolio—not a universal winner for every
 | Styling | Modern vanilla CSS in scoped layers | No runtime; explicit tokens; fewer dependencies; original visual language |
 | Client behavior | Native HTML first; small framework-free modules only when justified | Avoids hydration and protects no-JS operation |
 | Images | `astro:assets`, AVIF/WebP plus an explicit fallback | Build-time sizing, formats, and layout-shift prevention |
-| Package manager | npm with a committed lockfile and `npm ci` | Ubiquitous, reproducible, and friendly to external contributors and agents |
+| Development runtime | Node.js 24.21.0 LTS | Pins local tooling and GitHub Actions without adding a production runtime |
+| Package manager | pnpm 12.5.1 with a committed lockfile and frozen installs | Enforces declared dependencies and reuses a content-addressed package store |
 | Validation | Astro check, ESLint, Prettier, Playwright, axe, Lighthouse CI | Static correctness plus rendered-browser evidence |
 | Source and CI | Public GitHub repository + GitHub Actions | The code and delivery history remain inspectable |
 | Delivery | Cloudflare Pages Direct Upload | Deploys the prebuilt folder to a global static network |
@@ -185,6 +201,7 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 
 ```text
 .
+├── .nvmrc
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml
@@ -210,7 +227,7 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │       └── utilities.css
 ├── tests/
 ├── astro.config.mjs
-├── package-lock.json
+├── pnpm-lock.yaml
 ├── package.json
 └── tsconfig.json
 ```
@@ -253,7 +270,7 @@ R2 or another object store is unnecessary for the initial portfolio. If a future
 
 Every pull request must pass the following gates before merge:
 
-1. Install exactly from `package-lock.json` with `npm ci`.
+1. Install exactly from `pnpm-lock.yaml` with `pnpm install --frozen-lockfile`.
 2. Check Astro and TypeScript diagnostics.
 3. Enforce formatting and lint rules.
 4. Validate content schemas, unique slugs, dates, and required image alternatives.
