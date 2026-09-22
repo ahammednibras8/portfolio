@@ -238,6 +238,8 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │       ├── global.css
 │       └── utilities.css
 ├── tests/
+│   ├── accessibility/
+│   └── e2e/
 ├── astro.config.mjs
 ├── package.json
 ├── pnpm-lock.yaml
@@ -266,6 +268,10 @@ Create each source directory only when its first real file is implemented. Do no
 - `styles/` contains tokens, reset and global rules, plus narrowly shared utilities.
 
 Do not add `hooks/`, `services/`, `stores/`, `api/`, `utils/`, or `lib/` without a concrete application requirement that belongs in that boundary.
+
+Browser tests run against the built static site through Playwright. `tests/e2e/` owns navigation, canonical routes, no-JavaScript behavior, keyboard use, responsive layout, external-link safety, and 404 behavior. `tests/accessibility/` owns axe scans plus explicit keyboard and focus assertions; automated scans supplement rather than replace manual accessibility testing.
+
+Chromium runs for every pull request. Chromium, Firefox, and WebKit run after changes reach `main`, during the weekly scheduled audit, and when the browser workflow is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
 
 ## Delivery architecture and cost
 
