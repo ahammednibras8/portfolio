@@ -1,0 +1,38 @@
+verbose = "info"
+format = "detailed"
+no_progress = true
+
+max_redirects = 10
+max_retries = 2
+max_concurrency = 16
+timeout = 20
+retry_wait_time = 2
+method = "get"
+
+require_https = true
+include_fragments = "anchor-only"
+include_verbatim = false
+include_mail = false
+index_files = ["index.html"]
+fallback_extensions = ["html"]
+extensions = ["md", "html"]
+
+exclude_all_private = true
+host_concurrency = 2
+host_request_interval = "250ms"
+
+# Add only hosts confirmed to reject automated requests.
+exclude = []
+
+exclude_path = [
+  "(^|/)\\.cache/",
+  "(^|/)node_modules/",
+  "(^|/)\\.astro/",
+  "(^|/)\\.lighthouseci/",
+  "(^|/)\\.wrangler/",
+  "(^|/)blob-report/",
+  "(^|/)coverage/",
+  "(^|/)playwright-report/",
+  "(^|/)test-results/",
+  "(^|/)temp/",
+]
