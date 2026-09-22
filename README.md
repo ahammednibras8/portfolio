@@ -215,6 +215,9 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── .node-version
 ├── .npmrc
 ├── public/
+│   ├── downloads/
+│   ├── icons/
+│   ├── social/
 │   ├── _headers
 │   ├── _redirects
 │   ├── favicon.svg
@@ -241,6 +244,15 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── pnpm-workspace.yaml
 └── tsconfig.json
 ```
+
+Create each public directory only when its first real pass-through asset is implemented. Do not add empty directories or `.gitkeep` placeholders.
+
+- `public/downloads/` contains files whose stable download names must be preserved.
+- `public/icons/` contains icons that must bypass Astro's asset pipeline.
+- `public/social/` contains social-preview assets served at stable paths.
+- Hosting and crawler files such as `_headers`, `_redirects`, `robots.txt`, the web manifest, and favicons live directly under `public/` when implemented.
+
+Only files that must preserve their exact names or bypass Astro's optimization and fingerprinting belong in `public/`. Project screenshots and other content imagery belong under `src/assets/` and must use Astro's asset pipeline.
 
 Create each source directory only when its first real file is implemented. Do not add empty directories or `.gitkeep` placeholders merely to reproduce this tree.
 
