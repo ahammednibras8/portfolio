@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          runtime: node@24.21.0
+          cache: true
+          install: false
+
+      - name: Verify toolchain versions
+        run: |
+          test "$(node --version)" = "v24.21.0"
+          test "$(pnpm --version)" = "12.5.1"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
