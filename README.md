@@ -150,6 +150,8 @@ Local development and GitHub Actions use Node.js 24.21.0 LTS. Production remains
 
 Commands that load Astro configuration require `SITE_URL` to contain the canonical HTTPS origin. Builds fail when it is missing or includes credentials, a path, a query, or a fragment, preventing incorrect canonical URLs and sitemap entries from being published.
 
+Copy `.env.example` to `.env` for local development and replace the placeholder origin. `.env` is ignored by Git; `.env.example` documents the required variable and is committed.
+
 Node.js recommends supported LTS releases for production-oriented tooling; Node 24 is the current LTS line, while Node 26 remains Current until October 2026 ([Node.js release schedule](https://nodejs.org/en/about/previous-releases)).
 
 | Manager     | Strength                                                                                                 | Weakness here                                                                   | Decision      |

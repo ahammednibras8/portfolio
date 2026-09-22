@@ -1,5 +1,12 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
+import { existsSync } from "node:fs";
+
+const envFile = new URL(".env", import.meta.url);
+
+if (existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+}
 
 const site = process.env.SITE_URL;
 
