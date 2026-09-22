@@ -24,7 +24,9 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@astrojs/sitemap": "3.7.4",
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "astro": "7.3.3",
     "cspell": "10.3.3",
     "eslint": "10.11.0",
