@@ -33,16 +33,16 @@ The [PlanetScale home page](https://planetscale.com/) was visited and its render
 
 ### What the DOM revealed
 
-| Signal | Observation | Portfolio adaptation |
-| --- | --- | --- |
-| Document shape | One `header`, one `main`, one `footer`, three `nav` landmarks; a single top-level content section | Keep the shell shallow and semantic; use `article` for each case study |
-| Heading hierarchy | One `h1`, ten `h2`, four `h3` elements | One promise-led `h1`; predictable `h2` sections; no skipped levels |
-| Typography | System monospace at 16 px / 24 px, including the main heading | Use monospace for labels, metadata, and technical artifacts; use a system sans face for longer prose |
-| Layout | Approximately 1088 px of content inside a 1280 px viewport; repeated grids, rules, and bordered cells | A capped reading canvas, full-width rules, and responsive project grids |
-| Palette | Near-black surface, warm white text, neutral gray scale, orange and blue accents | Build an original token set with one warm action color and one cool link color |
-| Motion | Short, restrained transitions around 150 ms; little ornamental motion | CSS-only feedback, no scroll theatre, and full `prefers-reduced-motion` support |
-| Proof strategy | Customer logos, quotations, benchmarks, architecture diagrams, and detailed capability lists | Lead with shipped work, measurable outcomes, decision records, and links to evidence |
-| Delivery clues | One external stylesheet was observed; no external `script[src]` was present in the rendered document | Ship minimal CSS and no page-level JavaScript by default |
+| Signal            | Observation                                                                                           | Portfolio adaptation                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Document shape    | One `header`, one `main`, one `footer`, three `nav` landmarks; a single top-level content section     | Keep the shell shallow and semantic; use `article` for each case study                               |
+| Heading hierarchy | One `h1`, ten `h2`, four `h3` elements                                                                | One promise-led `h1`; predictable `h2` sections; no skipped levels                                   |
+| Typography        | System monospace at 16 px / 24 px, including the main heading                                         | Use monospace for labels, metadata, and technical artifacts; use a system sans face for longer prose |
+| Layout            | Approximately 1088 px of content inside a 1280 px viewport; repeated grids, rules, and bordered cells | A capped reading canvas, full-width rules, and responsive project grids                              |
+| Palette           | Near-black surface, warm white text, neutral gray scale, orange and blue accents                      | Build an original token set with one warm action color and one cool link color                       |
+| Motion            | Short, restrained transitions around 150 ms; little ornamental motion                                 | CSS-only feedback, no scroll theatre, and full `prefers-reduced-motion` support                      |
+| Proof strategy    | Customer logos, quotations, benchmarks, architecture diagrams, and detailed capability lists          | Lead with shipped work, measurable outcomes, decision records, and links to evidence                 |
+| Delivery clues    | One external stylesheet was observed; no external `script[src]` was present in the rendered document  | Ship minimal CSS and no page-level JavaScript by default                                             |
 
 The most valuable lesson is not the dark theme or monospace type. It is the information rhythm: **claim → evidence → explanation → deeper technical proof**. That rhythm will drive the portfolio.
 
@@ -77,15 +77,15 @@ If a metric cannot be published, the page must say why and use bounded evidence.
 
 ### Routes
 
-| Route | Purpose | Required content |
-| --- | --- | --- |
-| `/` | Establish fit and route readers to proof | Hero, proof strip, selected work, principles, short bio, contact |
-| `/work/` | Make all case studies comparable | Filter-free project index with role, outcome, year, and domain |
-| `/work/[slug]/` | Demonstrate judgment in depth | The eight-part case-study structure above |
-| `/about/` | Add human context and working preferences | Biography, values, timeline, current focus, contact |
-| `/writing/` | Show clarity and sustained technical thinking | Article index; omit the route until real writing exists |
-| `/resume/` | Give recruiters a fast printable artifact | Semantic HTML résumé plus a versioned PDF download |
-| `/404.html` | Recover without a client router | Useful static error page with navigation home |
+| Route           | Purpose                                       | Required content                                                 |
+| --------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| `/`             | Establish fit and route readers to proof      | Hero, proof strip, selected work, principles, short bio, contact |
+| `/work/`        | Make all case studies comparable              | Filter-free project index with role, outcome, year, and domain   |
+| `/work/[slug]/` | Demonstrate judgment in depth                 | The eight-part case-study structure above                        |
+| `/about/`       | Add human context and working preferences     | Biography, values, timeline, current focus, contact              |
+| `/writing/`     | Show clarity and sustained technical thinking | Article index; omit the route until real writing exists          |
+| `/resume/`      | Give recruiters a fast printable artifact     | Semantic HTML résumé plus a versioned PDF download               |
+| `/404.html`     | Recover without a client router               | Useful static error page with navigation home                    |
 
 ### Semantic DOM contract
 
@@ -134,15 +134,15 @@ Astro is the best-fit tool for this portfolio—not a universal winner for every
 
 “Every possible tool” is an unbounded set, so the comparison covers every materially different architecture that could satisfy this project: hand-authored files, traditional static-site generators, component-first static generators, application frameworks with static export, and runtime rendering.
 
-| Option | Built HTML | Default client cost | Content model | Component ergonomics | Operational fit | Decision |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Hand-written HTML/CSS | Excellent | Excellent | Weak at multiple case studies | Weak | Excellent | Too much repetition and no content schema |
-| Eleventy | Excellent | Excellent | Strong | Moderate | Excellent | Best lean alternative; [zero client JS by default](https://www.11ty.dev/) but less cohesive TypeScript/component/image tooling for this design |
-| Hugo or Zola | Excellent | Excellent | Strong | Moderate | Excellent | Extremely fast builders; adds a second templating ecosystem without a benefit this small site needs |
-| **Astro** | **Excellent** | **Excellent** | **Strong and typed** | **Strong** | **Excellent** | **Selected: strongest weighted fit** |
-| SvelteKit or Qwik static export | Strong | Good | Moderate | Strong | Strong | Valuable for richer applications; unnecessary runtime and adapter surface here |
-| Next.js or Gatsby static export | Strong | Moderate | Strong | Strong | Strong | React-centered runtime and dependency cost do not improve this content-first site |
-| Runtime SSR / CMS | Variable | Variable | Strong | Strong | Weak | Reject: adds servers, cold paths, cost risk, and availability dependencies |
+| Option                          |    Built HTML | Default client cost |                 Content model | Component ergonomics | Operational fit | Decision                                                                                                                                       |
+| ------------------------------- | ------------: | ------------------: | ----------------------------: | -------------------: | --------------: | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hand-written HTML/CSS           |     Excellent |           Excellent | Weak at multiple case studies |                 Weak |       Excellent | Too much repetition and no content schema                                                                                                      |
+| Eleventy                        |     Excellent |           Excellent |                        Strong |             Moderate |       Excellent | Best lean alternative; [zero client JS by default](https://www.11ty.dev/) but less cohesive TypeScript/component/image tooling for this design |
+| Hugo or Zola                    |     Excellent |           Excellent |                        Strong |             Moderate |       Excellent | Extremely fast builders; adds a second templating ecosystem without a benefit this small site needs                                            |
+| **Astro**                       | **Excellent** |       **Excellent** |          **Strong and typed** |           **Strong** |   **Excellent** | **Selected: strongest weighted fit**                                                                                                           |
+| SvelteKit or Qwik static export |        Strong |                Good |                      Moderate |               Strong |          Strong | Valuable for richer applications; unnecessary runtime and adapter surface here                                                                 |
+| Next.js or Gatsby static export |        Strong |            Moderate |                        Strong |               Strong |          Strong | React-centered runtime and dependency cost do not improve this content-first site                                                              |
+| Runtime SSR / CMS               |      Variable |            Variable |                        Strong |               Strong |            Weak | Reject: adds servers, cold paths, cost risk, and availability dependencies                                                                     |
 
 ### Development toolchain
 
@@ -152,30 +152,30 @@ Commands that load Astro configuration require `SITE_URL` to contain the canonic
 
 Node.js recommends supported LTS releases for production-oriented tooling; Node 24 is the current LTS line, while Node 26 remains Current until October 2026 ([Node.js release schedule](https://nodejs.org/en/about/previous-releases)).
 
-| Manager | Strength | Weakness here | Decision |
-| --- | --- | --- | --- |
-| npm | Bundled with Node and has the lowest onboarding friction | Hoisted dependencies and less efficient shared storage | Good fallback |
-| **pnpm** | Strict dependency visibility, content-addressed storage, fast CI caching, and controlled install scripts | Contributors may need to install it once | **Selected** |
-| Yarn Modern | Strong constraints and zero-install support | Plug'n'Play adds editor and compatibility complexity unnecessary for one site | Reject |
-| Bun | Very fast installer and runtime | Introduces a second runtime ecosystem without improving the final static output | Reject |
+| Manager     | Strength                                                                                                 | Weakness here                                                                   | Decision      |
+| ----------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------- |
+| npm         | Bundled with Node and has the lowest onboarding friction                                                 | Hoisted dependencies and less efficient shared storage                          | Good fallback |
+| **pnpm**    | Strict dependency visibility, content-addressed storage, fast CI caching, and controlled install scripts | Contributors may need to install it once                                        | **Selected**  |
+| Yarn Modern | Strong constraints and zero-install support                                                              | Plug'n'Play adds editor and compatibility complexity unnecessary for one site   | Reject        |
+| Bun         | Very fast installer and runtime                                                                          | Introduces a second runtime ecosystem without improving the final static output | Reject        |
 
 pnpm prevents undeclared dependency access and reuses packages through a content-addressed store ([pnpm motivation](https://pnpm.io/motivation)). Yarn documents that Plug'n'Play can require editor SDKs and package extensions ([Yarn install modes](https://yarnpkg.com/features/linkers)). Bun is capable, but installer speed for this small static build does not outweigh Node ecosystem compatibility.
 
 ### Selected stack
 
-| Layer | Choice | Reason |
-| --- | --- | --- |
-| Rendering | Astro, `output: "static"` | Produces complete route-level HTML in CI |
-| Language | Strict TypeScript | Makes components, metadata, and content transformations auditable |
-| Content | Markdown in Astro content collections | Git history, portable text, schema-checked front matter |
-| Styling | Modern vanilla CSS in scoped layers | No runtime; explicit tokens; fewer dependencies; original visual language |
-| Client behavior | Native HTML first; small framework-free modules only when justified | Avoids hydration and protects no-JS operation |
-| Images | `astro:assets`, AVIF/WebP plus an explicit fallback | Build-time sizing, formats, and layout-shift prevention |
-| Development runtime | Node.js 24.21.0 LTS | Pins local tooling and GitHub Actions without adding a production runtime |
-| Package manager | pnpm 12.5.1 with a committed lockfile and frozen installs | Enforces declared dependencies and reuses a content-addressed package store |
-| Validation | Astro check, ESLint, Prettier, Playwright, axe, Lighthouse CI | Static correctness plus rendered-browser evidence |
-| Source and CI | Public GitHub repository + GitHub Actions | The code and delivery history remain inspectable |
-| Delivery | Cloudflare Pages Direct Upload | Deploys the prebuilt folder to a global static network |
+| Layer               | Choice                                                              | Reason                                                                      |
+| ------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Rendering           | Astro, `output: "static"`                                           | Produces complete route-level HTML in CI                                    |
+| Language            | Strict TypeScript                                                   | Makes components, metadata, and content transformations auditable           |
+| Content             | Markdown in Astro content collections                               | Git history, portable text, schema-checked front matter                     |
+| Styling             | Modern vanilla CSS in scoped layers                                 | No runtime; explicit tokens; fewer dependencies; original visual language   |
+| Client behavior     | Native HTML first; small framework-free modules only when justified | Avoids hydration and protects no-JS operation                               |
+| Images              | `astro:assets`, AVIF/WebP plus an explicit fallback                 | Build-time sizing, formats, and layout-shift prevention                     |
+| Development runtime | Node.js 24.21.0 LTS                                                 | Pins local tooling and GitHub Actions without adding a production runtime   |
+| Package manager     | pnpm 12.5.1 with a committed lockfile and frozen installs           | Enforces declared dependencies and reuses a content-addressed package store |
+| Validation          | Astro check, ESLint, Prettier, Playwright, axe, Lighthouse CI       | Static correctness plus rendered-browser evidence                           |
+| Source and CI       | Public GitHub repository + GitHub Actions                           | The code and delivery history remain inspectable                            |
+| Delivery            | Cloudflare Pages Direct Upload                                      | Deploys the prebuilt folder to a global static network                      |
 
 React, Vue, Svelte, and other UI runtimes are prohibited in the initial build. An island may be added later only with a decision record showing that native HTML and a small DOM module cannot meet a real user need.
 
@@ -253,13 +253,13 @@ Cloudflare documents this exact prebuilt-asset CI flow for [Pages Direct Upload]
 
 ### Why Cloudflare Pages instead of S3
 
-| Host model | Static CDN | Custom domain/TLS | Free-plan fit | Portability | Decision |
-| --- | --- | --- | --- | --- | --- |
-| **Cloudflare Pages** | Global edge | Included | Purely static requests are currently free and unlimited | High | **Selected** |
-| GitHub Pages | Managed static hosting | Included | Good public-repository fallback | High | Recovery target, not primary delivery |
-| Netlify / Vercel | Managed edge | Included | Suitable, but broader app platforms add no advantage here | High | Viable alternative |
-| Amazon S3 + CloudFront | Object store + CDN | Available | AWS's current new-account free plan expires | High | Reject for a zero-bill objective |
-| Self-hosted server | Origin dependent | Manual | Ongoing compute, patching, and availability burden | Moderate | Reject |
+| Host model             | Static CDN             | Custom domain/TLS | Free-plan fit                                             | Portability | Decision                              |
+| ---------------------- | ---------------------- | ----------------- | --------------------------------------------------------- | ----------- | ------------------------------------- |
+| **Cloudflare Pages**   | Global edge            | Included          | Purely static requests are currently free and unlimited   | High        | **Selected**                          |
+| GitHub Pages           | Managed static hosting | Included          | Good public-repository fallback                           | High        | Recovery target, not primary delivery |
+| Netlify / Vercel       | Managed edge           | Included          | Suitable, but broader app platforms add no advantage here | High        | Viable alternative                    |
+| Amazon S3 + CloudFront | Object store + CDN     | Available         | AWS's current new-account free plan expires               | High        | Reject for a zero-bill objective      |
+| Self-hosted server     | Origin dependent       | Manual            | Ongoing compute, patching, and availability burden        | Moderate    | Reject                                |
 
 As of the research date, Cloudflare Pages' Free plan documents 500 builds per month, 20,000 files per site, a 25 MiB individual-file cap, up to 100 custom domains per project, and uploads to its global network; purely static requests are free and unlimited ([Pages limits](https://developers.cloudflare.com/pages/platform/limits/), [static routing](https://developers.cloudflare.com/pages/functions/routing/)). GitHub Actions is currently free on standard hosted runners for public repositories ([GitHub billing](https://docs.github.com/en/actions/concepts/billing-and-usage)). By contrast, AWS states that its new-account free plan ends after six months or when credits are exhausted, and S3 is usage-priced ([S3 pricing](https://aws.amazon.com/s3/pricing/)).
 
@@ -293,15 +293,15 @@ Deployment runs only after these gates pass on `main`. Pull requests from forks 
 
 These are release gates, not aspirations:
 
-| Area | Budget |
-| --- | --- |
-| Initial JavaScript | 0 kB for content-only routes; ≤ 20 kB compressed on any enhanced route |
-| First-party CSS | ≤ 40 kB compressed per route |
-| Initial transferred page weight | ≤ 500 kB on the home page at launch |
-| Lighthouse CI | ≥ 95 for Performance, Accessibility, Best Practices, and SEO on representative mobile runs |
-| Core Web Vitals target | LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 at the 75th percentile |
-| Accessibility | WCAG 2.2 AA; full keyboard path; visible focus; 200% zoom without lost content |
-| Browser baseline | Current and previous major versions of evergreen browsers; useful content without JS |
+| Area                            | Budget                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------ |
+| Initial JavaScript              | 0 kB for content-only routes; ≤ 20 kB compressed on any enhanced route                     |
+| First-party CSS                 | ≤ 40 kB compressed per route                                                               |
+| Initial transferred page weight | ≤ 500 kB on the home page at launch                                                        |
+| Lighthouse CI                   | ≥ 95 for Performance, Accessibility, Best Practices, and SEO on representative mobile runs |
+| Core Web Vitals target          | LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 at the 75th percentile                                |
+| Accessibility                   | WCAG 2.2 AA; full keyboard path; visible focus; 200% zoom without lost content             |
+| Browser baseline                | Current and previous major versions of evergreen browsers; useful content without JS       |
 
 The Core Web Vitals thresholds are Google's published “good” values ([web.dev](https://web.dev/articles/vitals)). Lighthouse CI is a regression detector, not a substitute for field data; Google notes that Lighthouse scores can vary with environment ([Lighthouse scoring](https://developer.chrome.com/docs/lighthouse/performance/performance-scoring)). Field measurement should be considered only after meaningful traffic exists and only with a privacy review.
 
@@ -363,16 +363,16 @@ Version 1 is complete when:
 
 ## Decision summary
 
-| Question | Decision |
-| --- | --- |
-| What are we building? | A proof-led engineering portfolio for fast human and machine evaluation |
-| Where is rendering performed? | In GitHub Actions during the Astro static build |
-| What reaches the browser? | Complete semantic HTML, CSS, optimized media, and only justified enhancement scripts |
-| Why not React? | This is a content document, not a stateful application; hydration adds cost without user value |
-| Where does the build live? | Cloudflare Pages' globally distributed static network |
-| What runs in production? | No server, function, or database |
-| Can it be free forever? | No provider can promise that; the design targets a zero bill under current published limits |
-| Can we leave the provider? | Yes; `dist/` is a portable static artifact |
+| Question                           | Decision                                                                                                |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| What are we building?              | A proof-led engineering portfolio for fast human and machine evaluation                                 |
+| Where is rendering performed?      | In GitHub Actions during the Astro static build                                                         |
+| What reaches the browser?          | Complete semantic HTML, CSS, optimized media, and only justified enhancement scripts                    |
+| Why not React?                     | This is a content document, not a stateful application; hydration adds cost without user value          |
+| Where does the build live?         | Cloudflare Pages' globally distributed static network                                                   |
+| What runs in production?           | No server, function, or database                                                                        |
+| Can it be free forever?            | No provider can promise that; the design targets a zero bill under current published limits             |
+| Can we leave the provider?         | Yes; `dist/` is a portable static artifact                                                              |
 | What is borrowed from PlanetScale? | Restraint, grid rhythm, technical typography, and proof-first sequencing—not brand expression or assets |
 
 ## Research record

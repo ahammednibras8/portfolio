@@ -33,3 +33,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Run source quality checks
+        run: pnpm run quality
+        env:
+          SITE_URL: https://example.com

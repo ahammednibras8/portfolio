@@ -1,5 +1,6 @@
 version: "0.2"
 language: en-US
+useGitignore: true
 
 files:
   - "**/*.{astro,css,html,js,json,md,mjs,ts,tsx,yaml,yml}"
@@ -18,6 +19,7 @@ words:
   - ahammednibras
   - crawlable
   - esbuild
+  - htmlvalidate
   - inspectable
   - Nibras
   - Qwik

@@ -4,6 +4,18 @@
   "private": true,
   "description": "A proof-first engineering portfolio built as a static Astro site.",
   "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "check": "astro check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "pnpm run lint:eslint && pnpm run lint:styles && pnpm run lint:spelling",
+    "lint:eslint": "eslint .",
+    "lint:html": "html-validate --config htmlvalidate.config.mjs \"dist/**/*.html\"",
+    "lint:spelling": "cspell --no-progress --no-summary",
+    "lint:styles": "stylelint \"**/*.{astro,css}\" --allow-empty-input",
+    "quality": "pnpm run format:check && pnpm run lint && pnpm run check"
+  },
   "engines": {
     "node": ">=24.21.0 <25",
     "pnpm": "12.5.1"
