@@ -36,8 +36,8 @@ export default [
         exports: "readonly",
         require: "readonly",
         process: "readonly",
-      }
-    }
+      },
+    },
   },
   {
     rules: {
