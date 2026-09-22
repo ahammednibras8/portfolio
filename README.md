@@ -165,19 +165,19 @@ pnpm prevents undeclared dependency access and reuses packages through a content
 
 ### Selected stack
 
-| Layer               | Choice                                                              | Reason                                                                      |
-| ------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Rendering           | Astro, `output: "static"`                                           | Produces complete route-level HTML in CI                                    |
-| Language            | Strict TypeScript                                                   | Makes components, metadata, and content transformations auditable           |
-| Content             | Markdown in Astro content collections                               | Git history, portable text, schema-checked front matter                     |
-| Styling             | Modern vanilla CSS in scoped layers                                 | No runtime; explicit tokens; fewer dependencies; original visual language   |
-| Client behavior     | Native HTML first; small framework-free modules only when justified | Avoids hydration and protects no-JS operation                               |
-| Images              | `astro:assets`, AVIF/WebP plus an explicit fallback                 | Build-time sizing, formats, and layout-shift prevention                     |
-| Development runtime | Node.js 24.21.0 LTS                                                 | Pins local tooling and GitHub Actions without adding a production runtime   |
-| Package manager     | pnpm 12.5.1 with a committed lockfile and frozen installs           | Enforces declared dependencies and reuses a content-addressed package store |
-| Validation          | Astro check, ESLint, Prettier, Playwright, axe, Lighthouse CI       | Static correctness plus rendered-browser evidence                           |
-| Source and CI       | Public GitHub repository + GitHub Actions                           | The code and delivery history remain inspectable                            |
-| Delivery            | Cloudflare Pages Direct Upload                                      | Deploys the prebuilt folder to a global static network                      |
+| Layer               | Choice                                                                | Reason                                                                      |
+| ------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Rendering           | Astro, `output: "static"`                                             | Produces complete route-level HTML in CI                                    |
+| Language            | Strict TypeScript                                                     | Makes components, metadata, and content transformations auditable           |
+| Content             | Markdown in Astro content collections                                 | Git history, portable text, schema-checked front matter                     |
+| Styling             | Modern vanilla CSS in scoped layers                                   | No runtime; explicit tokens; fewer dependencies; original visual language   |
+| Client behavior     | Native HTML first; small framework-free modules only when justified   | Avoids hydration and protects no-JS operation                               |
+| Images              | `astro:assets`, AVIF/WebP plus an explicit fallback                   | Build-time sizing, formats, and layout-shift prevention                     |
+| Development runtime | Node.js 24.21.0 LTS                                                   | Pins local tooling and GitHub Actions without adding a production runtime   |
+| Package manager     | pnpm 12.5.1 with a committed lockfile and frozen installs             | Enforces declared dependencies and reuses a content-addressed package store |
+| Validation          | Astro check, ESLint, Prettier, Lychee, Playwright, axe, Lighthouse CI | Static correctness plus rendered-browser evidence                           |
+| Source and CI       | Public GitHub repository + GitHub Actions                             | The code and delivery history remain inspectable                            |
+| Delivery            | Cloudflare Pages Direct Upload                                        | Deploys the prebuilt folder to a global static network                      |
 
 React, Vue, Svelte, and other UI runtimes are prohibited in the initial build. An island may be added later only with a decision record showing that native HTML and a small DOM module cannot meet a real user need.
 
@@ -209,7 +209,9 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── .gitattributes
 ├── .github/
 │   └── workflows/
+│       ├── browser-tests.yml
 │       ├── ci.yml
+│       ├── link-checks.yml
 │       └── deploy.yml
 ├── .gitignore
 ├── .node-version
@@ -242,6 +244,7 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │   └── e2e/
 ├── astro.config.mjs
 ├── lighthouserc.cjs
+├── lychee.toml
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
@@ -275,6 +278,8 @@ Browser tests run against the built static site through Playwright. `tests/e2e/`
 Chromium runs for every pull request. Chromium, Firefox, and WebKit run after changes reach `main`, during the weekly scheduled audit, and when the browser workflow is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
 
 Lighthouse CI runs through `pnpm run test:performance`. The command rebuilds `dist/`, serves that production output locally, and performs three mobile-default runs for every generated HTML route. Category assertions use the representative median run, while transfer budgets cover JavaScript, CSS, images, fonts, and total page weight. Reports stay local under `.lighthouseci/reports/`; they are not uploaded to public temporary storage.
+
+Lychee checks Markdown and generated HTML with the committed `lychee.toml` policy. Pull requests build the static site and run offline checks, so broken internal files, routes, and fragments block merging without depending on third-party availability. External URLs run in the weekly scheduled workflow and by manual dispatch. The exclusion list starts empty and accepts only hosts confirmed to reject automated requests.
 
 ## Delivery architecture and cost
 
