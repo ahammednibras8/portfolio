@@ -148,6 +148,8 @@ Astro is the best-fit tool for this portfolio—not a universal winner for every
 
 Local development and GitHub Actions use Node.js 24.21.0 LTS. Production remains runtime-free: Cloudflare Pages serves the static `dist/` artifact and does not execute Node.js.
 
+Commands that load Astro configuration require `SITE_URL` to contain the canonical HTTPS origin. Builds fail when it is missing or includes credentials, a path, a query, or a fragment, preventing incorrect canonical URLs and sitemap entries from being published.
+
 Node.js recommends supported LTS releases for production-oriented tooling; Node 24 is the current LTS line, while Node 26 remains Current until October 2026 ([Node.js release schedule](https://nodejs.org/en/about/previous-releases)).
 
 | Manager | Strength | Weakness here | Decision |
