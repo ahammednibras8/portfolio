@@ -38,8 +38,8 @@ export default defineConfig({
 
   webServer: {
     command:
-      "pnpm run build && pnpm exec astro preview --host 127.0.0.1 --port 4321",
-    url: baseURL,
+      "pnpm run build && pnpm exec astro preview --host 127.0.0.1 --port 4321 --ignore-lock",
+    port: 4321,
     env: {
       SITE_URL: process.env.SITE_URL ?? "https://example.com",
     },
