@@ -241,6 +241,7 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │   ├── accessibility/
 │   └── e2e/
 ├── astro.config.mjs
+├── lighthouserc.cjs
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
@@ -272,6 +273,8 @@ Do not add `hooks/`, `services/`, `stores/`, `api/`, `utils/`, or `lib/` without
 Browser tests run against the built static site through Playwright. `tests/e2e/` owns navigation, canonical routes, no-JavaScript behavior, keyboard use, responsive layout, external-link safety, and 404 behavior. `tests/accessibility/` owns axe scans plus explicit keyboard and focus assertions; automated scans supplement rather than replace manual accessibility testing.
 
 Chromium runs for every pull request. Chromium, Firefox, and WebKit run after changes reach `main`, during the weekly scheduled audit, and when the browser workflow is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
+
+Lighthouse CI runs through `pnpm run test:performance`. The command rebuilds `dist/`, serves that production output locally, and performs three mobile-default runs for every generated HTML route. Category assertions use the representative median run, while transfer budgets cover JavaScript, CSS, images, fonts, and total page weight. Reports stay local under `.lighthouseci/reports/`; they are not uploaded to public temporary storage.
 
 ## Delivery architecture and cost
 
@@ -318,7 +321,7 @@ Every pull request must pass the following gates before merge:
 5. Build the static site from a clean checkout.
 6. Fail on broken internal links, missing canonical URLs, or duplicate page titles.
 7. Run keyboard-navigation and axe checks against the built site in Playwright.
-8. Run Lighthouse CI against representative home, index, case-study, and résumé pages.
+8. Run Lighthouse CI against representative home, work index, case-study, about, and résumé pages.
 9. Confirm that core page content exists in the raw built HTML and that no unexpected JavaScript bundle was emitted.
 
 Deployment runs only after these gates pass on `main`. Pull requests from forks do not receive deployment secrets. Workflow permissions default to read-only, dependencies are updated deliberately, and external Actions are SHA-pinned.
@@ -331,7 +334,9 @@ These are release gates, not aspirations:
 | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | Initial JavaScript              | 0 kB for content-only routes; ≤ 20 kB compressed on any enhanced route                     |
 | First-party CSS                 | ≤ 40 kB compressed per route                                                               |
-| Initial transferred page weight | ≤ 500 kB on the home page at launch                                                        |
+| Images                          | ≤ 400 kB transferred per audited route                                                     |
+| Web fonts                       | 0 kB; the initial site uses the documented system-font stack                               |
+| Initial transferred page weight | ≤ 500 kB per audited route                                                                 |
 | Lighthouse CI                   | ≥ 95 for Performance, Accessibility, Best Practices, and SEO on representative mobile runs |
 | Core Web Vitals target          | LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 at the 75th percentile                                |
 | Accessibility                   | WCAG 2.2 AA; full keyboard path; visible focus; 200% zoom without lost content             |

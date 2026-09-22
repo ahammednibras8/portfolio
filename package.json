@@ -19,7 +19,8 @@
     "test:browser": "playwright test",
     "test:browser:chromium": "playwright test --project=chromium",
     "test:browser:cross": "playwright test --project=firefox --project=webkit",
-    "test:e2e": "playwright test tests/e2e"
+    "test:e2e": "playwright test tests/e2e",
+    "test:performance": "pnpm run build && lhci autorun"
   },
   "engines": {
     "node": ">=24.21.0 <25",
@@ -31,6 +32,7 @@
     "@astrojs/sitemap": "3.7.4",
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@lhci/cli": "0.15.1",
     "@playwright/test": "1.63.0",
     "astro": "7.3.3",
     "cspell": "10.3.3",

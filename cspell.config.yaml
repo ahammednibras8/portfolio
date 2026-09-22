@@ -17,10 +17,14 @@ ignorePaths:
 words:
   - Ahammed
   - ahammednibras
+  - autorun
   - crawlable
   - esbuild
   - htmlvalidate
   - inspectable
+  - lhci
+  - lighthouseci
+  - lighthouserc
   - Nibras
   - Qwik
   - résumé
