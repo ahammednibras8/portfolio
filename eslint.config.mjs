@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-import eslintConfigPrettier, { rules } from "eslint-config-prettier";
+import eslintConfigPrettier from "eslint-config-prettier";
 import eslintPluginAstro from "eslint-plugin-astro";
 import tseslint from "typescript-eslint";
 
@@ -12,12 +12,21 @@ export default [
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",
-    ]
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...eslintPluginAstro.configs.recommended,
   ...eslintPluginAstro.configs["jsx-a11y-strict"],
+  {
+    files: ["**/*.config.mjs"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+        URL: "readonly",
+      },
+    },
+  },
   {
     rules: {
       "no-eval": "error",
@@ -32,4 +41,4 @@ export default [
     },
   },
   eslintConfigPrettier,
-]
+];

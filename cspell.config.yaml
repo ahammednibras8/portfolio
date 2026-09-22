@@ -1,0 +1,25 @@
+version: "0.2"
+language: en-US
+
+files:
+  - "**/*.{astro,css,html,js,json,md,mjs,ts,tsx,yaml,yml}"
+
+ignorePaths:
+  - ".astro/**"
+  - "coverage/**"
+  - "dist/**"
+  - "node_modules/**"
+  - "playwright-report/**"
+  - "pnpm-lock.yaml"
+  - "test-results/**"
+
+words:
+  - Ahammed
+  - ahammednibras
+  - crawlable
+  - esbuild
+  - inspectable
+  - Nibras
+  - Qwik
+  - résumé
+  - WCAG
