@@ -201,11 +201,15 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 
 ```text
 .
-├── .nvmrc
+├── .editorconfig
+├── .gitattributes
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml
 │       └── deploy.yml
+├── .gitignore
+├── .node-version
+├── .npmrc
 ├── public/
 │   ├── _headers
 │   ├── _redirects
@@ -227,8 +231,9 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │       └── utilities.css
 ├── tests/
 ├── astro.config.mjs
-├── pnpm-lock.yaml
 ├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 └── tsconfig.json
 ```
 

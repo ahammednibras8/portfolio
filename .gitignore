@@ -1,2 +1,44 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Builds and generated framework data
+dist/
+.astro/
+.wrangler/
+
+# Tool caches
+.cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Test and browser reports
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.lighthouseci/
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Editor and operating-system files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local scratch files
 temp/
