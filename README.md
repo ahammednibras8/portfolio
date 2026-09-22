@@ -221,12 +221,13 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │   └── robots.txt
 ├── src/
 │   ├── assets/
+│   │   ├── images/
+│   │   └── diagrams/
 │   ├── components/
 │   ├── content/
 │   │   ├── projects/
 │   │   └── writing/
 │   ├── data/
-│   │   └── profile.ts
 │   ├── layouts/
 │   ├── pages/
 │   └── styles/
@@ -240,6 +241,19 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── pnpm-workspace.yaml
 └── tsconfig.json
 ```
+
+Create each source directory only when its first real file is implemented. Do not add empty directories or `.gitkeep` placeholders merely to reproduce this tree.
+
+- `assets/` contains images and SVG diagrams imported by Astro for build-time optimization and fingerprinting.
+- `components/` contains reusable presentation units and stays flat until real categories emerge.
+- `content/projects/` contains case studies.
+- `content/writing/` contains technical articles and remains absent until publishable writing exists.
+- `data/` contains shared structured profile, navigation, and social-link data.
+- `layouts/` contains document shells and metadata composition.
+- `pages/` contains route entry points only.
+- `styles/` contains tokens, reset and global rules, plus narrowly shared utilities.
+
+Do not add `hooks/`, `services/`, `stores/`, `api/`, `utils/`, or `lib/` without a concrete application requirement that belongs in that boundary.
 
 ## Delivery architecture and cost
 
