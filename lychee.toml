@@ -25,9 +25,14 @@ host_request_interval = "250ms"
 exclude = []
 
 exclude_path = [
+  "(^|/)\\.cache/",
   "(^|/)node_modules/",
   "(^|/)\\.astro/",
   "(^|/)\\.lighthouseci/",
+  "(^|/)\\.wrangler/",
+  "(^|/)blob-report/",
+  "(^|/)coverage/",
   "(^|/)playwright-report/",
   "(^|/)test-results/",
+  "(^|/)temp/",
 ]
