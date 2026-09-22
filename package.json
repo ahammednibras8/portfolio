@@ -1,8 +1,12 @@
 {
-    "private": true,
-    "engines": {
-        "node": "24.21.0",
-        "pnpm": "12.5.1"
-    },
-    "packageManager": "pnpm@12.5.1"
+  "name": "ahammednibras8-portfolio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A proof-first engineering portfolio built as a static Astro site.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.21.0 <25",
+    "pnpm": "12.5.1"
+  },
+  "packageManager": "pnpm@12.5.1"
 }

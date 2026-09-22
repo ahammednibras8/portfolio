@@ -1,0 +1,3 @@
+saveExact: true
+strictPeerDependencies: true
+strictDepBuilds: true
