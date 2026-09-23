@@ -6,6 +6,7 @@ This repository is a proof-first static portfolio. Contributions must preserve c
 
 - Node.js 24.21.0, matching `.node-version`
 - pnpm 12.5.1, matching `package.json`
+- Lychee 0.24.2
 - Git
 
 Install dependencies and create the ignored local environment file:
@@ -17,10 +18,16 @@ cp .env.example .env
 
 Replace the placeholder `SITE_URL` in `.env` with a valid HTTPS origin. Do not commit `.env` or credentials.
 
-Install Playwright browsers only when browser testing is needed:
+Install Chromium before running the required verification:
 
 ```sh
-pnpm exec playwright install chromium firefox webkit
+pnpm exec playwright install chromium
+```
+
+Install Firefox and WebKit when running the scheduled cross-browser checks locally:
+
+```sh
+pnpm exec playwright install firefox webkit
 ```
 
 ## Branches and scope
@@ -41,28 +48,30 @@ Before adding a directory or abstraction, identify its first real consumer. The 
 
 ## Verification
 
-Run these checks for every contribution:
+Run the repository's pre-merge contract for every contribution:
 
 ```sh
-pnpm run quality
-pnpm run build
+pnpm run verify
 ```
 
-For rendered HTML, styling, navigation, or accessibility changes, also run:
+For focused rendered-site checks during development, build first and then run:
 
 ```sh
-pnpm run test:browser:chromium
+pnpm run build
+PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:e2e --project=chromium
+PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:a11y --project=chromium
 ```
 
 Run all configured browsers when changing shared layout, interaction, responsive behavior, or browser-sensitive CSS:
 
 ```sh
-pnpm run test:browser
+pnpm run test:e2e
+pnpm run test:a11y
 ```
 
-Run `pnpm run lint:html` after the build once the site contains generated HTML. Run `pnpm run test:performance` when the representative Lighthouse routes exist.
+`verify` validates generated HTML and runs Lighthouse when the build contains pages. Before the first page exists, those two checks report an explicit skip while formatting, linting, type checks, the build, links, E2E behavior, and accessibility still run.
 
-Documentation-only changes still require formatting and spelling checks through `pnpm run quality`.
+Documentation-only changes still require `pnpm run verify` because Markdown links and public guidance are part of the product.
 
 ## Pull requests
 
