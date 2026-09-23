@@ -1,40 +1,39 @@
-# Evidence and disclosure rules
+# Evidence and privacy checklist
 
-Public claims must be accurate, attributable, permitted, and understandable in context. Missing evidence should be disclosed, not replaced with invented precision.
+Every public claim must be true, clear, and safe to publish. If proof cannot be shared, say so. Do not invent a precise number.
 
-## Evidence levels
+## Best kinds of proof
 
-Prefer evidence in this order:
+Use the strongest proof available:
 
-1. Public, durable artifacts such as source code, a live product, release notes, or published documentation.
-2. Reproducible measurements with a named baseline, method, time window, and unit.
-3. Approved screenshots, diagrams, quotations, or anonymized records with enough context to interpret them.
-4. Bounded qualitative outcomes that explain why stronger evidence cannot be published.
+1. Public source code, a live product, release notes, or public documentation.
+2. A repeatable measurement with a baseline, method, date range, and unit.
+3. An approved screenshot, diagram, quote, or anonymized record.
+4. A clear description of the result and why stronger proof must stay private.
 
-Do not turn an estimate into a measured result. Label estimates, projections, and recollections explicitly.
+Label estimates and memories as estimates and memories.
 
-## Metric checklist
+## Before publishing a number
 
-Before publishing a number, record:
+Write down:
 
-- what was measured and why it matters;
-- the baseline and comparison;
-- the population or sample;
-- the start and end dates;
-- the collection method and known limitations;
-- the source owner and permission to publish;
-- whether later events could make the number misleading.
+- what was measured;
+- why it matters;
+- what it is compared with;
+- when and how it was measured;
+- known limits in the data;
+- who owns the source;
+- whether it is approved for public use.
 
-## Disclosure checklist
+## Before publishing anything
 
-- [ ] Customer, employer, partner, and collaborator names are approved for public use.
-- [ ] Logos, product images, quotations, and testimonials have publication permission.
-- [ ] Screenshots contain no credentials, personal data, private URLs, internal identifiers, or hidden metadata.
-- [ ] Architecture diagrams omit exploitable internal detail and are redrawn when the original is proprietary.
-- [ ] Repository and demo links are intentionally public and require no private access.
-- [ ] Dates, role boundaries, and employment claims match authoritative records.
-- [ ] Confidential metrics are omitted or expressed as an approved range without implying false precision.
-- [ ] Accessibility text does not reveal information intentionally withheld from visible copy.
-- [ ] Removed information is deleted from the source asset, not merely cropped, blurred, covered, or hidden with CSS.
+- [ ] Names of customers, employers, partners, and teammates are approved.
+- [ ] Logos, quotes, testimonials, and product images are approved.
+- [ ] Screenshots contain no secrets, personal data, private links, or internal IDs.
+- [ ] Diagrams do not reveal sensitive system details.
+- [ ] Repository and demo links are meant to be public.
+- [ ] Dates, job titles, and ownership claims match reliable records.
+- [ ] Private numbers are removed or shown only as an approved range.
+- [ ] Hidden or cropped content has been removed from the original asset.
 
-When permission is uncertain, do not publish. Record the gap in the draft and request a decision from the information owner.
+When permission is unclear, do not publish.

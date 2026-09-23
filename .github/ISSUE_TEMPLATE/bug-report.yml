@@ -1,19 +1,19 @@
 name: Bug report
-description: Report reproducible incorrect behavior in the site or tooling.
+description: Report a problem with the site or its tools.
 title: "[Bug]: "
 
 body:
   - type: markdown
     attributes:
       value: |
-        Provide enough evidence to reproduce the problem. Remove credentials, private data, and confidential client information.
+        Help us reproduce the problem. Remove passwords, private data, and confidential client information.
 
   - type: textarea
     id: summary
     attributes:
       label: Problem
-      description: Describe what is wrong and who it affects.
-      placeholder: A clear description of the incorrect behavior.
+      description: What went wrong, and who does it affect?
+      placeholder: A short description of the problem.
     validations:
       required: true
 
@@ -21,7 +21,7 @@ body:
     id: reproduction
     attributes:
       label: Reproduction steps
-      description: List the smallest reliable sequence that reproduces the problem.
+      description: List the shortest steps that show the problem.
       placeholder: |
         1. Open ...
         2. Select ...
@@ -33,7 +33,7 @@ body:
     id: expected
     attributes:
       label: Expected behavior
-      description: Describe the correct observable result.
+      description: What should have happened?
     validations:
       required: true
 
@@ -56,7 +56,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Include the URL, browser and version, operating system, or command involved.
+      description: Include the URL, browser version, operating system, or command.
       placeholder: Safari 20 on macOS, or pnpm run build
     validations:
       required: true
@@ -65,4 +65,4 @@ body:
     id: evidence
     attributes:
       label: Supporting evidence
-      description: Add relevant logs, screenshots, URLs, or error output after removing secrets.
+      description: Add useful logs, screenshots, URLs, or errors after removing secrets.
