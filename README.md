@@ -6,6 +6,16 @@
 **Last researched:** 22 September 2026  
 **Implementation:** intentionally not started; this document is the contract for the build
 
+## Repository guides
+
+- [Agent instructions](AGENTS.md) define architectural boundaries, approved commands, and protected files.
+- [Contributing](CONTRIBUTING.md) covers local setup, branches, verification, content, and pull requests.
+- [Architecture decisions](docs/decisions/0001-static-astro-site.md) record accepted choices and their consequences.
+- [Content guidance](docs/content/case-study-template.md) includes the case-study template, writing voice, and disclosure rules.
+- [Research](docs/research/2026-09-22-platform-baseline.md) preserves dated findings that must be revalidated when their assumptions change.
+- [Security policy](SECURITY.md) explains private reporting and public-repository safety.
+- [MIT license](LICENSE) grants the code and associated documentation clear reuse rights.
+
 ## The proposition
 
 This portfolio is not a résumé enlarged into a website. It is a small, inspectable product that should answer four questions for a hiring manager, client, collaborator, search crawler, or software agent:
@@ -208,14 +218,19 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── .editorconfig
 ├── .gitattributes
 ├── .github/
-│   └── workflows/
-│       ├── browser-tests.yml
-│       ├── ci.yml
-│       ├── link-checks.yml
-│       └── deploy.yml
+│   ├── ISSUE_TEMPLATE/
+│   ├── workflows/
+│   │   ├── audit.yml
+│   │   └── ci.yml
+│   ├── dependabot.yml
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── .gitignore
 ├── .node-version
 ├── .npmrc
+├── docs/
+│   ├── content/
+│   ├── decisions/
+│   └── research/
 ├── public/
 │   ├── downloads/
 │   ├── icons/
@@ -242,6 +257,10 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── tests/
 │   ├── accessibility/
 │   └── e2e/
+├── AGENTS.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── SECURITY.md
 ├── astro.config.mjs
 ├── lighthouserc.cjs
 ├── lychee.toml
@@ -275,7 +294,7 @@ Do not add `hooks/`, `services/`, `stores/`, `api/`, `utils/`, or `lib/` without
 
 Browser tests run against the built static site through Playwright. `tests/e2e/` owns navigation, canonical routes, no-JavaScript behavior, keyboard use, responsive layout, external-link safety, and 404 behavior. `tests/accessibility/` owns axe scans plus explicit keyboard and focus assertions; automated scans supplement rather than replace manual accessibility testing.
 
-Chromium runs for every pull request. Chromium, Firefox, and WebKit run after changes reach `main`, during the weekly scheduled audit, and when the browser workflow is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
+Chromium runs for every pull request and after changes reach `main`. Firefox and WebKit run during the weekly scheduled audit and when that audit is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
 
 Lighthouse CI runs through `pnpm run test:performance`. The command rebuilds `dist/`, serves that production output locally, and performs three mobile-default runs for every generated HTML route. Category assertions use the representative median run, while transfer budgets cover JavaScript, CSS, images, fonts, and total page weight. Reports stay local under `.lighthouseci/reports/`; they are not uploaded to public temporary storage.
 
