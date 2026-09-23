@@ -16,10 +16,10 @@
     "lint:spelling": "cspell --no-progress --no-summary",
     "test:e2e": "playwright test tests/e2e",
     "test:a11y": "playwright test tests/accessibility",
-    "test:html": "if [ ! -d dist ]; then echo \"Run pnpm run build before test:html.\" >&2; exit 1; elif find dist -type f -name '*.html' -print -quit | grep -q .; then html-validate --config htmlvalidate.config.mjs \"dist/**/*.html\"; else echo \"Skipping HTML validation: dist contains no HTML files.\"; fi",
+    "test:html": "if [ ! -d dist ]; then echo \"Run pnpm run build before test:html.\" >&2; exit 1; fi; if find dist -type f -name '*.html' -print -quit | grep -q .; then html-validate --config htmlvalidate.config.mjs \"dist/**/*.html\"; else if [ -d src/pages ] && find src/pages -type f -print -quit | grep -q .; then echo \"Page sources exist but the build produced no HTML.\" >&2; exit 1; else echo \"Skipping HTML validation: no page sources exist yet.\"; fi; fi",
     "test:links": "lychee --root-dir ./dist \"./**/*.md\" \"./dist/**/*.html\"",
-    "test:lighthouse": "if [ ! -d dist ]; then echo \"Run pnpm run build before test:lighthouse.\" >&2; exit 1; elif find dist -type f -name '*.html' -print -quit | grep -q .; then lhci autorun; else echo \"Skipping Lighthouse: dist contains no HTML files.\"; fi",
-    "verify": "pnpm run format:check && pnpm run lint && pnpm run check && pnpm run build && pnpm run test:html && pnpm run test:links -- --offline && PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:e2e -- --project=chromium && PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:a11y -- --project=chromium && pnpm run test:lighthouse"
+    "test:lighthouse": "if [ ! -d dist ]; then echo \"Run pnpm run build before test:lighthouse.\" >&2; exit 1; fi; if find dist -type f -name '*.html' -print -quit | grep -q .; then lhci autorun; else echo \"Skipping Lighthouse: dist contains no HTML files.\"; fi",
+    "verify": "pnpm run format:check && pnpm run lint && pnpm run check && pnpm run build && pnpm run test:html && pnpm run test:links --offline && PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:e2e --project=chromium && PLAYWRIGHT_USE_EXISTING_BUILD=true pnpm run test:a11y --project=chromium && pnpm run test:lighthouse"
   },
   "engines": {
     "node": ">=24.21.0 <25",
