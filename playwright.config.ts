@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const isCI = Boolean(process.env.CI);
 const baseURL = "http://127.0.0.1:4321";
 const previewCommand =
-  "pnpm exec astro preview --host 127.0.0.1 --port 4321 --ignore-lock";
+  "pnpm run preview --host 127.0.0.1 --port 4321 --ignore-lock";
 const useExistingBuild = process.env.PLAYWRIGHT_USE_EXISTING_BUILD === "true";
 
 export default defineConfig({

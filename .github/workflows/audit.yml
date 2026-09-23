@@ -44,25 +44,33 @@ jobs:
       - name: Build static site
         run: pnpm run build
 
-      - name: Check external links
+      - name: Install Lychee 0.24.2
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: >-
-            --root-dir '${{ github.workspace }}/dist'
-            './**/*.md'
-            './dist/**/*.html'
+          args: --version
+          checkbox: false
           fail: true
-          failIfEmpty: true
-          format: markdown
-          jobSummary: true
+          failIfEmpty: false
+          jobSummary: false
           lycheeVersion: v0.24.2
-          output: .cache/lychee/external.md
+          output: .cache/lychee/setup.md
+
+      - name: Check external links
+        run: >-
+          pnpm run test:links
+          --format markdown
+          --output .cache/lychee/external.md
 
       - name: Install Firefox and WebKit
         run: pnpm exec playwright install --with-deps firefox webkit
 
-      - name: Run Firefox and WebKit tests
-        run: pnpm run test:browser:cross
+      - name: Run Firefox and WebKit end-to-end tests
+        run: pnpm run test:e2e --project=firefox --project=webkit
+        env:
+          PLAYWRIGHT_USE_EXISTING_BUILD: "true"
+
+      - name: Run Firefox and WebKit accessibility tests
+        run: pnpm run test:a11y --project=firefox --project=webkit
         env:
           PLAYWRIGHT_USE_EXISTING_BUILD: "true"
 
@@ -94,6 +102,7 @@ jobs:
         with:
           name: weekly-audit-reports
           path: |
+            .cache/lychee/external.md
             playwright-report/
             test-results/
           if-no-files-found: ignore

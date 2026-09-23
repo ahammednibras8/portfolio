@@ -41,62 +41,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check formatting
-        run: pnpm run format:check
-
-      - name: Run linters
-        run: pnpm run lint
-
-      - name: Check Astro and TypeScript
-        run: pnpm run check
-
-      - name: Build static site
-        run: pnpm run build
-
-      - name: Detect generated HTML
-        id: html
-        shell: bash
-        run: |
-          if find dist -type f -name '*.html' -print -quit | grep -q .; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          elif [[ -d src/pages ]] && find src/pages -type f -print -quit | grep -q .; then
-            echo "::error::Page sources exist but the build produced no HTML."
-            exit 1
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Generated HTML checks remain dormant until the first page is implemented."
-          fi
-
-      - name: Validate generated HTML
-        if: steps.html.outputs.present == 'true'
-        run: pnpm run lint:html
-
-      - name: Check internal links
+      - name: Install Lychee 0.24.2
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: >-
-            --offline
-            --root-dir '${{ github.workspace }}/dist'
-            './**/*.md'
-            './dist/**/*.html'
+          args: --version
+          checkbox: false
           fail: true
-          failIfEmpty: true
-          format: markdown
-          jobSummary: true
+          failIfEmpty: false
+          jobSummary: false
           lycheeVersion: v0.24.2
-          output: .cache/lychee/internal.md
+          output: .cache/lychee/setup.md
 
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run Chromium and axe tests
-        run: pnpm run test:browser:chromium
-        env:
-          PLAYWRIGHT_USE_EXISTING_BUILD: "true"
-
-      - name: Run Lighthouse
-        if: steps.html.outputs.present == 'true'
-        run: pnpm exec lhci autorun
+      - name: Run repository verification
+        run: pnpm run verify
 
       - name: Upload test reports
         if: ${{ !cancelled() }}

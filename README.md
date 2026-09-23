@@ -296,7 +296,7 @@ Browser tests run against the built static site through Playwright. `tests/e2e/`
 
 Chromium runs for every pull request and after changes reach `main`. Firefox and WebKit run during the weekly scheduled audit and when that audit is manually dispatched. Add Vitest only when pure utilities or content transformations create genuine unit-testable logic.
 
-Lighthouse CI runs through `pnpm run test:performance`. The command rebuilds `dist/`, serves that production output locally, and performs three mobile-default runs for every generated HTML route. Category assertions use the representative median run, while transfer budgets cover JavaScript, CSS, images, fonts, and total page weight. Reports stay local under `.lighthouseci/reports/`; they are not uploaded to public temporary storage.
+Lighthouse CI runs through `pnpm run test:lighthouse` against the existing `dist/` artifact. The aggregate `pnpm run verify` command builds that artifact first and performs three mobile-default runs for every generated HTML route. Category assertions use the representative median run, while transfer budgets cover JavaScript, CSS, images, fonts, and total page weight. Reports stay local under `.lighthouseci/reports/`; they are not uploaded to public temporary storage.
 
 Lychee checks Markdown and generated HTML with the committed `lychee.toml` policy. Pull requests build the static site and run offline checks, so broken internal files, routes, and fragments block merging without depending on third-party availability. External URLs run in the weekly scheduled workflow and by manual dispatch. The exclusion list starts empty and accepts only hosts confirmed to reject automated requests.
 

@@ -19,16 +19,21 @@ Use Node.js 24.21.0 and pnpm 12.5.1.
 | Purpose                          | Command                          |
 | -------------------------------- | -------------------------------- |
 | Deterministic install            | `pnpm install --frozen-lockfile` |
-| Development server               | `pnpm exec astro dev`            |
+| Development server               | `pnpm run dev`                   |
+| Static preview                   | `pnpm run preview`               |
 | Formatting                       | `pnpm run format`                |
 | Formatting check                 | `pnpm run format:check`          |
-| Linters and spelling             | `pnpm run lint`                  |
+| JavaScript, CSS, and spelling    | `pnpm run lint`                  |
+| CSS lint                         | `pnpm run lint:css`              |
+| Spelling check                   | `pnpm run lint:spelling`         |
 | Astro and TypeScript diagnostics | `pnpm run check`                 |
-| Combined static quality checks   | `pnpm run quality`               |
 | Static production build          | `pnpm run build`                 |
-| Chromium browser checks          | `pnpm run test:browser:chromium` |
-| All configured browsers          | `pnpm run test:browser`          |
-| Lighthouse CI                    | `pnpm run test:performance`      |
+| End-to-end browser tests         | `pnpm run test:e2e`              |
+| Accessibility browser tests      | `pnpm run test:a11y`             |
+| Generated HTML validation        | `pnpm run test:html`             |
+| Link validation                  | `pnpm run test:links`            |
+| Lighthouse CI                    | `pnpm run test:lighthouse`       |
+| Required pre-merge checks        | `pnpm run verify`                |
 
 Commands that load Astro configuration require `SITE_URL`. For local work, copy `.env.example` to the ignored `.env` file and use a valid HTTPS origin.
 
@@ -45,5 +50,5 @@ Commands that load Astro configuration require `SITE_URL`. For local work, copy 
 
 - Preserve unrelated work and keep changes scoped to the request.
 - Add behavior only when it has a real consumer. Every visible control must work without relying on fake records or placeholder services.
-- Verify the smallest relevant command first, then run `pnpm run quality`. Run the production build and browser checks for rendered-site changes.
+- Verify the smallest relevant command first, then run `pnpm run verify` before requesting review.
 - Generated directories such as `dist/`, `.astro/`, reports, caches, and local environment files must remain untracked.
