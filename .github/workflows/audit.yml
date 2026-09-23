@@ -1,0 +1,100 @@
+name: Weekly audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-audit
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://example.com
+  PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+
+jobs:
+  audit:
+    name: Cross-browser, links, dependencies, and production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          node-version-file: .node-version
+          cache: true
+          install: false
+
+      - name: Verify toolchain versions
+        run: |
+          test "$(node --version)" = "v24.21.0"
+          test "$(pnpm --version)" = "12.5.1"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static site
+        run: pnpm run build
+
+      - name: Check external links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --root-dir '${{ github.workspace }}/dist'
+            './**/*.md'
+            './dist/**/*.html'
+          fail: true
+          failIfEmpty: true
+          format: markdown
+          jobSummary: true
+          lycheeVersion: v0.24.2
+          output: .cache/lychee/external.md
+
+      - name: Install Firefox and WebKit
+        run: pnpm exec playwright install --with-deps firefox webkit
+
+      - name: Run Firefox and WebKit tests
+        run: pnpm run test:browser:cross
+        env:
+          PLAYWRIGHT_USE_EXISTING_BUILD: "true"
+
+      - name: Smoke test production
+        if: env.PRODUCTION_URL != ''
+        shell: bash
+        run: |
+          smoke_body="$RUNNER_TEMP/production-home.html"
+          smoke_headers="$RUNNER_TEMP/production-headers.txt"
+
+          curl --fail --silent --show-error --location --max-time 30 \
+            --dump-header "$smoke_headers" \
+            --output "$smoke_body" \
+            "$PRODUCTION_URL"
+
+          test -s "$smoke_body"
+          grep -Eiq '^content-type:[[:space:]]*text/html' "$smoke_headers"
+
+      - name: Report missing production URL
+        if: env.PRODUCTION_URL == ''
+        run: echo "::notice::Production smoke testing is dormant until the PRODUCTION_URL repository variable is configured."
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level high
+
+      - name: Upload audit reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: weekly-audit-reports
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
