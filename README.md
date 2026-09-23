@@ -215,18 +215,14 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 
 ```text
 .
-├── .editorconfig
-├── .gitattributes
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
 │   ├── workflows/
 │   │   ├── audit.yml
-│   │   └── ci.yml
+│   │   ├── ci.yml
+│   │   └── deploy.yml
 │   ├── dependabot.yml
 │   └── PULL_REQUEST_TEMPLATE.md
-├── .gitignore
-├── .node-version
-├── .npmrc
 ├── docs/
 │   ├── content/
 │   ├── decisions/
@@ -234,15 +230,11 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 ├── public/
 │   ├── downloads/
 │   ├── icons/
-│   ├── social/
-│   ├── _headers
-│   ├── _redirects
-│   ├── favicon.svg
-│   └── robots.txt
+│   └── social/
 ├── src/
 │   ├── assets/
-│   │   ├── images/
-│   │   └── diagrams/
+│   │   ├── diagrams/
+│   │   └── images/
 │   ├── components/
 │   ├── content/
 │   │   ├── projects/
@@ -251,24 +243,37 @@ The same tested `dist/` artifact is deployed. Production does not rebuild source
 │   ├── layouts/
 │   ├── pages/
 │   └── styles/
-│       ├── tokens.css
-│       ├── global.css
-│       └── utilities.css
 ├── tests/
 │   ├── accessibility/
 │   └── e2e/
+├── .editorconfig
+├── .env.example
+├── .gitattributes
+├── .gitignore
+├── .node-version
+├── .npmrc
+├── .prettierignore
 ├── AGENTS.md
 ├── CONTRIBUTING.md
 ├── LICENSE
+├── README.md
 ├── SECURITY.md
 ├── astro.config.mjs
+├── cspell.config.yaml
+├── eslint.config.mjs
+├── htmlvalidate.config.mjs
 ├── lighthouserc.cjs
 ├── lychee.toml
 ├── package.json
+├── playwright.config.ts
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
+├── prettier.config.mjs
+├── stylelint.config.mjs
 └── tsconfig.json
 ```
+
+This is a target map, not a requirement to commit empty paths. `deploy.yml` remains deferred until real pages and the Cloudflare Pages project exist.
 
 Create each public directory only when its first real pass-through asset is implemented. Do not add empty directories or `.gitkeep` placeholders.
 
