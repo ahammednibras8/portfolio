@@ -11,6 +11,20 @@ The site will show:
 
 The project is still being built. The development setup and quality checks are ready. The public pages and project stories come next.
 
+## Who the site is for
+
+People will spend different amounts of time on the site. Each level must work on its own.
+
+| Time       | Reader             | What they should learn                                                        |
+| ---------- | ------------------ | ----------------------------------------------------------------------------- |
+| 10 seconds | Recruiter          | Who I am, what I build, and the strongest reason to keep reading              |
+| 60 seconds | Hiring manager     | My best projects, their results, and what I personally contributed            |
+| 10 minutes | Technical reviewer | The decisions, limits, architecture, trade-offs, and evidence behind the work |
+
+The short version must use plain language. Deeper sections can add technical detail without making the summary harder to understand.
+
+[NN/g asked more than 200 UX hiring managers what they look for in portfolios](https://www.nngroup.com/videos/ux-portfolios-hiring/). The research focused on UX roles, but the lesson applies here: clear organization, writing, process, finished work, and outcomes matter alongside appearance.
+
 ## Design direction
 
 I want the site to feel like a clear conversation about my work.

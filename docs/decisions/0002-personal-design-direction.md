@@ -25,6 +25,20 @@ We need to agree on that direction before choosing colors, type, layouts, compon
 >
 > It should stay quiet without feeling empty.
 
+## Who must understand the site
+
+The site must work for three kinds of reading:
+
+| Time       | Reader             | What they need                                                             |
+| ---------- | ------------------ | -------------------------------------------------------------------------- |
+| 10 seconds | Recruiter          | Who Ahammed is, what he builds, and why they should continue               |
+| 60 seconds | Hiring manager     | Credible projects, useful results, and Ahammed's contribution              |
+| 10 minutes | Technical reviewer | Decisions, limits, architecture, trade-offs, and evidence they can inspect |
+
+Each longer path adds detail to the shorter one. A reader must not need design or engineering knowledge to understand the main point.
+
+[Research with more than 200 UX hiring managers](https://www.nngroup.com/videos/ux-portfolios-hiring/) found that portfolios are judged on more than appearance. This site uses the same lesson: organization, writing, process, finished work, and outcomes also matter.
+
 ## The five checks
 
 Every major design choice must support at least one of these goals.
