@@ -3,22 +3,24 @@
 - Status: Accepted
 - Date: 2026-09-22
 
-## Context
+## Why this decision exists
 
-The portfolio must deliver useful content before JavaScript runs, remain crawlable and accessible, keep recurring infrastructure near zero, and make its build output portable between ordinary static hosts. The project needs reusable presentation, typed content, image optimization, and strong automated validation, but it does not need application state or a production server.
+The portfolio must load quickly, work without JavaScript, and be easy to move between hosts.
+
+It needs reusable pages, checked content, and optimized images. It does not need a server or database.
 
 ## Decision
 
-Use Astro in static-output mode with strict TypeScript. Render primary content, navigation, and metadata during the build. Ship no client JavaScript by default.
+Use Astro with static output and strict TypeScript.
 
-Use an Astro island only when a documented user requirement cannot be met with semantic HTML, CSS, and a small framework-free DOM module. Such a change must include measurements, an accessibility plan, and a superseding or additional decision record.
+Astro builds the pages as complete HTML. JavaScript is added only when a real feature needs it and plain HTML and CSS cannot do the job.
 
-Production consumes the portable `dist/` artifact. Hosting automation and provider configuration are deferred until real pages exist and the deployment path can be tested end to end.
+The built `dist/` folder is the product that gets deployed. Cloudflare setup waits until real pages exist and the full path can be tested.
 
-## Consequences
+## What this means
 
-- Pages remain useful without JavaScript and can be inspected as HTML.
-- Content and component changes are validated at build time.
-- There is no application server, database, session state, or server-rendering adapter to operate.
-- Application-style interactions may require a later architecture review.
-- Changing rendering mode, adding a client UI runtime, or introducing a runtime service requires a new decision record that explains the need and migration impact.
+- Visitors can read and navigate the site without JavaScript.
+- Content and code are checked during the build.
+- Production has no application server, database, or login system.
+- The site can move to another static host.
+- Adding a client framework, server code, or database needs a new decision record.

@@ -1,54 +1,65 @@
-# Repository instructions for agents
+# Instructions for coding agents
 
-These instructions apply to the entire repository. Read the relevant source, tests, configuration, and recent history before changing anything.
+Read the files related to the task before making changes. Check the tests, configuration, Git status, and recent commits. Keep existing work safe.
 
-## Architecture boundaries
+## Keep the site simple
 
-- Astro must keep `output: "static"`. Do not add an SSR adapter, Pages Functions, an application server, a database, or a runtime dependency without an accepted architecture decision record.
-- Primary content, navigation, metadata, and recovery paths must exist in the built HTML. Do not make them depend on hydration, browser-only fetching, a client router, `canvas`, or CSS-generated content.
-- React, Vue, Svelte, and other client UI runtimes are not part of the initial build. Prefer semantic HTML, Astro components, and CSS. Any exception needs a measured user requirement and a decision record.
-- Route files belong in `src/pages/`; reusable presentation belongs in `src/components/`; shared structured data belongs in `src/data/`; document shells belong in `src/layouts/`.
-- Case studies belong in `src/content/projects/`. Writing belongs in `src/content/writing/` only when publishable material exists.
-- Import optimizable images and diagrams from `src/assets/`. Put a file in `public/` only when its exact public name must be preserved or it must bypass Astro's asset pipeline.
-- Create directories when their first real file is added. Do not add placeholder directories, `.gitkeep` files, speculative helpers, or unused abstractions.
+- Astro must use static output.
+- Important content and navigation must be present in the built HTML.
+- Do not add React, Vue, Svelte, server rendering, Pages Functions, a database, or an application server without a new accepted decision record.
+- Use semantic HTML, Astro components, and CSS first.
+- Put routes in `src/pages/`.
+- Put shared page shells in `src/layouts/`.
+- Put reusable presentation in `src/components/`.
+- Put shared profile and navigation data in `src/data/`.
+- Put case studies in `src/content/projects/`.
+- Add `src/content/writing/` only when an article is ready to publish.
+- Import images and diagrams from `src/assets/` when Astro should optimize them.
+- Use `public/` only when a file must keep its exact public name.
+- Do not create empty folders, placeholder files, or unused abstractions.
 
-## Approved commands
+## Commands
 
 Use Node.js 24.21.0 and pnpm 12.5.1.
 
-| Purpose                          | Command                          |
-| -------------------------------- | -------------------------------- |
-| Deterministic install            | `pnpm install --frozen-lockfile` |
-| Development server               | `pnpm run dev`                   |
-| Static preview                   | `pnpm run preview`               |
-| Formatting                       | `pnpm run format`                |
-| Formatting check                 | `pnpm run format:check`          |
-| JavaScript, CSS, and spelling    | `pnpm run lint`                  |
-| CSS lint                         | `pnpm run lint:css`              |
-| Spelling check                   | `pnpm run lint:spelling`         |
-| Astro and TypeScript diagnostics | `pnpm run check`                 |
-| Static production build          | `pnpm run build`                 |
-| End-to-end browser tests         | `pnpm run test:e2e`              |
-| Accessibility browser tests      | `pnpm run test:a11y`             |
-| Generated HTML validation        | `pnpm run test:html`             |
-| Link validation                  | `pnpm run test:links`            |
-| Lighthouse CI                    | `pnpm run test:lighthouse`       |
-| Required pre-merge checks        | `pnpm run verify`                |
+| Task                    | Command                          |
+| ----------------------- | -------------------------------- |
+| Install dependencies    | `pnpm install --frozen-lockfile` |
+| Start development       | `pnpm run dev`                   |
+| Preview the build       | `pnpm run preview`               |
+| Format files            | `pnpm run format`                |
+| Check formatting        | `pnpm run format:check`          |
+| Run all linters         | `pnpm run lint`                  |
+| Check CSS               | `pnpm run lint:css`              |
+| Check spelling          | `pnpm run lint:spelling`         |
+| Check Astro and TS      | `pnpm run check`                 |
+| Build the site          | `pnpm run build`                 |
+| Run browser tests       | `pnpm run test:e2e`              |
+| Run accessibility tests | `pnpm run test:a11y`             |
+| Check built HTML        | `pnpm run test:html`             |
+| Check links             | `pnpm run test:links`            |
+| Run Lighthouse          | `pnpm run test:lighthouse`       |
+| Run every local gate    | `pnpm run verify`                |
 
-Commands that load Astro configuration require `SITE_URL`. For local work, copy `.env.example` to the ignored `.env` file and use a valid HTTPS origin.
+Commands that load Astro need `SITE_URL`. Copy `.env.example` to the ignored `.env` file and use a valid HTTPS URL.
 
-## Protected files and data
+## Protect the repository
 
-- Never print, commit, or place secrets in generated output. `.env`, `.dev.vars`, credentials, private client data, and unpublished evidence stay outside Git.
-- Change `pnpm-lock.yaml` only through pnpm. Keep dependencies exact and preserve the approved-build list in `pnpm-workspace.yaml`.
-- Keep third-party GitHub Actions pinned to complete commit SHAs. Workflow permissions remain read-only unless a specific job requires a narrower documented exception.
-- Treat `README.md` as the product and architecture contract. An architectural change must update it and add or supersede a record in `docs/decisions/` in the same pull request.
-- Do not weaken accessibility, security, link, HTML, or performance gates to make a failure disappear. Identify the product or test defect.
-- Do not publish a name, logo, quotation, screenshot, metric, customer detail, or internal architecture without permission recorded in the content review.
+- Never print or commit secrets, credentials, private client data, or unpublished evidence.
+- Change `pnpm-lock.yaml` only through pnpm.
+- Keep dependency versions exact.
+- Keep the approved build list in `pnpm-workspace.yaml`.
+- Pin third-party GitHub Actions to full commit SHAs.
+- Keep workflow permissions read-only unless a job clearly needs more.
+- Update `README.md` and add a decision record when the architecture changes.
+- Do not weaken a quality check to hide a real failure.
 
-## Change discipline
+## Before finishing
 
-- Preserve unrelated work and keep changes scoped to the request.
-- Add behavior only when it has a real consumer. Every visible control must work without relying on fake records or placeholder services.
-- Verify the smallest relevant command first, then run `pnpm run verify` before requesting review.
-- Generated directories such as `dist/`, `.astro/`, reports, caches, and local environment files must remain untracked.
+- Keep changes focused.
+- Preserve unrelated work.
+- Add code only when something uses it.
+- Make every visible control work.
+- Run the smallest useful check first.
+- Run `pnpm run verify` before review.
+- Keep `dist/`, `.astro/`, reports, caches, and local environment files out of Git.

@@ -1,18 +1,18 @@
 name: Feature request
-description: Propose a user-facing improvement with a concrete outcome.
+description: Suggest an improvement for visitors or contributors.
 title: "[Feature]: "
 
 body:
   - type: markdown
     attributes:
       value: |
-        Start with the user problem and measurable outcome. Avoid prescribing unnecessary architecture.
+        Start with the problem and the result you want. Leave out technical changes that are not required.
 
   - type: textarea
     id: problem
     attributes:
       label: User problem
-      description: Explain who has the problem, what they are trying to do, and what prevents them.
+      description: Who has the problem, what are they trying to do, and what gets in the way?
     validations:
       required: true
 
@@ -20,7 +20,7 @@ body:
     id: outcome
     attributes:
       label: Desired outcome
-      description: Describe the observable improvement without assuming a specific implementation.
+      description: What should be better when this work is finished?
     validations:
       required: true
 
@@ -28,7 +28,7 @@ body:
     id: acceptance
     attributes:
       label: Acceptance criteria
-      description: Provide specific, testable completion criteria.
+      description: List clear checks that show the work is finished.
       placeholder: |
         - [ ] ...
         - [ ] ...
@@ -39,7 +39,7 @@ body:
     id: scope
     attributes:
       label: Scope boundaries
-      description: State what should not be included in this work.
+      description: What should this work leave out?
     validations:
       required: true
 
@@ -47,4 +47,4 @@ body:
     id: evidence
     attributes:
       label: Evidence and references
-      description: Add relevant research, examples, screenshots, or related issues without including confidential information.
+      description: Add useful research, examples, screenshots, or related issues. Do not include private information.

@@ -1,24 +1,24 @@
-## Summary
+## What changed?
 
-<!-- Describe the user-visible or operational outcome, not only the files changed. -->
+<!-- Explain the result in plain language. -->
 
-## Verification
+## How was it checked?
 
-<!-- List the exact automated and manual checks that were actually run and their results. -->
+<!-- List only checks you actually ran. Include manual checks when needed. -->
 
-- [ ] Focused checks pass.
-- [ ] Full relevant quality checks pass.
-- [ ] Manual verification is complete or explicitly not applicable.
+- [ ] Focused checks passed.
+- [ ] `pnpm run verify` passed.
+- [ ] Manual testing passed or was not needed.
 
-## Risk and recovery
+## What could go wrong?
 
-<!-- Describe meaningful failure modes, deployment considerations, and how to recover. Write "None" only when justified. -->
+<!-- Name the main risk and how to recover. Write “None” only when that is true. -->
 
-## Checklist
+## Final check
 
-- [ ] The change is focused and contains no speculative files or abstractions.
-- [ ] Accessibility, security, privacy, and performance impacts were reviewed where relevant.
-- [ ] Documentation and configuration match the implemented behavior.
-- [ ] No credentials, private data, generated reports, or local environment files are included.
+- [ ] This pull request contains one focused change.
+- [ ] Accessibility, security, privacy, and performance were considered.
+- [ ] Documentation matches the code.
+- [ ] No secrets, private data, generated reports, or local environment files are included.
 
-<!-- Use `Related: #123` when applicable. Do not use an auto-closing keyword unless closing the issue is intentional. -->
+<!-- Use `Related: #123` when needed. Do not use an auto-closing word unless the issue should close. -->
