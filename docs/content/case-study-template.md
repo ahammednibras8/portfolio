@@ -1,59 +1,59 @@
-# Case-study drafting template
+# Case-study template
 
-Use this document to draft and review a case study. It is not an Astro content schema; adapt it to the implemented schema when `src/content/projects/` is created. Remove every instruction and placeholder before publication.
+Use this file to draft a project story. Remove all instructions before publishing.
 
-## Working title
+## Title
 
-<!-- Use the problem or outcome, not an internal project code name. -->
+<!-- Name the problem or result, not an internal project code. -->
 
-## One-sentence outcome
+## Result
 
-<!-- State the result, audience, and relevant scale without unsupported adjectives. -->
+<!-- In one sentence, say what changed, for whom, and at what scale. -->
 
-## Context
+## The problem
 
-<!-- Who had the problem? What were they trying to accomplish? Why did it matter? -->
+<!-- Who needed help? What were they trying to do? Why did it matter? -->
 
-## Constraints
+## Limits
 
-<!-- Cover the meaningful limits: time, team, scale, legacy systems, reliability, privacy, budget, or disclosure. -->
+<!-- Include the limits that shaped the work: time, team, scale, old systems, reliability, privacy, or budget. -->
 
-## Ownership
+## My role
 
-<!-- Separate personal decisions and implementation from team or partner contributions. Credit collaborators accurately. -->
+<!-- Say what you owned. Name the work done by teammates or partners. -->
 
-## Decision record
+## The decision
 
-### Options considered
+### Options
 
-<!-- Name viable alternatives rather than creating an obvious losing option. -->
+<!-- List the real options that were considered. -->
 
-### Chosen approach
+### Choice
 
-<!-- Explain the decision and the evidence available at the time. -->
+<!-- Explain what you chose and why. -->
 
 ### Trade-offs
 
-<!-- State what the choice made easier, harder, or impossible. -->
+<!-- Say what the choice made better, worse, or impossible. -->
 
-## Execution
+## What I built
 
-<!-- Describe only the architecture and implementation details needed to understand the judgment. Link deeper artifacts where disclosure permits. -->
+<!-- Include only the technical detail needed to understand the work. Link to deeper material when it is safe to share. -->
 
 ## Evidence
 
-<!-- Provide sourced metrics, screenshots, code, a demo, a quotation with permission, or bounded qualitative evidence. Record the measurement window and comparison baseline. -->
+<!-- Add approved numbers, screenshots, code, demos, or quotes. Include the source, date range, and comparison. -->
 
-## Reflection
+## What I learned
 
-<!-- Explain what changed, what failed, what was learned, and what would be done differently now. -->
+<!-- Say what changed, what failed, and what you would do differently now. -->
 
-## Publication review
+## Before publishing
 
-- [ ] The audience, problem, role, and collaborators are accurate.
-- [ ] Every metric has a source, baseline, time window, and permission to publish.
-- [ ] Names, logos, quotations, screenshots, and internal details are approved for public use.
-- [ ] Images have useful alternative text or are correctly marked decorative.
-- [ ] Links work and do not expose private systems or tracking parameters.
-- [ ] Confidential information is removed rather than blurred or hidden with CSS.
-- [ ] The page remains truthful and useful if JavaScript is disabled.
+- [ ] The problem, audience, role, and teammates are described correctly.
+- [ ] Every number has a source, comparison, date range, and permission.
+- [ ] Names, logos, quotes, screenshots, and private details are approved.
+- [ ] Images have useful alt text or are marked as decorative.
+- [ ] Links work and do not expose private systems or tracking data.
+- [ ] Private information was removed from the source file, not only hidden.
+- [ ] The page still works without JavaScript.

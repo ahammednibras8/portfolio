@@ -1,32 +1,34 @@
-# Security policy
+# Security
 
-## Supported version
+Security fixes are made on the current `main` branch.
 
-Security fixes apply to the current `main` branch. This portfolio has no separately supported release branches.
+## Report a security problem
 
-## Reporting a vulnerability
+Do not open a public issue for a private security problem.
 
-Do not open a public issue for an undisclosed vulnerability.
+Email `ahammednibras@proton.me` with the subject `Portfolio security report`.
 
-Email `ahammednibras@proton.me` with the subject `Portfolio security report`. Include:
+Please include:
 
 - the affected URL, file, or commit;
-- the security impact;
-- the smallest safe reproduction;
-- any conditions required for exploitation;
-- suggested remediation, if available.
+- what an attacker could do;
+- the smallest safe way to reproduce the problem;
+- any conditions needed for the problem to happen;
+- a suggested fix, if you have one.
 
-Remove credentials, personal data, and unrelated private information from the report. Allow reasonable time for investigation and remediation before public disclosure. Acknowledgement and status updates will be provided through the reporting channel.
+Remove passwords, tokens, personal data, and unrelated private information from the report. Please allow time to investigate and fix the problem before sharing it publicly.
 
-## Public-repository safety
+## Keep private data out of Git
 
-Everything committed to this repository must be treated as public and permanent. Never commit:
+Never commit:
 
-- API tokens, passwords, private keys, session data, or environment files;
-- unpublished customer names, internal screenshots, confidential metrics, or proprietary source material;
-- private vulnerability details before remediation and coordinated disclosure;
-- generated artifacts that may embed local paths, credentials, or test data.
+- passwords, tokens, private keys, sessions, or environment files;
+- private customer details, screenshots, numbers, or source material;
+- details of an unfixed security problem;
+- generated files that contain local paths, credentials, or test data.
 
-If a secret is committed, removing the file is not sufficient. Revoke or rotate the credential first, then remove it from the repository and investigate its use.
+If a secret is committed, deleting the file is not enough. Revoke or rotate the secret first. Then remove it from the repository and check whether it was used.
 
-The static production design intentionally excludes authentication, databases, server functions, and third-party scripts at launch. Any future addition that processes data or executes at runtime requires a documented threat, privacy, and retention review.
+The first version of this site has no login, database, server function, or third-party browser script.
+
+Any future service that handles data must include a security, privacy, and data-retention review.
