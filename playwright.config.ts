@@ -43,7 +43,7 @@ export default defineConfig({
     command: useExistingBuild
       ? previewCommand
       : `pnpm run build && ${previewCommand}`,
-    port: 4321,
+    url: baseURL,
     env: {
       SITE_URL: process.env.SITE_URL ?? "https://example.com",
     },
