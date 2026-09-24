@@ -13,6 +13,8 @@ Write as if you are explaining the work to a smart person who was not on the pro
 - Be direct about limits, mistakes, and uncertainty.
 - Use exact dates and numbers when they matter.
 - Make link text describe where the link goes.
+- Put the plain-language result first. Add technical detail after it.
+- Make each page useful to someone who reads only the heading and first paragraph.
 
 ## Avoid
 
