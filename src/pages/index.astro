@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running."
+    />
+    <meta name="viewport" content="width=device-width" />
+    <title>Ahammed Nibras — Software engineer</title>
+  </head>
+
+  <body>
+    <a href="#main-content">Skip to content</a>
+
+    <header>
+      <nav aria-label="Primary">
+        <ul>
+          <li>
+            <a href="#work">Work</a>
+          </li>
+          <li>
+            <a href="#approach">How I work</a>
+          </li>
+          <li>
+            <a href="#now">Now</a>
+          </li>
+          <li>
+            <a href="#about">About</a>
+          </li>
+          <li>
+            <a href="#contact">Contact</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section aria-labelledby="introduction-heading">
+        <h1 id="introduction-heading">Hi, I’m Ahammed.</h1>
+
+        <p>
+          I’m a software engineer who builds AI products and the systems that
+          keep them useful after the demo.
+        </p>
+
+        <p>
+          I work across AI features, backend services, data, workers,
+          deployment, testing, and the screens people use. I like owning the
+          whole path instead of stopping at one layer.
+        </p>
+      </section>
+
+      <section aria-labelledby="experience-heading">
+        <h2 id="experience-heading">What that looks like</h2>
+
+        <dl>
+          <dt>AI products</dt>
+          <dd>
+            I have built retrieval, document processing, OCR, tool-using agents,
+            evaluation, and grounded-answer flows.
+          </dd>
+
+          <dt>Production systems</dt>
+          <dd>
+            I work on APIs, databases, queues, workers, deployment,
+            observability, and the recovery paths needed when something fails.
+          </dd>
+
+          <dt>Trust and safety</dt>
+          <dd>
+            I have worked on authentication, tenant isolation, privacy deletion,
+            audit trails, source permissions, and tests that cross real service
+            boundaries.
+          </dd>
+
+          <dt>Product delivery</dt>
+          <dd>
+            I follow features through the database, backend, worker, interface,
+            tests, and deployment instead of treating them as separate jobs.
+          </dd>
+        </dl>
+      </section>
+
+      <section id="work" aria-labelledby="work-heading">
+        <h2 id="work-heading">Selected work</h2>
+
+        <p>
+          Most of my professional work is private. Cascade is the clearest
+          public example of how I approach a large system.
+        </p>
+
+        <article>
+          <header>
+            <h3>Cascade</h3>
+            <p>
+              A task platform for work that needs to run in the background,
+              survive failures, and remain understandable afterward.
+            </p>
+          </header>
+
+          <p>
+            Today, Cascade can accept a task through its TypeScript SDK, store
+            the run, execute it in a worker, and show the result and logs in a
+            dashboard. The same system supports retries, schedules,
+            cancellation, and replay.
+          </p>
+
+          <section aria-labelledby="cascade-context">
+            <h4 id="cascade-context">Why I built it</h4>
+            <p>
+              Background work looks simple until a process crashes, a request is
+              repeated, or a deployment changes halfway through a run. I wanted
+              to understand those problems by building the complete system
+              myself.
+            </p>
+          </section>
+
+          <section aria-labelledby="cascade-constraints">
+            <h4 id="cascade-constraints">What had to be true</h4>
+            <ul>
+              <li>A run could not disappear when a worker stopped.</li>
+              <li>Repeating a request could not create duplicate work.</li>
+              <li>One organization could never read another one’s data.</li>
+              <li>
+                The dashboard had to show stored system state, not temporary
+                browser state.
+              </li>
+              <li>
+                Tests had to use the real SDK, API, queue, and worker path.
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="cascade-role">
+            <h4 id="cascade-role">My role</h4>
+            <p>
+              Cascade is my personal project. I set its direction, make the
+              final product and engineering decisions, and take responsibility
+              for what ships.
+            </p>
+          </section>
+
+          <section aria-labelledby="cascade-decisions">
+            <h4 id="cascade-decisions">The important choices</h4>
+            <p>
+              PostgreSQL is the source of truth for runs and deployments. Redis
+              handles short-lived coordination such as queues, rate limits, and
+              concurrency. Large payloads can move to object storage. The
+              dashboard reads the same durable records used by the workers.
+            </p>
+          </section>
+
+          <section aria-labelledby="cascade-execution">
+            <h4 id="cascade-execution">What exists now</h4>
+            <p>
+              The project includes an API, TypeScript SDK, workers, a deployment
+              runner, authentication, a dashboard, logs, traces, health checks,
+              and automated tests.
+            </p>
+          </section>
+
+          <section aria-labelledby="cascade-evidence">
+            <h4 id="cascade-evidence">See the evidence</h4>
+            <ul>
+              <li>
+                <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
+                  Read the architecture
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ahammednibras8/cascade/pull/22">
+                  Follow the durable task implementation
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ahammednibras8/cascade/pull/59">
+                  See the real SDK-to-worker test path
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ahammednibras8/cascade">
+                  View the repository
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="cascade-reflection">
+            <h4 id="cascade-reflection">What changed my approach</h4>
+            <p>
+              An early browser test created successful records directly in the
+              database. The screen passed even though that setup skipped the
+              real product. I replaced it with a test that starts from the SDK
+              and continues through the API, queue, worker, and dashboard.
+            </p>
+
+            <p>
+              That made the test slower and harder to build, but it now proves
+              something useful.
+            </p>
+          </section>
+        </article>
+      </section>
+
+      <section id="approach" aria-labelledby="approach-heading">
+        <h2 id="approach-heading">How I work</h2>
+
+        <p>
+          I start with what a person is trying to do. Then I follow that action
+          through the entire system and ask where it can fail, where the truth
+          should live, and how someone will understand the failure later.
+        </p>
+
+        <p>
+          AI is a major part of my daily development process. I use it heavily
+          for research, implementation, testing, debugging, and writing. I still
+          choose the direction, review the output, run the checks, and own what
+          ships.
+        </p>
+      </section>
+
+      <section id="now" aria-labelledby="now-heading">
+        <h2 id="now-heading">What I’m working on now</h2>
+
+        <p>
+          I’m continuing to build Cascade. I’m also interested in reliable agent
+          tools, useful evaluation, and observability that explains what an AI
+          system actually did.
+        </p>
+      </section>
+
+      <section id="about" aria-labelledby="about-heading">
+        <h2 id="about-heading">About me</h2>
+
+        <p>
+          I’m based in Kozhikode, Kerala, India. My day-to-day work is mostly
+          TypeScript and Python, with PostgreSQL, Redis, queues, containers, and
+          cloud services around them.
+        </p>
+      </section>
+
+      <section id="contact" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Contact</h2>
+
+        <p>
+          If you want to discuss a role, a project, or a difficult engineering
+          problem, email me.
+        </p>
+
+        <ul>
+          <li>
+            <a href="mailto:ahammednibras737@gmail.com">
+              ahammednibras737@gmail.com
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/ahammednibras8">GitHub</a>
+          </li>
+          <li>
+            <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  a {
+    display: inline-block;
+    min-block-size: 24px;
+  }
+</style>
