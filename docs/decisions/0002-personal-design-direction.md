@@ -25,6 +25,8 @@ Every major visual choice must combine three references:
 - IBM's _[System/360 Principles of Operation](https://www.bitsavers.org/pdf/ibm/360/princOps/A22-6821-6_360PrincOpsJan67.pdf)_ for information hierarchy;
 - [Nibras's public work](https://github.com/ahammednibras8) for plain language, visible boundaries, and proof beside claims.
 
+The color system has a more personal starting point. [Arsenal's off-white and dark red](https://www.arsenal.com/photos/the-inspiration-and-details-on-our-2526-third-kit-a4tcK6e5bV0Y) inform the canvas and action color. [Mercedes-AMG's black, silver, and PETRONAS green](https://www.mercedesamgf1.com/news/mercedes-amg-f1-2026-challenger-w17-revealed) inform the neutral structure and keyboard focus color. These are references, not copied brand palettes.
+
 ## Constraints
 
 - Take principles from the three sources, not their appearance.
