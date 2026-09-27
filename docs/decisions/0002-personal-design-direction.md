@@ -56,7 +56,7 @@ Major choices include type, color, layout, navigation, components, images, and m
 ## How a design choice is made
 
 1. Start with a real visitor need or piece of evidence.
-2. Use a reference from [the personal source board](../research/2026-09-26-personal-source-board.md) and explain why it matters.
+2. Combine three references: [PlanetScale](https://planetscale.com/) for presenting technical evidence, IBM's _[System/360 Principles of Operation](https://www.bitsavers.org/pdf/ibm/360/princOps/A22-6821-6_360PrincOpsJan67.pdf)_ for information hierarchy, and [Ahammed's work](../research/2026-09-26-personal-source-board.md) for the personal reason behind the choice.
 3. List the limits the design must respect.
 4. Write a simple rule for this site.
 5. Let Ahammed and another person review the result.
@@ -67,7 +67,7 @@ AI may not invent personal details, choose the site's personality, or make the f
 
 ## What this changes
 
-- Visual work starts from the approved personal source board, not a generic website mood board.
-- Outside websites may help solve a specific problem, but they do not define this site's identity.
+- Visual work starts where the three approved sources meet, not from a generic website mood board.
+- PlanetScale may contribute useful digital behavior, but it does not define this site's identity.
 - Existing ideas about color, type, layout, and motion must pass the five checks before they become code.
 - Accessibility, clear HTML, speed, and no-JavaScript support remain required.
