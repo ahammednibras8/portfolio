@@ -5,7 +5,7 @@ test("the homepage explains the work in document order", async ({ page }) => {
 
   await expect(page).toHaveTitle("Ahammed Nibras — Software engineer");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
 
   await expect(page.locator("main > section > h2")).toHaveText([
@@ -134,7 +134,7 @@ test("the complete homepage remains available without JavaScript", async ({
   await page.goto("http://127.0.0.1:4321/");
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Cascade" }),
