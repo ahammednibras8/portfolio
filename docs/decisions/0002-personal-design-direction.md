@@ -3,15 +3,9 @@
 - Status: Accepted
 - Date: 2026-09-23
 
-## Why this decision exists
+## Decision
 
-A portfolio can look polished and still feel anonymous.
-
-This site should feel like Ahammed's work. It should not look like a copy of another website or an AI-generated theme.
-
-## Direction
-
-The site should feel like a clear conversation about the work:
+Make the site feel like a clear conversation about the work:
 
 - technical, but not dressed up like a terminal;
 - precise, but not cold;
@@ -19,7 +13,11 @@ The site should feel like a clear conversation about the work:
 - detailed, but easy to scan;
 - quiet, but not empty.
 
-## Sources
+## Reason
+
+A portfolio can look polished and still feel anonymous. This direction should make the work recognizably Ahammed's without copying another website or adopting an AI-generated theme.
+
+## Evidence or personal source
 
 Every major visual choice must combine three references:
 
@@ -27,10 +25,10 @@ Every major visual choice must combine three references:
 - IBM's _[System/360 Principles of Operation](https://www.bitsavers.org/pdf/ibm/360/princOps/A22-6821-6_360PrincOpsJan67.pdf)_ for information hierarchy;
 - [Ahammed's public work](https://github.com/ahammednibras8) for plain language, visible boundaries, and proof beside claims.
 
-These sources provide rules, not an appearance to copy. The site must not reproduce PlanetScale's branding, the manual's retro style, or GitHub's interface.
+## Constraints
 
-## Rules
-
+- Take principles from the three sources, not their appearance.
+- Do not reproduce PlanetScale's branding, the manual's retro style, or GitHub's interface.
 - Put the plain-language result before technical detail.
 - Use real diagrams, measurements, and project evidence.
 - Let readers move from a short summary to details they can inspect.
@@ -38,4 +36,12 @@ These sources provide rules, not an appearance to copy. The site must not reprod
 - Keep motion optional and never depend on color alone.
 - Preserve accessible HTML, speed, and no-JavaScript support.
 
-AI is part of the working process. Ahammed chooses the direction, verifies the output, and owns the final decisions.
+## Where it is used
+
+The rule applies to typography, color, layout, components, images, diagrams, motion, and case-study presentation. The content order in `src/pages/index.astro` is the starting structure that visual work must preserve or deliberately improve.
+
+## Reconsider when
+
+Change a source or rule when it blocks understanding, accessibility, or an honest presentation of the work, or when it no longer represents Ahammed after human review. Do not change it only because a new visual trend appears.
+
+AI may inspect, challenge, and test the work. Ahammed chooses the direction, verifies the result, and owns the final decision.

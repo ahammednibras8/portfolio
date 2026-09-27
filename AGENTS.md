@@ -54,6 +54,14 @@ Commands that load Astro need `SITE_URL`. Copy `.env.example` to the ignored `.e
 - Update `README.md` and add a decision record when the architecture changes.
 - Do not weaken a quality check to hide a real failure.
 
+## Record durable decisions
+
+- `docs/decisions/` is the decision ledger.
+- Add a record only when a substantial choice constrains future work.
+- Record the decision, reason, evidence or personal source, constraints, where it is used, and when it should be reconsidered.
+- Update an existing record instead of adding an overlapping one.
+- Keep temporary research and rejected ideas out of the public ledger.
+
 ## Before finishing
 
 - Keep changes focused.
