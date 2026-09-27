@@ -355,6 +355,7 @@ test("the personal color and depth systems keep their roles distinct", async ({
 
   const colors = await page.evaluate(() => {
     const rootStyles = getComputedStyle(document.documentElement);
+    const siteHeader = document.querySelector<HTMLElement>(".site-header");
     const navigationLink = document.querySelector<HTMLElement>(
       ".primary-navigation a",
     );
@@ -369,6 +370,7 @@ test("the personal color and depth systems keep their roles distinct", async ({
 
     if (
       !navigationLink ||
+      !siteHeader ||
       !pageFrame ||
       !article ||
       !articleSection ||
@@ -399,11 +401,18 @@ test("the personal color and depth systems keep their roles distinct", async ({
           .trim(),
         action: rootStyles.getPropertyValue("--color-action").trim(),
         focus: rootStyles.getPropertyValue("--color-focus").trim(),
+        atmosphereAlpha: rootStyles
+          .getPropertyValue("--alpha-atmosphere")
+          .trim(),
         gridAlpha: rootStyles.getPropertyValue("--alpha-grid").trim(),
         structureAlpha: rootStyles.getPropertyValue("--alpha-structure").trim(),
         emphasisAlpha: rootStyles.getPropertyValue("--alpha-emphasis").trim(),
       },
       canvas: getComputedStyle(document.body).backgroundColor,
+      headerSurface: getComputedStyle(siteHeader).backgroundColor,
+      recessedSurfaceAlpha: alphaFrom(
+        getComputedStyle(article).backgroundColor,
+      ),
       primaryInk: getComputedStyle(document.body).color,
       bodyOpacity: getComputedStyle(document.body).opacity,
       secondaryInk: getComputedStyle(secondaryText).color,
@@ -430,11 +439,14 @@ test("the personal color and depth systems keep their roles distinct", async ({
       secondaryInk: "#51565a",
       action: "#a11f35",
       focus: "#007a73",
+      atmosphereAlpha: "4%",
       gridAlpha: "8%",
       structureAlpha: "12%",
       emphasisAlpha: "20%",
     },
     canvas: "rgb(243, 241, 237)",
+    headerSurface: "rgb(243, 241, 237)",
+    recessedSurfaceAlpha: 0.04,
     primaryInk: "rgb(23, 25, 26)",
     bodyOpacity: "1",
     secondaryInk: "rgb(81, 86, 90)",
@@ -454,6 +466,109 @@ test("the personal color and depth systems keep their roles distinct", async ({
   await skipLink.focus();
   await expect(skipLink).toHaveCSS("outline-color", "rgb(0, 122, 115)");
   await expect(skipLink).toHaveCSS("outline-style", "solid");
+});
+
+test("three surfaces and two border widths create depth without shadows", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+
+  const depth = await page.evaluate(() => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const siteHeader = document.querySelector<HTMLElement>(".site-header");
+    const pageFrame = document.querySelector<HTMLElement>(".page");
+    const article = document.querySelector<HTMLElement>("article");
+    const evidence = document.querySelector<HTMLElement>(".project-evidence");
+
+    if (!siteHeader || !pageFrame || !article || !evidence) {
+      throw new Error("Expected homepage depth targets were not found.");
+    }
+
+    const bodyStyles = getComputedStyle(document.body);
+    const headerStyles = getComputedStyle(siteHeader);
+    const articleStyles = getComputedStyle(article);
+    const evidenceStyles = getComputedStyle(evidence);
+    const renderedBorderWidths = new Set<string>();
+
+    for (const element of document.querySelectorAll<HTMLElement>("*")) {
+      const styles = getComputedStyle(element);
+
+      for (const border of [
+        { style: styles.borderTopStyle, width: styles.borderTopWidth },
+        { style: styles.borderRightStyle, width: styles.borderRightWidth },
+        { style: styles.borderBottomStyle, width: styles.borderBottomWidth },
+        { style: styles.borderLeftStyle, width: styles.borderLeftWidth },
+      ]) {
+        if (border.style !== "none" && border.width !== "0px") {
+          renderedBorderWidths.add(border.width);
+        }
+      }
+    }
+
+    return {
+      borderWidths: {
+        default: rootStyles.getPropertyValue("--border-width-default").trim(),
+        emphasis: rootStyles.getPropertyValue("--border-width-emphasis").trim(),
+        frame: getComputedStyle(pageFrame).borderInlineStartWidth,
+        article: articleStyles.borderBlockStartWidth,
+        evidence: evidenceStyles.borderBlockStartWidth,
+        rendered: [...renderedBorderWidths].sort(),
+      },
+      surfaces: new Set([
+        bodyStyles.backgroundColor,
+        headerStyles.backgroundColor,
+        articleStyles.backgroundColor,
+        evidenceStyles.backgroundColor,
+      ]).size,
+      headerPosition: headerStyles.position,
+      headerTop: siteHeader.getBoundingClientRect().top,
+      shadows: [
+        headerStyles.boxShadow,
+        articleStyles.boxShadow,
+        evidenceStyles.boxShadow,
+      ],
+    };
+  });
+
+  expect(depth).toEqual({
+    borderWidths: {
+      default: "1px",
+      emphasis: ".25rem",
+      frame: "1px",
+      article: "4px",
+      evidence: "4px",
+      rendered: ["1px", "4px"],
+    },
+    surfaces: 3,
+    headerPosition: "sticky",
+    headerTop: 0,
+    shadows: ["none", "none", "none"],
+  });
+
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "How I work", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#approach$/);
+
+  const anchoredPosition = await page.evaluate(() => {
+    const siteHeader = document.querySelector<HTMLElement>(".site-header");
+    const target = document.querySelector<HTMLElement>("#approach");
+
+    if (!siteHeader || !target) {
+      throw new Error("Expected sticky navigation targets were not found.");
+    }
+
+    return {
+      headerBottom: siteHeader.getBoundingClientRect().bottom,
+      targetTop: target.getBoundingClientRect().top,
+    };
+  });
+
+  expect(anchoredPosition.targetTop).toBeGreaterThan(
+    anchoredPosition.headerBottom,
+  );
 });
 
 test("the evidence and contact links expose their real destinations", async ({

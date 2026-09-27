@@ -36,6 +36,7 @@ The color system has a more personal starting point. [Arsenal's off-white and da
 - Let readers move from a short summary to details they can inspect.
 - Use normal reading type for the story and monospace only for exact technical information.
 - Use alpha only for non-text depth: 8% for the grid, 12% for structure, and 20% for emphasis.
+- Use canvas, recessed project, and raised evidence surfaces; separate sticky layers with rules rather than shadows.
 - Keep motion optional and never depend on color alone.
 - Preserve accessible HTML, speed, and no-JavaScript support.
 
