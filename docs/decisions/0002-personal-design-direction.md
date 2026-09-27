@@ -27,6 +27,8 @@ Every major visual choice must combine three references:
 
 The color system has a more personal starting point. [Arsenal's off-white and dark red](https://www.arsenal.com/photos/the-inspiration-and-details-on-our-2526-third-kit-a4tcK6e5bV0Y) inform the canvas and action color. [Mercedes-AMG's black, silver, and PETRONAS green](https://www.mercedesamgf1.com/news/mercedes-amg-f1-2026-challenger-w17-revealed) inform the neutral structure and keyboard focus color. These are references, not copied brand palettes.
 
+The repeating visual device is a raised white band held between two dark-red rules. It marks the three moments where the reader needs a clear signal: identity in the introduction, proof inside the case study, and action in the contact section. It extends an existing evidence treatment instead of adding an unrelated emblem.
+
 ## Constraints
 
 - Take principles from the three sources, not their appearance.
@@ -37,6 +39,7 @@ The color system has a more personal starting point. [Arsenal's off-white and da
 - Use normal reading type for the story and monospace only for exact technical information.
 - Use alpha only for non-text depth: 8% for the grid, 12% for structure, and 20% for emphasis.
 - Use canvas, recessed project, and raised evidence surfaces; separate sticky layers with rules rather than shadows.
+- Reserve the red-ruled signature band for identity, proof, and contact; do not use it as a generic container.
 - Keep motion optional and never depend on color alone.
 - Preserve accessible HTML, speed, and no-JavaScript support.
 
