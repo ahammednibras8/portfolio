@@ -1,0 +1,267 @@
+:root {
+  color-scheme: light;
+
+  --paper: #f4f4f4;
+  --ink: #171717;
+  --muted: #565656;
+  --rule: #b8b8b8;
+  --rule-strong: #707070;
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --page-measure: 42rem;
+  --text-measure: 38rem;
+  --touch-target: 2.75rem;
+
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizelegibility;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 20rem;
+  scroll-padding-block-start: var(--space-3);
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-wrap: anywhere;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding-inline-start: 1.25rem;
+}
+
+p,
+li,
+dd {
+  max-width: var(--text-measure);
+}
+
+main li + li {
+  margin-block-start: var(--space-2);
+}
+
+a {
+  display: inline-block;
+  min-block-size: 1.5rem;
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 0.13em;
+}
+
+:focus-visible {
+  outline: 0.1875rem solid var(--ink);
+  outline-offset: 0.1875rem;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 10;
+  inset-block-start: var(--space-1);
+  inset-inline-start: var(--space-1);
+  min-block-size: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  transform: translateY(calc(-100% - var(--space-3)));
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.page {
+  width: min(100%, var(--page-measure));
+  margin-inline: auto;
+  border-inline: 1px solid var(--rule);
+}
+
+section[id] {
+  scroll-margin-block-start: var(--space-3);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  max-width: var(--text-measure);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.25rem, 12vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+h4 {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+p + p {
+  margin-block-start: var(--space-3);
+}
+
+h1 + p {
+  margin-block-start: var(--space-4);
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+h2 + * {
+  margin-block-start: var(--space-4);
+}
+
+h3 + * {
+  margin-block-start: var(--space-2);
+}
+
+h4 + * {
+  margin-block-start: var(--space-2);
+}
+
+dl {
+  margin-block-start: var(--space-4);
+}
+
+dt {
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--rule);
+  font-weight: 700;
+}
+
+dd {
+  margin-block: var(--space-1) var(--space-4);
+  color: var(--muted);
+}
+
+article {
+  margin-block-start: var(--space-5);
+  border-block-start: 0.25rem solid var(--ink);
+}
+
+article > header {
+  padding-block: var(--space-4);
+}
+
+article > p {
+  padding-block-end: var(--space-4);
+}
+
+article > header p {
+  margin-block-start: var(--space-2);
+  color: var(--muted);
+}
+
+article > section {
+  padding-block: var(--space-4);
+  border-block-start: 1px solid var(--rule);
+}
+
+article ul {
+  margin-block-start: var(--space-3);
+}
+
+.link-list {
+  padding: 0;
+  list-style: none;
+}
+
+.link-list li + li {
+  margin-block-start: var(--space-1);
+}
+
+.link-list a {
+  padding-block: var(--space-1);
+}
+
+.site-header {
+  border-block-end: 1px solid var(--rule);
+}
+
+.primary-navigation {
+  width: min(100%, var(--page-measure));
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+
+.primary-navigation ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.primary-navigation a {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--touch-target);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primary-navigation a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.page > section {
+  padding: var(--space-6) var(--space-3);
+  border-block-end: 1px solid var(--rule);
+}
+
+.introduction {
+  padding-block: 3.5rem;
+}

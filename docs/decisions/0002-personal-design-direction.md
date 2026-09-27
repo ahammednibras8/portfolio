@@ -15,7 +15,7 @@ Make the site feel like a clear conversation about the work:
 
 ## Reason
 
-A portfolio can look polished and still feel anonymous. This direction should make the work recognizably Ahammed's without copying another website or adopting an AI-generated theme.
+A portfolio can look polished and still feel anonymous. This direction should make the work recognizably Nibras's without copying another website or adopting an AI-generated theme.
 
 ## Evidence or personal source
 
@@ -23,7 +23,7 @@ Every major visual choice must combine three references:
 
 - [PlanetScale](https://planetscale.com/) for presenting technical evidence;
 - IBM's _[System/360 Principles of Operation](https://www.bitsavers.org/pdf/ibm/360/princOps/A22-6821-6_360PrincOpsJan67.pdf)_ for information hierarchy;
-- [Ahammed's public work](https://github.com/ahammednibras8) for plain language, visible boundaries, and proof beside claims.
+- [Nibras's public work](https://github.com/ahammednibras8) for plain language, visible boundaries, and proof beside claims.
 
 ## Constraints
 
@@ -42,6 +42,6 @@ The rule applies to typography, color, layout, components, images, diagrams, mot
 
 ## Reconsider when
 
-Change a source or rule when it blocks understanding, accessibility, or an honest presentation of the work, or when it no longer represents Ahammed after human review. Do not change it only because a new visual trend appears.
+Change a source or rule when it blocks understanding, accessibility, or an honest presentation of the work, or when it no longer represents Nibras after human review. Do not change it only because a new visual trend appears.
 
-AI may inspect, challenge, and test the work. Ahammed chooses the direction, verifies the result, and owns the final decision.
+AI may inspect, challenge, and test the work. Nibras chooses the direction, verifies the result, and owns the final decision.

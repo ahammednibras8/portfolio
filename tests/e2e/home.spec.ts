@@ -5,7 +5,7 @@ test("the homepage explains the work in document order", async ({ page }) => {
 
   await expect(page).toHaveTitle("Ahammed Nibras — Software engineer");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
 
   await expect(page.locator("main > section > h2")).toHaveText([
@@ -48,6 +48,61 @@ test("the primary navigation points to real homepage sections", async ({
   await expect(page.locator("#work")).toBeVisible();
 });
 
+test("the 320px layout keeps navigation and recovery paths usable", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+
+  const viewport = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+
+  expect(viewport.scrollWidth).toBe(viewport.clientWidth);
+
+  const navigationLinks = page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link");
+  const linkBounds = await navigationLinks.evaluateAll((links) =>
+    links.map((link) => {
+      const bounds = link.getBoundingClientRect();
+
+      return {
+        top: Math.round(bounds.top),
+        left: bounds.left,
+        right: bounds.right,
+      };
+    }),
+  );
+
+  expect(linkBounds).toHaveLength(5);
+  expect(new Set(linkBounds.map(({ top }) => top)).size).toBe(1);
+
+  for (const bounds of linkBounds) {
+    expect(bounds.left).toBeGreaterThanOrEqual(0);
+    expect(bounds.right).toBeLessThanOrEqual(viewport.clientWidth);
+  }
+
+  await page.keyboard.press("Tab");
+
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeInViewport();
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
+
+  const contact = page.locator("#contact");
+  await contact.scrollIntoViewIfNeeded();
+  await expect(contact).toBeInViewport();
+  await expect(contact.getByRole("link", { name: "GitHub" })).toBeVisible();
+  await expect(contact.getByRole("link", { name: "LinkedIn" })).toBeVisible();
+  await expect(
+    contact.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+  ).toBeVisible();
+});
+
 test("the evidence and contact links expose their real destinations", async ({
   page,
 }) => {
@@ -79,7 +134,7 @@ test("the complete homepage remains available without JavaScript", async ({
   await page.goto("http://127.0.0.1:4321/");
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Cascade" }),
