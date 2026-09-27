@@ -347,6 +347,76 @@ test("typography keeps reading and technical roles distinct", async ({
   }
 });
 
+test("the personal color system keeps action and focus roles distinct", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+
+  const colors = await page.evaluate(() => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const navigationLink = document.querySelector<HTMLElement>(
+      ".primary-navigation a",
+    );
+    const article = document.querySelector<HTMLElement>("article");
+    const evidence = document.querySelector<HTMLElement>(".project-evidence");
+    const evidenceLink = evidence?.querySelector<HTMLElement>("a");
+
+    if (!navigationLink || !article || !evidence || !evidenceLink) {
+      throw new Error("Expected homepage color targets were not found.");
+    }
+
+    return {
+      tokens: {
+        canvas: rootStyles.getPropertyValue("--color-canvas").trim(),
+        surface: rootStyles.getPropertyValue("--color-surface-raised").trim(),
+        primaryInk: rootStyles.getPropertyValue("--color-ink-primary").trim(),
+        secondaryInk: rootStyles
+          .getPropertyValue("--color-ink-secondary")
+          .trim(),
+        quietRule: rootStyles.getPropertyValue("--color-rule-quiet").trim(),
+        strongRule: rootStyles.getPropertyValue("--color-rule-strong").trim(),
+        action: rootStyles.getPropertyValue("--color-action").trim(),
+        focus: rootStyles.getPropertyValue("--color-focus").trim(),
+      },
+      canvas: getComputedStyle(document.body).backgroundColor,
+      primaryInk: getComputedStyle(document.body).color,
+      navigationInk: getComputedStyle(navigationLink).color,
+      articleRule: getComputedStyle(article).borderBlockStartColor,
+      evidenceSurface: getComputedStyle(evidence).backgroundColor,
+      evidenceRule: getComputedStyle(evidence).borderBlockStartColor,
+      action: getComputedStyle(evidenceLink).color,
+    };
+  });
+
+  expect(colors).toEqual({
+    tokens: {
+      canvas: "#f3f1ed",
+      surface: "#fff",
+      primaryInk: "#17191a",
+      secondaryInk: "#51565a",
+      quietRule: "#b9bec0",
+      strongRule: "#6b7275",
+      action: "#a11f35",
+      focus: "#007a73",
+    },
+    canvas: "rgb(243, 241, 237)",
+    primaryInk: "rgb(23, 25, 26)",
+    navigationInk: "rgb(23, 25, 26)",
+    articleRule: "rgb(107, 114, 117)",
+    evidenceSurface: "rgb(255, 255, 255)",
+    evidenceRule: "rgb(161, 31, 53)",
+    action: "rgb(161, 31, 53)",
+  });
+
+  await page.keyboard.press("Tab");
+
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toHaveCSS("outline-color", "rgb(0, 122, 115)");
+  await expect(skipLink).toHaveCSS("outline-style", "solid");
+});
+
 test("the evidence and contact links expose their real destinations", async ({
   page,
 }) => {
