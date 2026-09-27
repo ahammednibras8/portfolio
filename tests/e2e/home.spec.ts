@@ -243,6 +243,65 @@ test("the responsive grid keeps a deliberate rule hierarchy", async ({
   }
 });
 
+test("the page uses the named interface and editorial spacing rhythm", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+
+  const spacing = await page.evaluate(() => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const introduction = document.querySelector<HTMLElement>(".introduction");
+    const introductionCopy = introduction?.querySelector<HTMLElement>("p");
+    const article = document.querySelector<HTMLElement>("article");
+    const articleSummary = article?.querySelector<HTMLElement>("header p");
+    const articleList = article?.querySelector<HTMLElement>("ul");
+    const articleSection = article?.querySelector<HTMLElement>("section");
+
+    if (
+      !introduction ||
+      !introductionCopy ||
+      !article ||
+      !articleSummary ||
+      !articleList ||
+      !articleSection
+    ) {
+      throw new Error("Expected homepage spacing targets were not found.");
+    }
+
+    return {
+      tokens: {
+        interface: rootStyles.getPropertyValue("--space-interface").trim(),
+        component: rootStyles.getPropertyValue("--space-component").trim(),
+        editorial: rootStyles.getPropertyValue("--space-editorial").trim(),
+        section: rootStyles.getPropertyValue("--space-section").trim(),
+      },
+      introductionPadding: getComputedStyle(introduction).paddingBlockStart,
+      introductionCopyMargin:
+        getComputedStyle(introductionCopy).marginBlockStart,
+      articleMargin: getComputedStyle(article).marginBlockStart,
+      articleSummaryMargin: getComputedStyle(articleSummary).marginBlockStart,
+      articleListMargin: getComputedStyle(articleList).marginBlockStart,
+      articleSectionPadding: getComputedStyle(articleSection).paddingBlockStart,
+    };
+  });
+
+  expect(spacing).toEqual({
+    tokens: {
+      interface: ".5rem",
+      component: "1rem",
+      editorial: "1.5rem",
+      section: "3rem",
+    },
+    introductionPadding: "48px",
+    introductionCopyMargin: "24px",
+    articleMargin: "24px",
+    articleSummaryMargin: "8px",
+    articleListMargin: "16px",
+    articleSectionPadding: "24px",
+  });
+});
+
 test("the evidence and contact links expose their real destinations", async ({
   page,
 }) => {
