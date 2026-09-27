@@ -302,6 +302,51 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
   });
 });
 
+test("typography keeps reading and technical roles distinct", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(() => document.fonts.ready);
+
+  const typography = await page.evaluate(() => {
+    const body = document.body;
+    const label = document.querySelector<HTMLElement>("h4");
+    const navigationLink = document.querySelector<HTMLElement>(
+      ".primary-navigation a",
+    );
+
+    if (!label || !navigationLink) {
+      throw new Error("Expected homepage typography targets were not found.");
+    }
+
+    const fontResources = performance
+      .getEntriesByType("resource")
+      .map(({ name }) => name)
+      .filter((name) => name.endsWith(".woff2"));
+
+    return {
+      bodyFamily: getComputedStyle(body).fontFamily,
+      bodySize: getComputedStyle(body).fontSize,
+      labelFamily: getComputedStyle(label).fontFamily,
+      labelWeight: getComputedStyle(label).fontWeight,
+      navigationFamily: getComputedStyle(navigationLink).fontFamily,
+      fontResources,
+      origin: location.origin,
+    };
+  });
+
+  expect(typography.bodyFamily).toContain("IBM Plex Sans");
+  expect(typography.bodySize).toBe("16px");
+  expect(typography.labelFamily).toContain("IBM Plex Mono");
+  expect(typography.labelWeight).toBe("600");
+  expect(typography.navigationFamily).toContain("IBM Plex Sans");
+  expect(typography.fontResources).toHaveLength(3);
+
+  for (const resource of typography.fontResources) {
+    expect(new URL(resource).origin).toBe(typography.origin);
+  }
+});
+
 test("the evidence and contact links expose their real destinations", async ({
   page,
 }) => {

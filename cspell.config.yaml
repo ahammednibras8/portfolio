@@ -20,6 +20,7 @@ words:
   - autorun
   - crawlable
   - esbuild
+  - fontsource
   - htmlvalidate
   - inspectable
   - lhci
