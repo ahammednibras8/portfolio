@@ -1,3 +1,7 @@
+---
+import "../styles/global.css";
+---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -11,10 +15,12 @@
   </head>
 
   <body>
-    <a href="#main-content">Skip to content</a>
+    <a class="skip-link" href="#main-content">
+      Skip to content
+    </a>
 
-    <header>
-      <nav aria-label="Primary">
+    <header class="site-header">
+      <nav class="primary-navigation" aria-label="Primary">
         <ul>
           <li>
             <a href="#work">Work</a>
@@ -35,8 +41,8 @@
       </nav>
     </header>
 
-    <main id="main-content">
-      <section aria-labelledby="introduction-heading">
+    <main id="main-content" class="page" tabindex="-1">
+      <section class="introduction" aria-labelledby="introduction-heading">
         <h1 id="introduction-heading">Hi, I’m Ahammed.</h1>
 
         <p>
@@ -162,7 +168,7 @@
 
           <section aria-labelledby="cascade-evidence">
             <h4 id="cascade-evidence">See the evidence</h4>
-            <ul>
+            <ul class="link-list">
               <li>
                 <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
                   Read the architecture
@@ -248,7 +254,7 @@
           problem, email me.
         </p>
 
-        <ul>
+        <ul class="link-list">
           <li>
             <a href="mailto:ahammednibras737@gmail.com">
               ahammednibras737@gmail.com
@@ -265,10 +271,3 @@
     </main>
   </body>
 </html>
-
-<style>
-  a {
-    display: inline-block;
-    min-block-size: 24px;
-  }
-</style>
