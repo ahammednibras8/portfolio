@@ -1,53 +1,8 @@
 # Ahammed Nibras — Portfolio
 
-This repository contains the source code for my personal engineering portfolio.
+This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-The site will show:
-
-- the problems I worked on;
-- what I personally owned;
-- the choices and trade-offs I made;
-- the results I can support with real evidence.
-
-The project is still being built. The development setup and quality checks are ready. The public pages and project stories come next.
-
-## Who the site is for
-
-People will spend different amounts of time on the site. Each level must work on its own.
-
-| Time       | Reader             | What they should learn                                                        |
-| ---------- | ------------------ | ----------------------------------------------------------------------------- |
-| 10 seconds | Recruiter          | Who I am, what I build, and the strongest reason to keep reading              |
-| 60 seconds | Hiring manager     | My best projects, their results, and what I personally contributed            |
-| 10 minutes | Technical reviewer | The decisions, limits, architecture, trade-offs, and evidence behind the work |
-
-The short version must use plain language. Deeper sections can add technical detail without making the summary harder to understand.
-
-[NN/g asked more than 200 UX hiring managers what they look for in portfolios](https://www.nngroup.com/videos/ux-portfolios-hiring/). The research focused on UX roles, but the lesson applies here: clear organization, writing, process, finished work, and outcomes matter alongside appearance.
-
-## Design direction
-
-I want the site to feel like a clear conversation about my work.
-
-- Technical, but not dressed up like a fake terminal.
-- Precise, but not cold.
-- Experimental, but still reliable.
-- Full of evidence, but easy to scan.
-- Quiet, but not empty.
-
-Every major design choice must support at least one of these goals.
-
-The design process is simple:
-
-1. Start with a real need or piece of evidence.
-2. Use references that mean something to me.
-3. Write down the limits the design must respect.
-4. Turn those inputs into a rule made for this site.
-5. Review the result with people.
-
-AI can help find problems, compare options, and test the work. It does not choose the site's personality or invent personal details.
-
-The full rule is recorded in [ADR 0002](docs/decisions/0002-personal-design-direction.md).
+The homepage has its complete content structure. Visual design and additional project stories are still in progress.
 
 ## How the site works
 
@@ -56,9 +11,9 @@ The full rule is recorded in [ADR 0002](docs/decisions/0002-personal-design-dire
 - There is no application server, database, or client framework.
 - Images are optimized during the build.
 - The finished `dist/` folder can be hosted by any normal static host.
-- Cloudflare Pages is the planned host, but deployment will be added only after real pages exist.
+- Cloudflare Pages is the planned host. Deployment automation has not been enabled yet.
 
-The architecture decision is recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md).
+The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md) and [ADR 0002](docs/decisions/0002-personal-design-direction.md).
 
 ## Run it locally
 
@@ -74,37 +29,17 @@ Set `SITE_URL` in `.env` to a valid HTTPS URL. Never commit `.env`.
 
 ## Main commands
 
-| Task                | Command              |
-| ------------------- | -------------------- |
-| Start development   | `pnpm run dev`       |
-| Build the site      | `pnpm run build`     |
-| Preview the build   | `pnpm run preview`   |
-| Format files        | `pnpm run format`    |
-| Run linters         | `pnpm run lint`      |
-| Check Astro and TS  | `pnpm run check`     |
-| Run browser tests   | `pnpm run test:e2e`  |
-| Run a11y tests      | `pnpm run test:a11y` |
-| Run all local gates | `pnpm run verify`    |
+| Task                | Command            |
+| ------------------- | ------------------ |
+| Start development   | `pnpm run dev`     |
+| Build the site      | `pnpm run build`   |
+| Preview the build   | `pnpm run preview` |
+| Format files        | `pnpm run format`  |
+| Run linters         | `pnpm run lint`    |
+| Check Astro and TS  | `pnpm run check`   |
+| Run all local gates | `pnpm run verify`  |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and pull-request details.
-
-## Where things belong
-
-Directories are added only when they have a real file. Empty folders are not kept with `.gitkeep`.
-
-| Path                    | Purpose                                      |
-| ----------------------- | -------------------------------------------- |
-| `src/pages/`            | Routes                                       |
-| `src/layouts/`          | Shared page shells and metadata              |
-| `src/components/`       | Reusable presentation                        |
-| `src/data/`             | Shared profile, navigation, and social data  |
-| `src/content/projects/` | Case studies                                 |
-| `src/content/writing/`  | Published articles                           |
-| `src/assets/`           | Images and diagrams processed by Astro       |
-| `public/`               | Files that must keep their exact public name |
-| `tests/e2e/`            | Browser behavior                             |
-| `tests/accessibility/`  | Automated accessibility checks               |
-| `docs/`                 | Decisions, content rules, and research       |
 
 ## Content rules
 
@@ -113,14 +48,6 @@ Project stories must clearly separate my work from team work. Claims need a sour
 - [Case-study template](docs/content/case-study-template.md)
 - [Writing guide](docs/content/writing-voice.md)
 - [Evidence and privacy checklist](docs/content/evidence-and-disclosure.md)
-
-## Project notes
-
-- [Static-site decision](docs/decisions/0001-static-astro-site.md)
-- [Design-direction decision](docs/decisions/0002-personal-design-direction.md)
-- [Personal source board](docs/research/2026-09-26-personal-source-board.md)
-- [Platform research](docs/research/2026-09-22-platform-baseline.md)
-- [Instructions for coding agents](AGENTS.md)
 
 ## Security and license
 
