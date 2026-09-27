@@ -571,6 +571,45 @@ test("three surfaces and two border widths create depth without shadows", async 
   );
 });
 
+test("signature bands mark identity, proof, and contact", async ({ page }) => {
+  await page.goto("/");
+
+  const bands = page.locator(".signature-band");
+
+  await expect(bands).toHaveCount(3);
+  await expect(bands.nth(0)).toHaveClass(/\bintroduction\b/);
+  await expect(bands.nth(1)).toHaveClass(/\bproject-evidence\b/);
+  await expect(bands.nth(2)).toHaveAttribute("id", "contact");
+
+  const presentation = await bands.evaluateAll((elements) =>
+    elements.map((element) => {
+      const styles = getComputedStyle(element);
+
+      return {
+        background: styles.backgroundColor,
+        borderTopColor: styles.borderTopColor,
+        borderTopWidth: styles.borderTopWidth,
+        borderBottomColor: styles.borderBottomColor,
+        borderBottomWidth: styles.borderBottomWidth,
+      };
+    }),
+  );
+
+  expect(new Set(presentation.map(({ background }) => background))).toEqual(
+    new Set(["rgb(255, 255, 255)"]),
+  );
+
+  for (const band of presentation) {
+    expect(band).toEqual({
+      background: "rgb(255, 255, 255)",
+      borderTopColor: "rgb(161, 31, 53)",
+      borderTopWidth: "4px",
+      borderBottomColor: "rgb(161, 31, 53)",
+      borderBottomWidth: "4px",
+    });
+  }
+});
+
 test("the evidence and contact links expose their real destinations", async ({
   page,
 }) => {

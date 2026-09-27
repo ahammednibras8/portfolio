@@ -256,12 +256,6 @@ article ul {
   margin-block-start: var(--space-component);
 }
 
-.project-evidence {
-  background: var(--color-surface-raised);
-  border-block-start: var(--border-width-emphasis) solid var(--color-action);
-  border-block-end: var(--border-width-emphasis) solid var(--color-action);
-}
-
 .link-list {
   padding: 0;
   list-style: none;
@@ -319,6 +313,13 @@ article ul {
   grid-template-columns: minmax(0, 1fr);
   padding: var(--space-section) var(--space-component);
   border-block-end: var(--border-width-default) solid var(--color-rule-quiet);
+}
+
+article > .signature-band,
+.page > .signature-band {
+  background: var(--color-surface-raised);
+  border-block-start: var(--border-width-emphasis) solid var(--color-action);
+  border-block-end: var(--border-width-emphasis) solid var(--color-action);
 }
 
 .introduction {
