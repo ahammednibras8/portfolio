@@ -7,6 +7,7 @@
   --color-ink-secondary: #51565a;
 
   /* Depth: transparency describes structural relationships, never text. */
+  --alpha-atmosphere: 4%;
   --alpha-grid: 8%;
   --alpha-structure: 12%;
   --alpha-emphasis: 20%;
@@ -19,8 +20,13 @@
   --color-rule-strong: oklch(
     from var(--color-ink-primary) l c h / var(--alpha-emphasis)
   );
+  --border-width-default: 1px;
+  --border-width-emphasis: 0.25rem;
   --color-action: #a11f35;
   --color-focus: #007a73;
+  --color-surface-recessed: oklch(
+    from var(--color-ink-primary) l c h / var(--alpha-atmosphere)
+  );
 
   /* Typography: reading and technical text stacks. */
   --font-reading:
@@ -53,7 +59,9 @@
 
 html {
   min-width: 20rem;
-  scroll-padding-block-start: var(--space-component);
+  scroll-padding-block-start: calc(
+    var(--touch-target) + var(--space-component)
+  );
   text-size-adjust: 100%;
 }
 
@@ -131,7 +139,7 @@ a:hover {
 .page {
   width: min(100%, var(--page-measure));
   margin-inline: auto;
-  border-inline: 1px solid var(--color-rule-quiet);
+  border-inline: var(--border-width-default) solid var(--color-rule-quiet);
 }
 
 section[id] {
@@ -201,7 +209,8 @@ dl {
 
 dt {
   padding-block-start: var(--space-component);
-  border-block-start: 1px solid var(--color-rule-structural);
+  border-block-start: var(--border-width-default) solid
+    var(--color-rule-structural);
   font-weight: 700;
 }
 
@@ -214,7 +223,9 @@ article {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   margin-block-start: var(--space-editorial);
-  border-block-start: 0.25rem solid var(--color-rule-strong);
+  background: var(--color-surface-recessed);
+  border-block-start: var(--border-width-emphasis) solid
+    var(--color-rule-strong);
 }
 
 article > *,
@@ -237,7 +248,8 @@ article > header p {
 
 article > section {
   padding-block: var(--space-editorial);
-  border-block-start: 1px solid var(--color-rule-structural);
+  border-block-start: var(--border-width-default) solid
+    var(--color-rule-structural);
 }
 
 article ul {
@@ -246,8 +258,8 @@ article ul {
 
 .project-evidence {
   background: var(--color-surface-raised);
-  border-block-start: 0.25rem solid var(--color-action);
-  border-block-end: 0.25rem solid var(--color-action);
+  border-block-start: var(--border-width-emphasis) solid var(--color-action);
+  border-block-end: var(--border-width-emphasis) solid var(--color-action);
 }
 
 .link-list {
@@ -264,7 +276,11 @@ article ul {
 }
 
 .site-header {
-  border-block-end: 1px solid var(--color-rule-quiet);
+  position: sticky;
+  z-index: 5;
+  inset-block-start: 0;
+  background: var(--color-canvas);
+  border-block-end: var(--border-width-default) solid var(--color-rule-quiet);
 }
 
 .primary-navigation {
@@ -302,7 +318,7 @@ article ul {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   padding: var(--space-section) var(--space-component);
-  border-block-end: 1px solid var(--color-rule-quiet);
+  border-block-end: var(--border-width-default) solid var(--color-rule-quiet);
 }
 
 .introduction {
