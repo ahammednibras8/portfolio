@@ -118,6 +118,7 @@ Project stories must clearly separate my work from team work. Claims need a sour
 
 - [Static-site decision](docs/decisions/0001-static-astro-site.md)
 - [Design-direction decision](docs/decisions/0002-personal-design-direction.md)
+- [Personal source board](docs/research/2026-09-26-personal-source-board.md)
 - [Platform research](docs/research/2026-09-22-platform-baseline.md)
 - [Instructions for coding agents](AGENTS.md)
 
