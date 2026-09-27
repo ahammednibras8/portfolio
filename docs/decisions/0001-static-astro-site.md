@@ -3,24 +3,34 @@
 - Status: Accepted
 - Date: 2026-09-22
 
-## Why this decision exists
-
-The portfolio must load quickly, work without JavaScript, and be easy to move between hosts.
-
-It needs reusable pages, checked content, and optimized images. It does not need a server or database.
-
 ## Decision
 
 Use Astro with static output and strict TypeScript.
 
-Astro builds the pages as complete HTML. JavaScript is added only when a real feature needs it and plain HTML and CSS cannot do the job.
+## Reason
 
-The built `dist/` folder is the product that gets deployed. Cloudflare setup waits until real pages exist and the full path can be tested.
+The portfolio needs reusable pages, checked content, and optimized images. It does not need an application server or database.
 
-## What this means
+Static HTML keeps the site fast, accessible without JavaScript, and easy to move between hosts.
 
-- Visitors can read and navigate the site without JavaScript.
-- Content and code are checked during the build.
-- Production has no application server, database, or login system.
-- The site can move to another static host.
-- Adding a client framework, server code, or database needs a new decision record.
+## Evidence or source
+
+- The current homepage and navigation work as complete HTML.
+- The product has no server-only feature or persistent application state.
+- The build, HTML validation, browser tests, accessibility tests, and Lighthouse checks run against the generated site.
+
+## Constraints
+
+- Important content and navigation must remain available without JavaScript.
+- Browser JavaScript is added only when HTML and CSS cannot provide the required behavior.
+- A client framework, server code, or database requires a replacement decision record.
+
+## Where it is used
+
+- `astro.config.mjs` keeps Astro in static-output mode.
+- `src/pages/` contains the route entry points.
+- CI tests the generated `dist/` output that will be deployed.
+
+## Reconsider when
+
+Replace this decision only when an approved product requirement cannot be delivered as a static site. The replacement must account for accessibility, performance, security, deployment, and host portability.
