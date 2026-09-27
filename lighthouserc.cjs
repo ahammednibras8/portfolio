@@ -35,7 +35,10 @@ module.exports = {
           "error",
           { maxNumericValue: kilobytes(400) },
         ],
-        "resource-summary:font:size": ["error", { maxNumericValue: 0 }],
+        "resource-summary:font:size": [
+          "error",
+          { maxNumericValue: kilobytes(70) },
+        ],
         "resource-summary:total:size": [
           "error",
           { maxNumericValue: kilobytes(500) },

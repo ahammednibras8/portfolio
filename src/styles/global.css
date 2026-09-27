@@ -7,6 +7,12 @@
   --rule: #b8b8b8;
   --rule-strong: #707070;
 
+  /* Typography: reading and technical text stacks. */
+  --font-reading:
+    "IBM Plex Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  --font-technical:
+    "IBM Plex Mono", "SFMono-Regular", consolas, "Liberation Mono", monospace;
+
   /* Interface rhythm: controls, labels, and internal spacing. */
   --space-interface: 0.5rem;
   --space-component: 1rem;
@@ -19,7 +25,7 @@
   --grid-gap: var(--space-component);
   --touch-target: 2.75rem;
 
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-reading);
   font-synthesis: none;
   text-rendering: optimizelegibility;
 }
@@ -144,6 +150,8 @@ h3 {
 }
 
 h4 {
+  font-family: var(--font-technical);
+  font-weight: 600;
   font-size: 0.8125rem;
   line-height: 1.4;
   letter-spacing: 0.06em;
