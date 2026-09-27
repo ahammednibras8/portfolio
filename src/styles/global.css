@@ -5,8 +5,20 @@
   --color-surface-raised: #fff;
   --color-ink-primary: #17191a;
   --color-ink-secondary: #51565a;
-  --color-rule-quiet: #b9bec0;
-  --color-rule-strong: #6b7275;
+
+  /* Depth: transparency describes structural relationships, never text. */
+  --alpha-grid: 8%;
+  --alpha-structure: 12%;
+  --alpha-emphasis: 20%;
+  --color-rule-quiet: oklch(
+    from var(--color-ink-primary) l c h / var(--alpha-grid)
+  );
+  --color-rule-structural: oklch(
+    from var(--color-ink-primary) l c h / var(--alpha-structure)
+  );
+  --color-rule-strong: oklch(
+    from var(--color-ink-primary) l c h / var(--alpha-emphasis)
+  );
   --color-action: #a11f35;
   --color-focus: #007a73;
 
@@ -189,7 +201,7 @@ dl {
 
 dt {
   padding-block-start: var(--space-component);
-  border-block-start: 1px solid var(--color-rule-quiet);
+  border-block-start: 1px solid var(--color-rule-structural);
   font-weight: 700;
 }
 
@@ -225,7 +237,7 @@ article > header p {
 
 article > section {
   padding-block: var(--space-editorial);
-  border-block-start: 1px solid var(--color-rule-quiet);
+  border-block-start: 1px solid var(--color-rule-structural);
 }
 
 article ul {

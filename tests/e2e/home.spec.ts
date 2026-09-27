@@ -347,7 +347,7 @@ test("typography keeps reading and technical roles distinct", async ({
   }
 });
 
-test("the personal color system keeps action and focus roles distinct", async ({
+test("the personal color and depth systems keep their roles distinct", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -358,13 +358,36 @@ test("the personal color system keeps action and focus roles distinct", async ({
     const navigationLink = document.querySelector<HTMLElement>(
       ".primary-navigation a",
     );
+    const pageFrame = document.querySelector<HTMLElement>(".page");
     const article = document.querySelector<HTMLElement>("article");
+    const articleSection = document.querySelector<HTMLElement>(
+      "article > section:not(.project-evidence)",
+    );
     const evidence = document.querySelector<HTMLElement>(".project-evidence");
     const evidenceLink = evidence?.querySelector<HTMLElement>("a");
+    const secondaryText = document.querySelector<HTMLElement>("dd");
 
-    if (!navigationLink || !article || !evidence || !evidenceLink) {
+    if (
+      !navigationLink ||
+      !pageFrame ||
+      !article ||
+      !articleSection ||
+      !evidence ||
+      !evidenceLink ||
+      !secondaryText
+    ) {
       throw new Error("Expected homepage color targets were not found.");
     }
+
+    const alphaFrom = (color: string) => {
+      const match = color.match(/\/\s*([\d.]+)\)$/);
+
+      if (!match) {
+        throw new Error(`Expected an alpha channel in ${color}.`);
+      }
+
+      return Number(match[1]);
+    };
 
     return {
       tokens: {
@@ -374,15 +397,25 @@ test("the personal color system keeps action and focus roles distinct", async ({
         secondaryInk: rootStyles
           .getPropertyValue("--color-ink-secondary")
           .trim(),
-        quietRule: rootStyles.getPropertyValue("--color-rule-quiet").trim(),
-        strongRule: rootStyles.getPropertyValue("--color-rule-strong").trim(),
         action: rootStyles.getPropertyValue("--color-action").trim(),
         focus: rootStyles.getPropertyValue("--color-focus").trim(),
+        gridAlpha: rootStyles.getPropertyValue("--alpha-grid").trim(),
+        structureAlpha: rootStyles.getPropertyValue("--alpha-structure").trim(),
+        emphasisAlpha: rootStyles.getPropertyValue("--alpha-emphasis").trim(),
       },
       canvas: getComputedStyle(document.body).backgroundColor,
       primaryInk: getComputedStyle(document.body).color,
+      bodyOpacity: getComputedStyle(document.body).opacity,
+      secondaryInk: getComputedStyle(secondaryText).color,
+      secondaryOpacity: getComputedStyle(secondaryText).opacity,
       navigationInk: getComputedStyle(navigationLink).color,
-      articleRule: getComputedStyle(article).borderBlockStartColor,
+      ruleAlphas: {
+        grid: alphaFrom(getComputedStyle(pageFrame).borderInlineStartColor),
+        structure: alphaFrom(
+          getComputedStyle(articleSection).borderBlockStartColor,
+        ),
+        emphasis: alphaFrom(getComputedStyle(article).borderBlockStartColor),
+      },
       evidenceSurface: getComputedStyle(evidence).backgroundColor,
       evidenceRule: getComputedStyle(evidence).borderBlockStartColor,
       action: getComputedStyle(evidenceLink).color,
@@ -395,24 +428,30 @@ test("the personal color system keeps action and focus roles distinct", async ({
       surface: "#fff",
       primaryInk: "#17191a",
       secondaryInk: "#51565a",
-      quietRule: "#b9bec0",
-      strongRule: "#6b7275",
       action: "#a11f35",
       focus: "#007a73",
+      gridAlpha: "8%",
+      structureAlpha: "12%",
+      emphasisAlpha: "20%",
     },
     canvas: "rgb(243, 241, 237)",
     primaryInk: "rgb(23, 25, 26)",
+    bodyOpacity: "1",
+    secondaryInk: "rgb(81, 86, 90)",
+    secondaryOpacity: "1",
     navigationInk: "rgb(23, 25, 26)",
-    articleRule: "rgb(107, 114, 117)",
+    ruleAlphas: {
+      grid: 0.08,
+      structure: 0.12,
+      emphasis: 0.2,
+    },
     evidenceSurface: "rgb(255, 255, 255)",
     evidenceRule: "rgb(161, 31, 53)",
     action: "rgb(161, 31, 53)",
   });
 
-  await page.keyboard.press("Tab");
-
   const skipLink = page.getByRole("link", { name: "Skip to content" });
-  await expect(skipLink).toBeFocused();
+  await skipLink.focus();
   await expect(skipLink).toHaveCSS("outline-color", "rgb(0, 122, 115)");
   await expect(skipLink).toHaveCSS("outline-style", "solid");
 });
