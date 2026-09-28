@@ -3,6 +3,7 @@ strictPeerDependencies: true
 strictDepBuilds: true
 # Remove these transitive overrides when Lighthouse CI supports Lighthouse 13 or newer.
 overrides:
+  "@lhci/cli>proxy-agent": 8.0.1
   "@puppeteer/browsers": 3.2.3
   tmp: 0.2.7
 allowBuilds:
