@@ -45,6 +45,7 @@
     "postcss-html": "2.0.0",
     "prettier": "3.9.8",
     "prettier-plugin-astro": "1.0.1",
+    "proxy-agent": "8.0.1",
     "stylelint": "17.15.0",
     "stylelint-config-html": "2.0.0",
     "stylelint-config-standard": "40.0.0",
