@@ -29,13 +29,7 @@ import "../styles/global.css";
             <a href="#work">Work</a>
           </li>
           <li>
-            <a href="#approach">How I work</a>
-          </li>
-          <li>
-            <a href="#now">Now</a>
-          </li>
-          <li>
-            <a href="#about">About</a>
+            <a href="#evidence">Evidence</a>
           </li>
           <li>
             <a href="#contact">Contact</a>
@@ -58,30 +52,6 @@ import "../styles/global.css";
           the API, database, queue, and worker, then back to the result or
           failure the user sees.
         </p>
-      </section>
-
-      <section aria-labelledby="experience-heading">
-        <h2 id="experience-heading">What that looks like</h2>
-
-        <dl>
-          <dt>AI products</dt>
-          <dd>
-            Retrieval, document processing, OCR, tool-using agents, evaluation,
-            and grounded answers.
-          </dd>
-
-          <dt>Systems</dt>
-          <dd>
-            APIs, databases, queues, workers, deployment, observability, and
-            recovery.
-          </dd>
-
-          <dt>Trust</dt>
-          <dd>
-            Authentication, tenant isolation, privacy deletion, audit trails,
-            and source permissions.
-          </dd>
-        </dl>
       </section>
 
       <section id="work" aria-labelledby="work-heading">
@@ -151,32 +121,60 @@ import "../styles/global.css";
           </section>
 
           <section
+            id="evidence"
             class="project-evidence signature-band"
             aria-labelledby="cascade-evidence"
           >
-            <h4 id="cascade-evidence">See the evidence</h4>
-            <ul class="link-list">
-              <li>
+            <h4 id="cascade-evidence">Run lifecycle</h4>
+
+            <figure class="run-path">
+              <ol aria-label="Cascade task run lifecycle">
+                <li>
+                  <span class="run-path-step" aria-hidden="true">
+                    01
+                  </span>
+                  <strong>TypeScript SDK</strong>
+                  <span>Sends a task trigger.</span>
+                </li>
+                <li>
+                  <span class="run-path-step" aria-hidden="true">
+                    02
+                  </span>
+                  <strong>API + PostgreSQL</strong>
+                  <span>Records a pending run before execution.</span>
+                </li>
+                <li>
+                  <span class="run-path-step" aria-hidden="true">
+                    03
+                  </span>
+                  <strong>Redis</strong>
+                  <span>Queues the run ID for a worker.</span>
+                </li>
+                <li>
+                  <span class="run-path-step" aria-hidden="true">
+                    04
+                  </span>
+                  <strong>Worker</strong>
+                  <span>
+                    Claims the run and writes logs, heartbeats, and output.
+                  </span>
+                </li>
+                <li>
+                  <span class="run-path-step" aria-hidden="true">
+                    05
+                  </span>
+                  <strong>Dashboard</strong>
+                  <span>Reloads the stored state for the user.</span>
+                </li>
+              </ol>
+
+              <figcaption>
+                Simplified from Cascade’s documented runtime path.
                 <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
-                  Read the architecture
+                  Read the source documentation
                 </a>
-              </li>
-              <li>
-                <a href="https://github.com/ahammednibras8/cascade/pull/22">
-                  Follow the durable task implementation
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/ahammednibras8/cascade/pull/59">
-                  See the real SDK-to-worker test path
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/ahammednibras8/cascade">
-                  View the repository
-                </a>
-              </li>
-            </ul>
+              </figcaption>
+            </figure>
           </section>
 
           <section aria-labelledby="cascade-reflection">
@@ -194,38 +192,6 @@ import "../styles/global.css";
             </p>
           </section>
         </article>
-      </section>
-
-      <section id="approach" aria-labelledby="approach-heading">
-        <h2 id="approach-heading">How I work</h2>
-
-        <p>
-          I trace one user action through the system and test where it can fail.
-        </p>
-
-        <p>
-          I use AI every day for research, code, tests, debugging, and drafts. I
-          choose the direction, review the result, and run the checks.
-        </p>
-      </section>
-
-      <section id="now" aria-labelledby="now-heading">
-        <h2 id="now-heading">What I’m working on now</h2>
-
-        <p>
-          I’m continuing to build Cascade. I’m also interested in how to
-          evaluate tool-using agents and how logs and traces can show what an AI
-          system actually did.
-        </p>
-      </section>
-
-      <section id="about" aria-labelledby="about-heading">
-        <h2 id="about-heading">About me</h2>
-
-        <p>
-          I’m based in Kozhikode, Kerala, India. I work mostly in TypeScript and
-          Python.
-        </p>
       </section>
 
       <section
@@ -252,5 +218,12 @@ import "../styles/global.css";
         </ul>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <p class="site-footer-location">
+        Ahammed Nibras · Kozhikode, Kerala, India
+      </p>
+      <a href="#main-content">Back to top</a>
+    </footer>
   </body>
 </html>
