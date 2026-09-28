@@ -2,7 +2,7 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-The homepage has its complete content structure. Visual design and additional project stories are still in progress.
+Current version: `v0.1.0-rc.1`. It is ready for a controlled friends preview, not a finished portfolio. It currently contains one case study; visual refinement and production deployment are still in progress.
 
 ## How the site works
 
