@@ -18,6 +18,14 @@ Read the files related to the task before making changes. Check the tests, confi
 - Use `public/` only when a file must keep its exact public name.
 - Do not create empty folders, placeholder files, or unused abstractions.
 
+## Treat components as contracts
+
+- Keep markup in its page until reuse or a distinct behavior gives it a real component boundary.
+- Before adding a component, define its purpose, required content, maximum content, root semantic element, visual states, keyboard and touch behavior, responsive behavior, reduced-motion behavior, no-JavaScript behavior, and deletion condition.
+- Express required content and limits through typed props and semantic markup where possible. Test behavior that a refactor could break.
+- Do not create a universal `Card` until two real content types require the same structure and semantics.
+- Remove a component when its stated boundary no longer exists; do not preserve a wrapper only because it already has a file.
+
 ## Commands
 
 Use Node.js 24.21.0 and pnpm 12.5.1.
