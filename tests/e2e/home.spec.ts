@@ -251,6 +251,8 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
 
   const spacing = await page.evaluate(() => {
     const rootStyles = getComputedStyle(document.documentElement);
+    const tokenValue = (name: string) =>
+      Number.parseFloat(rootStyles.getPropertyValue(name));
     const introduction = document.querySelector<HTMLElement>(".introduction");
     const introductionCopy = introduction?.querySelector<HTMLElement>("p");
     const article = document.querySelector<HTMLElement>("article");
@@ -271,10 +273,10 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
 
     return {
       tokens: {
-        interface: rootStyles.getPropertyValue("--space-interface").trim(),
-        component: rootStyles.getPropertyValue("--space-component").trim(),
-        editorial: rootStyles.getPropertyValue("--space-editorial").trim(),
-        section: rootStyles.getPropertyValue("--space-section").trim(),
+        interface: tokenValue("--space-interface"),
+        component: tokenValue("--space-component"),
+        editorial: tokenValue("--space-editorial"),
+        section: tokenValue("--space-section"),
       },
       introductionPadding: getComputedStyle(introduction).paddingBlockStart,
       introductionCopyMargin:
@@ -288,10 +290,10 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
 
   expect(spacing).toEqual({
     tokens: {
-      interface: ".5rem",
-      component: "1rem",
-      editorial: "1.5rem",
-      section: "3rem",
+      interface: 0.5,
+      component: 1,
+      editorial: 1.5,
+      section: 3,
     },
     introductionPadding: "48px",
     introductionCopyMargin: "24px",
@@ -400,6 +402,12 @@ test("the personal color and depth systems keep their roles distinct", async ({
           .getPropertyValue("--color-ink-secondary")
           .trim(),
         action: rootStyles.getPropertyValue("--color-action").trim(),
+        actionVisited: rootStyles
+          .getPropertyValue("--color-action-visited")
+          .trim(),
+        actionActive: rootStyles
+          .getPropertyValue("--color-action-active")
+          .trim(),
         focus: rootStyles.getPropertyValue("--color-focus").trim(),
         atmosphereAlpha: rootStyles
           .getPropertyValue("--alpha-atmosphere")
@@ -438,6 +446,8 @@ test("the personal color and depth systems keep their roles distinct", async ({
       primaryInk: "#17191a",
       secondaryInk: "#51565a",
       action: "#a11f35",
+      actionVisited: "#6f4350",
+      actionActive: "#641426",
       focus: "#007a73",
       atmosphereAlpha: "4%",
       gridAlpha: "8%",
@@ -468,6 +478,85 @@ test("the personal color and depth systems keep their roles distinct", async ({
   await expect(skipLink).toHaveCSS("outline-style", "solid");
 });
 
+test("links expose deliberate pointer and reduced-motion states", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const evidenceLink = page.getByRole("link", {
+    name: "Read the architecture",
+  });
+  const navigationLink = page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Work", exact: true });
+
+  await expect(evidenceLink).toHaveCSS("color", "rgb(161, 31, 53)");
+  await expect(evidenceLink).toHaveCSS("text-decoration-thickness", "1.28px");
+
+  await evidenceLink.hover();
+  await expect(evidenceLink).toHaveCSS("text-decoration-thickness", "2.08px");
+
+  await navigationLink.hover();
+  await expect(navigationLink).toHaveCSS("color", "rgb(161, 31, 53)");
+  await expect(navigationLink).toHaveCSS("text-decoration-line", "underline");
+
+  await page.mouse.down();
+  await expect(navigationLink).toHaveCSS("color", "rgb(100, 20, 38)");
+  await expect(navigationLink).toHaveCSS("text-decoration-thickness", "1.69px");
+  await page.mouse.up();
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  const motion = await page.locator("a").evaluateAll((links) =>
+    links.map((link) => {
+      const styles = getComputedStyle(link);
+
+      return {
+        animationName: styles.animationName,
+        transitionDuration: styles.transitionDuration,
+      };
+    }),
+  );
+
+  expect(new Set(motion.map(({ animationName }) => animationName))).toEqual(
+    new Set(["none"]),
+  );
+  expect(
+    new Set(motion.map(({ transitionDuration }) => transitionDuration)),
+  ).toEqual(new Set(["0s"]));
+});
+
+test("forced colors preserve link and keyboard-focus visibility", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(
+    browserName !== "chromium",
+    "Forced-colors emulation is Chromium-only.",
+  );
+
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto("/");
+  await page.keyboard.press("Tab");
+
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+  const evidenceLink = page.getByRole("link", {
+    name: "Read the architecture",
+  });
+
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toHaveCSS("outline-style", "solid");
+  await expect(skipLink).toHaveCSS("outline-width", "3px");
+
+  const forcedColors = await page.evaluate(() => ({
+    active: matchMedia("(forced-colors: active)").matches,
+    body: getComputedStyle(document.body).color,
+  }));
+
+  expect(forcedColors.active).toBe(true);
+  await expect(evidenceLink).not.toHaveCSS("color", forcedColors.body);
+});
+
 test("three surfaces and two border widths create depth without shadows", async ({
   page,
 }) => {
@@ -476,6 +565,8 @@ test("three surfaces and two border widths create depth without shadows", async 
 
   const depth = await page.evaluate(() => {
     const rootStyles = getComputedStyle(document.documentElement);
+    const tokenValue = (name: string) =>
+      Number.parseFloat(rootStyles.getPropertyValue(name));
     const siteHeader = document.querySelector<HTMLElement>(".site-header");
     const pageFrame = document.querySelector<HTMLElement>(".page");
     const article = document.querySelector<HTMLElement>("article");
@@ -508,8 +599,8 @@ test("three surfaces and two border widths create depth without shadows", async 
 
     return {
       borderWidths: {
-        default: rootStyles.getPropertyValue("--border-width-default").trim(),
-        emphasis: rootStyles.getPropertyValue("--border-width-emphasis").trim(),
+        default: tokenValue("--border-width-default"),
+        emphasis: tokenValue("--border-width-emphasis"),
         frame: getComputedStyle(pageFrame).borderInlineStartWidth,
         article: articleStyles.borderBlockStartWidth,
         evidence: evidenceStyles.borderBlockStartWidth,
@@ -533,8 +624,8 @@ test("three surfaces and two border widths create depth without shadows", async 
 
   expect(depth).toEqual({
     borderWidths: {
-      default: "1px",
-      emphasis: ".25rem",
+      default: 1,
+      emphasis: 0.25,
       frame: "1px",
       article: "4px",
       evidence: "4px",

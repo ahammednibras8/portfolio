@@ -23,6 +23,8 @@
   --border-width-default: 1px;
   --border-width-emphasis: 0.25rem;
   --color-action: #a11f35;
+  --color-action-visited: #6f4350;
+  --color-action-active: #641426;
   --color-focus: #007a73;
   --color-surface-recessed: oklch(
     from var(--color-ink-primary) l c h / var(--alpha-atmosphere)
@@ -108,10 +110,6 @@ a {
   color: var(--color-action);
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.2em;
-}
-
-a:hover {
-  text-decoration-thickness: 0.13em;
 }
 
 :focus-visible {
@@ -302,10 +300,56 @@ article ul {
   text-decoration: none;
 }
 
-.primary-navigation a:hover {
-  color: var(--color-action);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+.page a:visited {
+  color: var(--color-action-visited);
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 0.13em;
+  }
+
+  .primary-navigation a:hover {
+    color: var(--color-action);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.page a:active,
+.primary-navigation a:active {
+  color: var(--color-action-active);
+  text-decoration-thickness: 0.13em;
+}
+
+.skip-link:active {
+  background: var(--color-action-active);
+  color: var(--color-surface-raised);
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+
+  .page a,
+  .primary-navigation a {
+    color: LinkText;
+  }
+
+  .page a:visited {
+    color: VisitedText;
+  }
+
+  .page a:active,
+  .primary-navigation a:active {
+    color: ActiveText;
+  }
+
+  .skip-link {
+    background: CanvasText;
+    color: Canvas;
+  }
 }
 
 .page > section {
