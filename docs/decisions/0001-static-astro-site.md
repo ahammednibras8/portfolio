@@ -28,6 +28,7 @@ Static HTML keeps the site fast, accessible without JavaScript, and easy to move
 ## Where it is used
 
 - `astro.config.mjs` keeps Astro in static-output mode.
+- `src/layouts/DocumentLayout.astro` owns the shared document shell and metadata used by route pages.
 - `src/pages/` contains the route entry points.
 - CI tests the generated `dist/` output that will be deployed.
 
