@@ -51,15 +51,12 @@ import "../styles/global.css";
       >
         <h1 id="introduction-heading">Hi, I’m Nibras.</h1>
 
-        <p>
-          I’m a software engineer who builds AI products and the systems that
-          keep them useful after the demo.
-        </p>
+        <p>I build AI products and the backend systems they depend on.</p>
 
         <p>
-          I work across AI features, backend services, data, workers,
-          deployment, testing, and the screens people use. I like owning the
-          whole path instead of stopping at one layer.
+          My work often starts with an action on a screen. I follow it through
+          the API, database, queue, and worker, then back to the result or
+          failure the user sees.
         </p>
       </section>
 
@@ -69,27 +66,20 @@ import "../styles/global.css";
         <dl>
           <dt>AI products</dt>
           <dd>
-            I have built retrieval, document processing, OCR, tool-using agents,
-            evaluation, and grounded-answer flows.
+            Retrieval, document processing, OCR, tool-using agents, evaluation,
+            and grounded answers.
           </dd>
 
-          <dt>Production systems</dt>
+          <dt>Systems</dt>
           <dd>
-            I work on APIs, databases, queues, workers, deployment,
-            observability, and the recovery paths needed when something fails.
+            APIs, databases, queues, workers, deployment, observability, and
+            recovery.
           </dd>
 
-          <dt>Trust and safety</dt>
+          <dt>Trust</dt>
           <dd>
-            I have worked on authentication, tenant isolation, privacy deletion,
-            audit trails, source permissions, and tests that cross real service
-            boundaries.
-          </dd>
-
-          <dt>Product delivery</dt>
-          <dd>
-            I follow features through the database, backend, worker, interface,
-            tests, and deployment instead of treating them as separate jobs.
+            Authentication, tenant isolation, privacy deletion, audit trails,
+            and source permissions.
           </dd>
         </dl>
       </section>
@@ -98,33 +88,34 @@ import "../styles/global.css";
         <h2 id="work-heading">Selected work</h2>
 
         <p>
-          Most of my professional work is private. Cascade is the clearest
-          public example of how I approach a large system.
+          Most of my work for employers cannot be shown publicly. Cascade is the
+          project I can open up, from its database schema to the browser test
+          that runs a real task.
         </p>
 
         <article>
           <header>
             <h3>Cascade</h3>
             <p>
-              A task platform for work that needs to run in the background,
-              survive failures, and remain understandable afterward.
+              Cascade runs background tasks and keeps a durable record of each
+              run.
             </p>
           </header>
 
           <p>
-            Today, Cascade can accept a task through its TypeScript SDK, store
-            the run, execute it in a worker, and show the result and logs in a
-            dashboard. The same system supports retries, schedules,
-            cancellation, and replay.
+            A task starts in the TypeScript SDK, passes through the API and
+            Redis queue, runs in a worker, and appears in the dashboard with its
+            output and logs. It can be retried, scheduled, cancelled, or
+            replayed.
           </p>
 
           <section aria-labelledby="cascade-context">
             <h4 id="cascade-context">Why I built it</h4>
             <p>
-              Background work looks simple until a process crashes, a request is
-              repeated, or a deployment changes halfway through a run. I wanted
-              to understand those problems by building the complete system
-              myself.
+              The project started with three questions: What happens if a worker
+              dies? What if the same request arrives twice? What if a deployment
+              changes while a task is still running? I built Cascade to answer
+              them in one system.
             </p>
           </section>
 
@@ -146,11 +137,7 @@ import "../styles/global.css";
 
           <section aria-labelledby="cascade-role">
             <h4 id="cascade-role">My role</h4>
-            <p>
-              Cascade is my personal project. I set its direction, make the
-              final product and engineering decisions, and take responsibility
-              for what ships.
-            </p>
+            <p>I started Cascade and maintain it.</p>
           </section>
 
           <section aria-labelledby="cascade-decisions">
@@ -160,15 +147,6 @@ import "../styles/global.css";
               handles short-lived coordination such as queues, rate limits, and
               concurrency. Large payloads can move to object storage. The
               dashboard reads the same durable records used by the workers.
-            </p>
-          </section>
-
-          <section aria-labelledby="cascade-execution">
-            <h4 id="cascade-execution">What exists now</h4>
-            <p>
-              The project includes an API, TypeScript SDK, workers, a deployment
-              runner, authentication, a dashboard, logs, traces, health checks,
-              and automated tests.
             </p>
           </section>
 
@@ -211,8 +189,8 @@ import "../styles/global.css";
             </p>
 
             <p>
-              That made the test slower and harder to build, but it now proves
-              something useful.
+              The replacement is slower. It catches failures the old test could
+              not see.
             </p>
           </section>
         </article>
@@ -222,16 +200,12 @@ import "../styles/global.css";
         <h2 id="approach-heading">How I work</h2>
 
         <p>
-          I start with what a person is trying to do. Then I follow that action
-          through the entire system and ask where it can fail, where the truth
-          should live, and how someone will understand the failure later.
+          I trace one user action through the system and test where it can fail.
         </p>
 
         <p>
-          AI is a major part of my daily development process. I use it heavily
-          for research, implementation, testing, debugging, and writing. I still
-          choose the direction, review the output, run the checks, and own what
-          ships.
+          I use AI every day for research, code, tests, debugging, and drafts. I
+          choose the direction, review the result, and run the checks.
         </p>
       </section>
 
@@ -239,8 +213,8 @@ import "../styles/global.css";
         <h2 id="now-heading">What I’m working on now</h2>
 
         <p>
-          I’m continuing to build Cascade. I’m also interested in reliable agent
-          tools, useful evaluation, and observability that explains what an AI
+          I’m continuing to build Cascade. I’m also interested in how to
+          evaluate tool-using agents and how logs and traces can show what an AI
           system actually did.
         </p>
       </section>
@@ -249,9 +223,8 @@ import "../styles/global.css";
         <h2 id="about-heading">About me</h2>
 
         <p>
-          I’m based in Kozhikode, Kerala, India. My day-to-day work is mostly
-          TypeScript and Python, with PostgreSQL, Redis, queues, containers, and
-          cloud services around them.
+          I’m based in Kozhikode, Kerala, India. I work mostly in TypeScript and
+          Python.
         </p>
       </section>
 
@@ -262,10 +235,7 @@ import "../styles/global.css";
       >
         <h2 id="contact-heading">Contact</h2>
 
-        <p>
-          If you want to discuss a role, a project, or a difficult engineering
-          problem, email me.
-        </p>
+        <p>If you want to discuss a role or project, email me.</p>
 
         <ul class="link-list">
           <li>
