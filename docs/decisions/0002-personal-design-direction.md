@@ -29,6 +29,8 @@ The color system has a more personal starting point. [Arsenal's off-white and da
 
 The repeating visual device is a raised white band held between two dark-red rules. It marks the three moments where the reader needs a clear signal: identity in the introduction, proof inside the case study, and action in the contact section. It extends an existing evidence treatment instead of adding an unrelated emblem.
 
+The favicon uses an outlined uppercase N from the site's IBM Plex Sans Bold typeface. It uses the existing canvas and primary-ink colors so the browser mark identifies Nibras without introducing a separate logo system.
+
 A 2024 study of short-story writing found that access to generative AI ideas improved how individual stories were evaluated while making AI-assisted stories more similar to one another. The study does not establish the same effect in web design. It does support using AI to critique an authored direction instead of asking it to choose the direction. See [“Generative AI enhances individual creativity but reduces the collective diversity of novel content”](https://doi.org/10.1126/sciadv.adn5290).
 
 ## Constraints
