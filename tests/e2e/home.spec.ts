@@ -9,11 +9,7 @@ test("the homepage explains the work in document order", async ({ page }) => {
   ).toBeVisible();
 
   await expect(page.locator("main > section > h2")).toHaveText([
-    "What that looks like",
     "Selected work",
-    "How I work",
-    "What I’m working on now",
-    "About me",
     "Contact",
   ]);
 
@@ -24,10 +20,11 @@ test("the homepage explains the work in document order", async ({ page }) => {
     page.getByText("Most of my work for employers cannot be shown publicly."),
   ).toBeVisible();
   await expect(
-    page.getByText(
-      "I use AI every day for research, code, tests, debugging, and drafts.",
-    ),
+    page.getByRole("heading", { level: 4, name: "Run lifecycle" }),
   ).toBeVisible();
+  await expect(page.locator("footer")).toContainText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
 });
 
 test("the primary navigation points to real homepage sections", async ({
@@ -38,12 +35,12 @@ test("the primary navigation points to real homepage sections", async ({
   const navigation = page.getByRole("navigation", { name: "Primary" });
   const links = navigation.getByRole("link");
 
-  await expect(links).toHaveCount(5);
+  await expect(links).toHaveCount(3);
   expect(
     await links.evaluateAll((items) =>
       items.map((item) => item.getAttribute("href")),
     ),
-  ).toEqual(["#work", "#approach", "#now", "#about", "#contact"]);
+  ).toEqual(["#work", "#evidence", "#contact"]);
 
   await navigation.getByRole("link", { name: "Work", exact: true }).click();
   await expect(page).toHaveURL(/#work$/);
@@ -78,7 +75,7 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
     }),
   );
 
-  expect(linkBounds).toHaveLength(5);
+  expect(linkBounds).toHaveLength(3);
   expect(new Set(linkBounds.map(({ top }) => top)).size).toBe(1);
 
   for (const bounds of linkBounds) {
@@ -103,6 +100,64 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
   await expect(
     contact.getByRole("link", { name: "ahammednibras737@gmail.com" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
+});
+
+test("the vertical slice exposes one artifact and a complete keyboard path", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+
+  await expect(page.getByRole("article")).toHaveCount(1);
+
+  const lifecycle = page.getByRole("list", {
+    name: "Cascade task run lifecycle",
+  });
+  await expect(lifecycle.getByRole("listitem")).toHaveCount(5);
+  await expect(lifecycle.locator("strong")).toHaveText([
+    "TypeScript SDK",
+    "API + PostgreSQL",
+    "Redis",
+    "Worker",
+    "Dashboard",
+  ]);
+  await expect(lifecycle).toHaveCSS("grid-template-columns", /\d+(\.\d+)?px/);
+
+  const focusOrder = [
+    page.getByRole("link", { name: "Skip to content" }),
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Work", exact: true }),
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Evidence", exact: true }),
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Contact", exact: true }),
+    page.getByRole("link", { name: "Read the source documentation" }),
+    page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+    page.getByRole("link", { name: "GitHub" }),
+    page.getByRole("link", { name: "LinkedIn" }),
+    page.getByRole("link", { name: "Back to top" }),
+  ];
+
+  for (const link of focusOrder) {
+    await page.keyboard.press("Tab");
+    await expect(link).toBeFocused();
+  }
+
+  await page.setViewportSize({ width: 1152, height: 900 });
+  expect(
+    await lifecycle.evaluate(
+      (list) => getComputedStyle(list).gridTemplateColumns.split(" ").length,
+    ),
+  ).toBe(5);
+
+  const backToTop = page.getByRole("link", { name: "Back to top" });
+  await backToTop.click();
+  await expect(page).toHaveURL(/#main-content$/);
+  await expect(page.locator("#main-content")).toBeFocused();
 });
 
 test("the responsive grid keeps a deliberate rule hierarchy", async ({
@@ -370,7 +425,9 @@ test("the personal color and depth systems keep their roles distinct", async ({
     );
     const evidence = document.querySelector<HTMLElement>(".project-evidence");
     const evidenceLink = evidence?.querySelector<HTMLElement>("a");
-    const secondaryText = document.querySelector<HTMLElement>("dd");
+    const secondaryText = document.querySelector<HTMLElement>(
+      ".run-path li > span:last-child",
+    );
 
     if (
       !navigationLink ||
@@ -487,7 +544,7 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await page.goto("/");
 
   const evidenceLink = page.getByRole("link", {
-    name: "Read the architecture",
+    name: "Read the source documentation",
   });
   const navigationLink = page
     .getByRole("navigation", { name: "Primary" })
@@ -569,7 +626,7 @@ test("forced colors preserve link and keyboard-focus visibility", async ({
 
   const skipLink = page.getByRole("link", { name: "Skip to content" });
   const evidenceLink = page.getByRole("link", {
-    name: "Read the architecture",
+    name: "Read the source documentation",
   });
 
   await expect(skipLink).toBeFocused();
@@ -667,13 +724,13 @@ test("three surfaces and two border widths create depth without shadows", async 
 
   await page
     .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "How I work", exact: true })
+    .getByRole("link", { name: "Evidence", exact: true })
     .click();
-  await expect(page).toHaveURL(/#approach$/);
+  await expect(page).toHaveURL(/#evidence$/);
 
   const anchoredPosition = await page.evaluate(() => {
     const siteHeader = document.querySelector<HTMLElement>(".site-header");
-    const target = document.querySelector<HTMLElement>("#approach");
+    const target = document.querySelector<HTMLElement>("#evidence");
 
     if (!siteHeader || !target) {
       throw new Error("Expected sticky navigation targets were not found.");
@@ -735,20 +792,18 @@ test("the evidence and contact links expose their real destinations", async ({
   await page.goto("/");
 
   await expect(
-    page.getByRole("link", { name: "Read the architecture" }),
+    page.getByRole("link", { name: "Read the source documentation" }),
   ).toHaveAttribute(
     "href",
     "https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx",
   );
   await expect(
-    page.getByRole("link", { name: "See the real SDK-to-worker test path" }),
-  ).toHaveAttribute(
-    "href",
-    "https://github.com/ahammednibras8/cascade/pull/59",
-  );
-  await expect(
     page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
   ).toHaveAttribute("href", "mailto:ahammednibras737@gmail.com");
+  await expect(page.getByRole("link", { name: "Back to top" })).toHaveAttribute(
+    "href",
+    "#main-content",
+  );
 });
 
 test("the complete homepage remains available without JavaScript", async ({
@@ -766,8 +821,12 @@ test("the complete homepage remains available without JavaScript", async ({
     page.getByRole("heading", { level: 3, name: "Cascade" }),
   ).toBeVisible();
   await expect(
+    page.getByRole("list", { name: "Cascade task run lifecycle" }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("heading", { level: 2, name: "Contact" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
   await expect(page.locator("script")).toHaveCount(0);
 
   await context.close();
