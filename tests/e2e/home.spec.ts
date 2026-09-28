@@ -481,6 +481,7 @@ test("the personal color and depth systems keep their roles distinct", async ({
 test("links expose deliberate pointer and reduced-motion states", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
 
   const evidenceLink = page.getByRole("link", {
@@ -489,6 +490,30 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   const navigationLink = page
     .getByRole("navigation", { name: "Primary" })
     .getByRole("link", { name: "Work", exact: true });
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+
+  const motionGrammar = await page.evaluate(() => {
+    const rootStyles = getComputedStyle(document.documentElement);
+
+    return {
+      short: rootStyles.getPropertyValue("--motion-short").trim(),
+      standard: rootStyles.getPropertyValue("--motion-standard").trim(),
+      deliberate: rootStyles.getPropertyValue("--motion-deliberate").trim(),
+    };
+  });
+
+  expect(motionGrammar).toEqual({
+    short: ".12s",
+    standard: ".18s",
+    deliberate: ".22s",
+  });
+  await expect(evidenceLink).toHaveCSS(
+    "transition-property",
+    "color, text-decoration-thickness",
+  );
+  await expect(evidenceLink).toHaveCSS("transition-duration", "0.18s, 0.18s");
+  await expect(skipLink).toHaveCSS("transition-property", "transform");
+  await expect(skipLink).toHaveCSS("transition-duration", "0.22s");
 
   await expect(evidenceLink).toHaveCSS("color", "rgb(161, 31, 53)");
   await expect(evidenceLink).toHaveCSS("text-decoration-thickness", "1.28px");
@@ -501,13 +526,14 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await expect(navigationLink).toHaveCSS("text-decoration-line", "underline");
 
   await page.mouse.down();
+  await expect(navigationLink).toHaveCSS("transition-duration", "0.12s");
   await expect(navigationLink).toHaveCSS("color", "rgb(100, 20, 38)");
   await expect(navigationLink).toHaveCSS("text-decoration-thickness", "1.69px");
   await page.mouse.up();
 
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  const motion = await page.locator("a").evaluateAll((links) =>
+  const reducedMotion = await page.locator("a").evaluateAll((links) =>
     links.map((link) => {
       const styles = getComputedStyle(link);
 
@@ -518,11 +544,11 @@ test("links expose deliberate pointer and reduced-motion states", async ({
     }),
   );
 
-  expect(new Set(motion.map(({ animationName }) => animationName))).toEqual(
-    new Set(["none"]),
-  );
   expect(
-    new Set(motion.map(({ transitionDuration }) => transitionDuration)),
+    new Set(reducedMotion.map(({ animationName }) => animationName)),
+  ).toEqual(new Set(["none"]));
+  expect(
+    new Set(reducedMotion.map(({ transitionDuration }) => transitionDuration)),
   ).toEqual(new Set(["0s"]));
 });
 

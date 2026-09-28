@@ -48,6 +48,12 @@
   --grid-gap: var(--space-component);
   --touch-target: 2.75rem;
 
+  /* Motion explains a state or context change; it never introduces content. */
+  --motion-short: 120ms;
+  --motion-standard: 180ms;
+  --motion-deliberate: 220ms;
+  --motion-ease-out: cubic-bezier(0.2, 0, 0, 1);
+
   font-family: var(--font-reading);
   font-synthesis: none;
   text-rendering: optimizelegibility;
@@ -132,6 +138,12 @@ a {
 
 .skip-link:focus {
   transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skip-link {
+    transition: transform var(--motion-deliberate) var(--motion-ease-out);
+  }
 }
 
 .page {
@@ -325,6 +337,20 @@ article ul {
 .skip-link:active {
   background: var(--color-action-active);
   color: var(--color-surface-raised);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .page a,
+  .primary-navigation a {
+    transition:
+      color var(--motion-standard) var(--motion-ease-out),
+      text-decoration-thickness var(--motion-standard) var(--motion-ease-out);
+  }
+
+  .page a:active,
+  .primary-navigation a:active {
+    transition-duration: var(--motion-short);
+  }
 }
 
 @media (forced-colors: active) {
