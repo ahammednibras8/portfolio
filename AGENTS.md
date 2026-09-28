@@ -26,6 +26,27 @@ Read the files related to the task before making changes. Check the tests, confi
 - Do not create a universal `Card` until two real content types require the same structure and semantics.
 - Remove a component when its stated boundary no longer exists; do not preserve a wrapper only because it already has a file.
 
+## Use AI as a reviewer
+
+AI may:
+
+- find edge cases and suggest alternatives;
+- review semantics and accessibility;
+- challenge a decision;
+- check implementation consistency; and
+- flag repetitive writing.
+
+AI must not:
+
+- choose the first visual direction;
+- invent Nibras's personality or write final project claims;
+- choose the final palette;
+- invent project evidence;
+- produce the logo or decorative artwork to fill space; or
+- make a substantial design decision without recorded reasoning.
+
+Nibras chooses the direction, verifies the claims, reviews the result, and makes the final decision.
+
 ## Commands
 
 Use Node.js 24.21.0 and pnpm 12.5.1.
