@@ -33,6 +33,44 @@ test("the homepage explains the work in document order", async ({ page }) => {
   );
 });
 
+test("the homepage publishes modern and fallback favicon formats", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/");
+
+  const icons = page.locator('link[rel="icon"]');
+
+  await expect(icons).toHaveCount(2);
+  expect(
+    await icons.evaluateAll((items) =>
+      items.map((item) => ({
+        href: item.getAttribute("href"),
+        sizes: item.getAttribute("sizes"),
+        type: item.getAttribute("type"),
+      })),
+    ),
+  ).toEqual([
+    {
+      href: "/favicon.ico",
+      sizes: "16x16 32x32 64x64",
+      type: "image/x-icon",
+    },
+    {
+      href: "/favicon.svg",
+      sizes: "any",
+      type: "image/svg+xml",
+    },
+  ]);
+
+  for (const path of ["/favicon.ico", "/favicon.svg"]) {
+    const response = await request.get(path);
+
+    expect(response.ok()).toBe(true);
+    expect((await response.body()).byteLength).toBeGreaterThan(0);
+  }
+});
+
 test("the primary navigation points to real homepage sections", async ({
   page,
 }) => {
