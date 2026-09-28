@@ -1,0 +1,99 @@
+---
+import "@fontsource/ibm-plex-sans/latin-400.css";
+import "@fontsource/ibm-plex-sans/latin-700.css";
+import "@fontsource/ibm-plex-mono/latin-600.css";
+import "../styles/global.css";
+
+interface SocialImage {
+  url: URL;
+  alt: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: URL;
+  socialImage?: SocialImage;
+}
+
+const { title, description, canonical, socialImage } = Astro.props;
+
+const canonicalUrl = canonical?.href;
+const socialImageUrl = socialImage?.url.href;
+const sectionHref = (id: string) =>
+  Astro.url.pathname === "/" ? `#${id}` : `/#${id}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+    <link
+      rel="icon"
+      href="/favicon.ico"
+      sizes="16x16 32x32 64x64"
+      type="image/x-icon"
+    />
+    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+
+    <meta property="og:site_name" content="Ahammed Nibras" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    {socialImage && <meta property="og:image:alt" content={socialImage.alt} />}
+
+    <meta
+      name="twitter:card"
+      content={socialImage ? "summary_large_image" : "summary"}
+    />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+    {socialImage && <meta name="twitter:image:alt" content={socialImage.alt} />}
+
+    <title>{title}</title>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main-content">
+      Skip to content
+    </a>
+
+    <header class="site-header">
+      <nav class="primary-navigation" aria-label="Primary">
+        <ul>
+          <li>
+            <a href={sectionHref("work")}>Work</a>
+          </li>
+          <li>
+            <a href={sectionHref("evidence")}>Evidence</a>
+          </li>
+          <li>
+            <a href={sectionHref("contact")}>Contact</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content" class="page" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p class="site-footer-location">
+        Ahammed Nibras · Kozhikode, Kerala, India
+      </p>
+      <a href="#main-content">Back to top</a>
+    </footer>
+  </body>
+</html>
