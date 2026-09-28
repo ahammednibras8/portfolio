@@ -16,6 +16,12 @@ test("the homepage explains the work in document order", async ({ page }) => {
   await expect(
     page.getByRole("heading", { level: 3, name: "Cascade" }),
   ).toBeVisible();
+  await expect(page.locator("article > header")).toContainText(
+    "Cascade runs background tasks and keeps a durable record of each run. I started the project and maintain it.",
+  );
+  await expect(
+    page.getByRole("heading", { level: 4, name: "My role" }),
+  ).toHaveCount(0);
   await expect(
     page.getByText("Most of my work for employers cannot be shown publicly."),
   ).toBeVisible();
