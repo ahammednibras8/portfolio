@@ -7,6 +7,7 @@ Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, no
 ## How the site works
 
 - [Astro](https://docs.astro.build/) builds the site as static HTML.
+- A typed document layout owns shared metadata, fonts, navigation, and the footer.
 - Important content and navigation work without JavaScript.
 - There is no application server, database, or client framework.
 - Images are optimized during the build.

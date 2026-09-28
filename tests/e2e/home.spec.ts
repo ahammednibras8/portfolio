@@ -1,9 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+const homepageTitle = "Ahammed Nibras — Software engineer";
+const homepageDescription =
+  "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
+
 test("the homepage explains the work in document order", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page).toHaveTitle("Ahammed Nibras — Software engineer");
+  await expect(page).toHaveTitle(homepageTitle);
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
@@ -33,11 +37,63 @@ test("the homepage explains the work in document order", async ({ page }) => {
   );
 });
 
-test("the homepage publishes modern and fallback favicon formats", async ({
+test("the homepage publishes canonical, social, and favicon metadata", async ({
   page,
   request,
 }) => {
   await page.goto("/");
+
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    homepageDescription,
+  );
+
+  const canonicalLink = page.locator('link[rel="canonical"]');
+  await expect(canonicalLink).toHaveCount(1);
+
+  const canonicalHref = await canonicalLink.getAttribute("href");
+  if (!canonicalHref) {
+    throw new Error("Expected the homepage to publish a canonical URL.");
+  }
+
+  const canonical = new URL(canonicalHref);
+  expect(canonical.protocol).toBe("https:");
+  expect(canonical.pathname).toBe("/");
+  expect(canonical.search).toBe("");
+  expect(canonical.hash).toBe("");
+
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
+    "content",
+    "Ahammed Nibras",
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute(
+    "content",
+    "website",
+  );
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+    "content",
+    homepageTitle,
+  );
+  await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+    "content",
+    homepageDescription,
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    canonical.href,
+  );
+
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary",
+  );
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
+    "content",
+    homepageTitle,
+  );
+  await expect(
+    page.locator('meta[name="twitter:description"]'),
+  ).toHaveAttribute("content", homepageDescription);
 
   const icons = page.locator('link[rel="icon"]');
 

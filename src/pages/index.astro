@@ -1,231 +1,181 @@
 ---
-import "@fontsource/ibm-plex-sans/latin-400.css";
-import "@fontsource/ibm-plex-sans/latin-700.css";
-import "@fontsource/ibm-plex-mono/latin-600.css";
-import "../styles/global.css";
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+
+const title = "Ahammed Nibras — Software engineer";
+const description =
+  "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
+const canonical = new URL("/", Astro.site ?? Astro.url);
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="description"
-      content="Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running."
-    />
-    <meta name="viewport" content="width=device-width" />
-    <link
-      rel="icon"
-      href="/favicon.ico"
-      sizes="16x16 32x32 64x64"
-      type="image/x-icon"
-    />
-    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
-    <title>Ahammed Nibras — Software engineer</title>
-  </head>
+<DocumentLayout title={title} description={description} canonical={canonical}>
+  <section
+    class="introduction signature-band"
+    aria-labelledby="introduction-heading"
+  >
+    <h1 id="introduction-heading">Hi, I’m Nibras.</h1>
 
-  <body>
-    <a class="skip-link" href="#main-content">
-      Skip to content
-    </a>
+    <p>I build AI products and the backend systems they depend on.</p>
 
-    <header class="site-header">
-      <nav class="primary-navigation" aria-label="Primary">
-        <ul>
-          <li>
-            <a href="#work">Work</a>
-          </li>
-          <li>
-            <a href="#evidence">Evidence</a>
-          </li>
-          <li>
-            <a href="#contact">Contact</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
+    <p>
+      My work often starts with an action on a screen. I follow it through the
+      API, database, queue, and worker, then back to the result or failure the
+      user sees.
+    </p>
+  </section>
 
-    <main id="main-content" class="page" tabindex="-1">
-      <section
-        class="introduction signature-band"
-        aria-labelledby="introduction-heading"
-      >
-        <h1 id="introduction-heading">Hi, I’m Nibras.</h1>
+  <section id="work" aria-labelledby="work-heading">
+    <h2 id="work-heading">Selected work</h2>
 
-        <p>I build AI products and the backend systems they depend on.</p>
+    <p>
+      Most of my work for employers cannot be shown publicly. Cascade is the
+      project I can open up, from its database schema to the browser test that
+      runs a real task.
+    </p>
 
+    <article>
+      <header>
+        <h3>Cascade</h3>
         <p>
-          My work often starts with an action on a screen. I follow it through
-          the API, database, queue, and worker, then back to the result or
-          failure the user sees.
+          Cascade runs background tasks and keeps a durable record of each run.
+          I started the project and maintain it.
         </p>
-      </section>
+      </header>
 
-      <section id="work" aria-labelledby="work-heading">
-        <h2 id="work-heading">Selected work</h2>
-
-        <p>
-          Most of my work for employers cannot be shown publicly. Cascade is the
-          project I can open up, from its database schema to the browser test
-          that runs a real task.
-        </p>
-
-        <article>
-          <header>
-            <h3>Cascade</h3>
-            <p>
-              Cascade runs background tasks and keeps a durable record of each
-              run. I started the project and maintain it.
-            </p>
-          </header>
-
-          <p>
-            A task starts in the TypeScript SDK, passes through the API and
-            Redis queue, runs in a worker, and appears in the dashboard with its
-            output and logs. It can be retried, scheduled, cancelled, or
-            replayed.
-          </p>
-
-          <section aria-labelledby="cascade-context">
-            <h4 id="cascade-context">Why I built it</h4>
-            <p>
-              The project started with three questions: What happens if a worker
-              dies? What if the same request arrives twice? What if a deployment
-              changes while a task is still running? I built Cascade to answer
-              them in one system.
-            </p>
-          </section>
-
-          <section aria-labelledby="cascade-constraints">
-            <h4 id="cascade-constraints">What had to be true</h4>
-            <ul>
-              <li>A run could not disappear when a worker stopped.</li>
-              <li>Repeating a request could not create duplicate work.</li>
-              <li>One organization could never read another one’s data.</li>
-              <li>
-                The dashboard had to show stored system state, not temporary
-                browser state.
-              </li>
-              <li>
-                Tests had to use the real SDK, API, queue, and worker path.
-              </li>
-            </ul>
-          </section>
-
-          <section aria-labelledby="cascade-decisions">
-            <h4 id="cascade-decisions">The important choices</h4>
-            <p>
-              PostgreSQL is the source of truth for runs and deployments. Redis
-              handles short-lived coordination such as queues, rate limits, and
-              concurrency. Large payloads can move to object storage. The
-              dashboard reads the same durable records used by the workers.
-            </p>
-          </section>
-
-          <section
-            id="evidence"
-            class="project-evidence signature-band"
-            aria-labelledby="cascade-evidence"
-          >
-            <h4 id="cascade-evidence">Run lifecycle</h4>
-
-            <figure class="run-path">
-              <ol aria-label="Cascade task run lifecycle">
-                <li>
-                  <span class="run-path-step" aria-hidden="true">
-                    01
-                  </span>
-                  <strong>TypeScript SDK</strong>
-                  <span>Sends a task trigger.</span>
-                </li>
-                <li>
-                  <span class="run-path-step" aria-hidden="true">
-                    02
-                  </span>
-                  <strong>API + PostgreSQL</strong>
-                  <span>Records a pending run before execution.</span>
-                </li>
-                <li>
-                  <span class="run-path-step" aria-hidden="true">
-                    03
-                  </span>
-                  <strong>Redis</strong>
-                  <span>Queues the run ID for a worker.</span>
-                </li>
-                <li>
-                  <span class="run-path-step" aria-hidden="true">
-                    04
-                  </span>
-                  <strong>Worker</strong>
-                  <span>
-                    Claims the run and writes logs, heartbeats, and output.
-                  </span>
-                </li>
-                <li>
-                  <span class="run-path-step" aria-hidden="true">
-                    05
-                  </span>
-                  <strong>Dashboard</strong>
-                  <span>Reloads the stored state for the user.</span>
-                </li>
-              </ol>
-
-              <figcaption>
-                Simplified from Cascade’s documented runtime path.
-                <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
-                  Read the source documentation
-                </a>
-              </figcaption>
-            </figure>
-          </section>
-
-          <section aria-labelledby="cascade-reflection">
-            <h4 id="cascade-reflection">What changed my approach</h4>
-            <p>
-              An early browser test created successful records directly in the
-              database. The screen passed even though that setup skipped the
-              real product. I replaced it with a test that starts from the SDK
-              and continues through the API, queue, worker, and dashboard.
-            </p>
-
-            <p>
-              The replacement is slower. It catches failures the old test could
-              not see.
-            </p>
-          </section>
-        </article>
-      </section>
-
-      <section
-        id="contact"
-        class="signature-band"
-        aria-labelledby="contact-heading"
-      >
-        <h2 id="contact-heading">Contact</h2>
-
-        <p>If you want to discuss a role or project, email me.</p>
-
-        <ul class="link-list">
-          <li>
-            <a href="mailto:ahammednibras737@gmail.com">
-              ahammednibras737@gmail.com
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/ahammednibras8">GitHub</a>
-          </li>
-          <li>
-            <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
-          </li>
-        </ul>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <p class="site-footer-location">
-        Ahammed Nibras · Kozhikode, Kerala, India
+      <p>
+        A task starts in the TypeScript SDK, passes through the API and Redis
+        queue, runs in a worker, and appears in the dashboard with its output
+        and logs. It can be retried, scheduled, cancelled, or replayed.
       </p>
-      <a href="#main-content">Back to top</a>
-    </footer>
-  </body>
-</html>
+
+      <section aria-labelledby="cascade-context">
+        <h4 id="cascade-context">Why I built it</h4>
+        <p>
+          The project started with three questions: What happens if a worker
+          dies? What if the same request arrives twice? What if a deployment
+          changes while a task is still running? I built Cascade to answer them
+          in one system.
+        </p>
+      </section>
+
+      <section aria-labelledby="cascade-constraints">
+        <h4 id="cascade-constraints">What had to be true</h4>
+        <ul>
+          <li>A run could not disappear when a worker stopped.</li>
+          <li>Repeating a request could not create duplicate work.</li>
+          <li>One organization could never read another one’s data.</li>
+          <li>
+            The dashboard had to show stored system state, not temporary browser
+            state.
+          </li>
+          <li>Tests had to use the real SDK, API, queue, and worker path.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="cascade-decisions">
+        <h4 id="cascade-decisions">The important choices</h4>
+        <p>
+          PostgreSQL is the source of truth for runs and deployments. Redis
+          handles short-lived coordination such as queues, rate limits, and
+          concurrency. Large payloads can move to object storage. The dashboard
+          reads the same durable records used by the workers.
+        </p>
+      </section>
+
+      <section
+        id="evidence"
+        class="project-evidence signature-band"
+        aria-labelledby="cascade-evidence"
+      >
+        <h4 id="cascade-evidence">Run lifecycle</h4>
+
+        <figure class="run-path">
+          <ol aria-label="Cascade task run lifecycle">
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                01
+              </span>
+              <strong>TypeScript SDK</strong>
+              <span>Sends a task trigger.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                02
+              </span>
+              <strong>API + PostgreSQL</strong>
+              <span>Records a pending run before execution.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                03
+              </span>
+              <strong>Redis</strong>
+              <span>Queues the run ID for a worker.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                04
+              </span>
+              <strong>Worker</strong>
+              <span>
+                Claims the run and writes logs, heartbeats, and output.
+              </span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                05
+              </span>
+              <strong>Dashboard</strong>
+              <span>Reloads the stored state for the user.</span>
+            </li>
+          </ol>
+
+          <figcaption>
+            Simplified from Cascade’s documented runtime path.
+            <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
+              Read the source documentation
+            </a>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section aria-labelledby="cascade-reflection">
+        <h4 id="cascade-reflection">What changed my approach</h4>
+        <p>
+          An early browser test created successful records directly in the
+          database. The screen passed even though that setup skipped the real
+          product. I replaced it with a test that starts from the SDK and
+          continues through the API, queue, worker, and dashboard.
+        </p>
+
+        <p>
+          The replacement is slower. It catches failures the old test could not
+          see.
+        </p>
+      </section>
+    </article>
+  </section>
+
+  <section
+    id="contact"
+    class="signature-band"
+    aria-labelledby="contact-heading"
+  >
+    <h2 id="contact-heading">Contact</h2>
+
+    <p>If you want to discuss a role or project, email me.</p>
+
+    <ul class="link-list">
+      <li>
+        <a href="mailto:ahammednibras737@gmail.com">
+          ahammednibras737@gmail.com
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/ahammednibras8">GitHub</a>
+      </li>
+      <li>
+        <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
+      </li>
+    </ul>
+  </section>
+</DocumentLayout>
