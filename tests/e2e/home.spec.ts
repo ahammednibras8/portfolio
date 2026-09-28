@@ -21,10 +21,12 @@ test("the homepage explains the work in document order", async ({ page }) => {
     page.getByRole("heading", { level: 3, name: "Cascade" }),
   ).toBeVisible();
   await expect(
-    page.getByText("Most of my professional work is private."),
+    page.getByText("Most of my work for employers cannot be shown publicly."),
   ).toBeVisible();
   await expect(
-    page.getByText("AI is a major part of my daily development process."),
+    page.getByText(
+      "I use AI every day for research, code, tests, debugging, and drafts.",
+    ),
   ).toBeVisible();
 });
 
