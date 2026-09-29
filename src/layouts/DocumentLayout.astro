@@ -7,6 +7,9 @@ import "../styles/global.css";
 interface SocialImage {
   url: URL;
   alt: string;
+  type: "image/png" | "image/jpeg" | "image/webp";
+  width: number;
+  height: number;
 }
 
 interface Props {
@@ -29,6 +32,8 @@ const sectionHref = (id: string) =>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
+    <meta name="author" content="Ahammed Nibras" />
+    <meta name="theme-color" content="#f3f1ed" />
     <meta name="viewport" content="width=device-width" />
 
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
@@ -48,8 +53,15 @@ const sectionHref = (id: string) =>
 
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
 
-    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
-    {socialImage && <meta property="og:image:alt" content={socialImage.alt} />}
+    {socialImage && (
+      <>
+        <meta property="og:image" content={socialImageUrl} />
+        <meta property="og:image:type" content={socialImage.type} />
+        <meta property="og:image:width" content={String(socialImage.width)} />
+        <meta property="og:image:height" content={String(socialImage.height)} />
+        <meta property="og:image:alt" content={socialImage.alt} />
+      </>
+    )}
 
     <meta
       name="twitter:card"
