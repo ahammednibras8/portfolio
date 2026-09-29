@@ -5,9 +5,21 @@ const title = "Ahammed Nibras — Software engineer";
 const description =
   "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
 const canonical = new URL("/", Astro.site ?? Astro.url);
+const socialImage = {
+  url: new URL("/social/home.png", Astro.site ?? Astro.url),
+  alt: "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.",
+  type: "image/png",
+  width: 1200,
+  height: 630,
+} as const;
 ---
 
-<DocumentLayout title={title} description={description} canonical={canonical}>
+<DocumentLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  socialImage={socialImage}
+>
   <section
     class="introduction signature-band"
     aria-labelledby="introduction-heading"

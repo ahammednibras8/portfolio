@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 const homepageTitle = "Ahammed Nibras — Software engineer";
 const homepageDescription =
   "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
+const homepageSocialImageAlt =
+  "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.";
 
 test("the homepage explains the work in document order", async ({ page }) => {
   await page.goto("/");
@@ -47,6 +49,14 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
     "content",
     homepageDescription,
   );
+  await expect(page.locator('meta[name="author"]')).toHaveAttribute(
+    "content",
+    "Ahammed Nibras",
+  );
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+    "content",
+    "#f3f1ed",
+  );
 
   const canonicalLink = page.locator('link[rel="canonical"]');
   await expect(canonicalLink).toHaveCount(1);
@@ -83,9 +93,35 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
     canonical.href,
   );
 
+  const socialImageContent = await page
+    .locator('meta[property="og:image"]')
+    .getAttribute("content");
+  if (!socialImageContent) {
+    throw new Error("Expected the homepage to publish a social image URL.");
+  }
+
+  const socialImageUrl = new URL(socialImageContent);
+  expect(socialImageUrl.protocol).toBe("https:");
+  expect(socialImageUrl.pathname).toBe("/social/home.png");
+  await expect(page.locator('meta[property="og:image:type"]')).toHaveAttribute(
+    "content",
+    "image/png",
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    "content",
+    "1200",
+  );
+  await expect(
+    page.locator('meta[property="og:image:height"]'),
+  ).toHaveAttribute("content", "630");
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+    "content",
+    homepageSocialImageAlt,
+  );
+
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
-    "summary",
+    "summary_large_image",
   );
   await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
     "content",
@@ -94,6 +130,22 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   await expect(
     page.locator('meta[name="twitter:description"]'),
   ).toHaveAttribute("content", homepageDescription);
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    socialImageUrl.href,
+  );
+  await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute(
+    "content",
+    homepageSocialImageAlt,
+  );
+
+  const socialImageResponse = await request.get("/social/home.png");
+  expect(socialImageResponse.ok()).toBe(true);
+  expect(socialImageResponse.headers()["content-type"]).toContain("image/png");
+
+  const socialImageBody = await socialImageResponse.body();
+  expect(socialImageBody.readUInt32BE(16)).toBe(1200);
+  expect(socialImageBody.readUInt32BE(20)).toBe(630);
 
   const icons = page.locator('link[rel="icon"]');
 
