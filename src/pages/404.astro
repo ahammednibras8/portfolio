@@ -1,0 +1,56 @@
+---
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+
+const title = "Page not found — Ahammed Nibras";
+const description =
+  "The requested page could not be found. Continue to Ahammed Nibras’s work or contact details.";
+---
+
+<DocumentLayout title={title} description={description}>
+  <section class="not-found-introduction" aria-labelledby="not-found-heading">
+    <p class="not-found-status" aria-hidden="true">
+      404
+    </p>
+
+    <div class="not-found-message">
+      <h1 id="not-found-heading">
+        I haven’t published a page at this address.
+      </h1>
+
+      <p>
+        The link may be old, or the address may be wrong. Choose another route
+        below.
+      </p>
+    </div>
+  </section>
+
+  <section class="not-found-recovery" aria-labelledby="recovery-heading">
+    <h2 id="recovery-heading">Where to go next</h2>
+
+    <nav aria-label="Page recovery">
+      <ul class="recovery-list">
+        <li>
+          <a class="recovery-link" href="/">
+            <span class="recovery-label">Overview</span>
+            <strong>Homepage</strong>
+            <span>A short introduction to what I build.</span>
+          </a>
+        </li>
+        <li>
+          <a class="recovery-link" href="/#work">
+            <span class="recovery-label">Project</span>
+            <strong>Selected work</strong>
+            <span>Cascade, its constraints, and the evidence behind it.</span>
+          </a>
+        </li>
+        <li>
+          <a class="recovery-link" href="/#contact">
+            <span class="recovery-label">Contact</span>
+            <strong>Get in touch</strong>
+            <span>Email, GitHub, and LinkedIn.</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </section>
+</DocumentLayout>
