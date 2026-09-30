@@ -2,7 +2,9 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, not a finished portfolio. It currently contains one case study; visual refinement and production deployment are still in progress.
+Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, not a finished portfolio. It currently contains one case study and does not yet use a custom domain.
+
+Production: [ahammed-nibras.pages.dev](https://ahammed-nibras.pages.dev/)
 
 ## How the site works
 
@@ -11,10 +13,18 @@ Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, no
 - Important content and navigation work without JavaScript.
 - There is no application server, database, or client framework.
 - Images are optimized during the build.
-- The finished `dist/` folder can be hosted by any normal static host.
-- Cloudflare Pages is the planned host. Deployment automation has not been enabled yet.
+- GitHub Actions builds and tests the site after a change reaches `main`.
+- The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.
+- Cloudflare serves static files only. The site has no Pages Functions, Worker, database, or storage service.
 
-The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md) and [ADR 0002](docs/decisions/0002-personal-design-direction.md).
+The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), and [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md).
+
+## Deployment
+
+- Pull requests run the quality checks but do not create public preview deployments.
+- A push to `main` runs the full verification suite, then uploads that exact build to the `ahammed-nibras` Pages project.
+- Cloudflare keeps each successful production deployment. If a release is bad, select the previous production deployment in the Cloudflare dashboard and use **Rollback to this deployment**.
+- The current public address is the Cloudflare-provided `pages.dev` hostname. A custom domain can be added later without changing the build.
 
 ## Run it locally
 

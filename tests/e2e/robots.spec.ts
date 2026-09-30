@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("robots allows production crawling and advertises the generated sitemap", async ({
   request,
 }) => {
+  const siteUrl = process.env.SITE_URL ?? "https://example.com";
   const response = await request.get("/robots.txt");
 
   expect(response.ok()).toBe(true);
@@ -13,7 +14,7 @@ test("robots allows production crawling and advertises the generated sitemap", a
     [
       "User-agent: *",
       "Allow: /",
-      "Sitemap: https://example.com/sitemap-index.xml",
+      `Sitemap: ${new URL("/sitemap-index.xml", siteUrl).href}`,
       "",
     ].join("\n"),
   );

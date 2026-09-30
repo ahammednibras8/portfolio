@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  SITE_URL: ${{ vars.PRODUCTION_URL }}
+
+jobs:
+  deploy:
+    name: Verify and deploy production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          node-version-file: .node-version
+          cache: true
+          install: false
+
+      - name: Verify toolchain versions
+        run: |
+          test "$(node --version)" = "v24.21.0"
+          test "$(pnpm --version)" = "12.5.1"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Lychee 0.24.2
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --version
+          checkbox: false
+          fail: true
+          failIfEmpty: false
+          jobSummary: false
+          lycheeVersion: v0.24.2
+          output: .cache/lychee/setup.md
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Verify production artifact
+        run: pnpm run verify
+
+      - name: Deploy verified artifact
+        run: >-
+          pnpm exec wrangler pages deploy dist
+          --project-name ahammed-nibras
+          --branch main
+          --commit-hash "$GITHUB_SHA"
+          --commit-dirty=false
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test production
+        run: |
+          production_body="$RUNNER_TEMP/production-home.html"
+
+          curl --fail --silent --show-error --location \
+            --retry 5 \
+            --retry-delay 2 \
+            --retry-all-errors \
+            --output "$production_body" \
+            "$SITE_URL"
+
+          test -s "$production_body"
+          grep -Fq "<title>Ahammed Nibras — Software engineer</title>" "$production_body"
