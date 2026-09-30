@@ -964,7 +964,7 @@ test("the complete homepage remains available without JavaScript", async ({
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
 
-  await page.goto("http://127.0.0.1:4321/");
+  await page.goto("/");
 
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),

@@ -1,9 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const isCI = Boolean(process.env.CI);
-const baseURL = "http://127.0.0.1:4321";
-const previewCommand =
-  "pnpm run preview --host 127.0.0.1 --port 4321 --ignore-lock";
+const baseURL = "http://127.0.0.1:4322";
+const pagesCommand =
+  "pnpm exec wrangler pages dev dist --ip 127.0.0.1 --port 4322 --log-level error --show-interactive-dev-session false";
 const useExistingBuild = process.env.PLAYWRIGHT_USE_EXISTING_BUILD === "true";
 
 export default defineConfig({
@@ -41,13 +41,13 @@ export default defineConfig({
 
   webServer: {
     command: useExistingBuild
-      ? previewCommand
-      : `pnpm run build && ${previewCommand}`,
+      ? pagesCommand
+      : `pnpm run build && ${pagesCommand}`,
     url: baseURL,
     env: {
       SITE_URL: process.env.SITE_URL ?? "https://example.com",
     },
-    reuseExistingServer: !isCI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });
