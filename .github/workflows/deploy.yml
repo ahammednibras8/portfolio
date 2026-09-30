@@ -1,21 +1,23 @@
-name: CI
+name: Deploy
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: production-deploy
+  cancel-in-progress: false
 
 env:
-  SITE_URL: https://example.com
+  SITE_URL: ${{ vars.PRODUCTION_URL }}
 
 jobs:
-  verify:
-    name: Quality, build, and Chromium
+  deploy:
+    name: Verify and deploy production
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -52,17 +54,30 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run repository verification
+      - name: Verify production artifact
         run: pnpm run verify
 
-      - name: Upload test reports
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ci-reports
-          path: |
-            playwright-report/
-            test-results/
-            .lighthouseci/reports/
-          if-no-files-found: ignore
-          retention-days: 7
+      - name: Deploy verified artifact
+        run: >-
+          pnpm exec wrangler pages deploy dist
+          --project-name ahammed-nibras
+          --branch main
+          --commit-hash "$GITHUB_SHA"
+          --commit-dirty=false
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test production
+        run: |
+          production_body="$RUNNER_TEMP/production-home.html"
+
+          curl --fail --silent --show-error --location \
+            --retry 5 \
+            --retry-delay 2 \
+            --retry-all-errors \
+            --output "$production_body" \
+            "$SITE_URL"
+
+          test -s "$production_body"
+          grep -Fq "<title>Ahammed Nibras — Software engineer</title>" "$production_body"
