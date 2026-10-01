@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  SITE_URL: https://example.com
+  SITE_URL: ${{ vars.PRODUCTION_URL }}
 
 jobs:
   verify:
