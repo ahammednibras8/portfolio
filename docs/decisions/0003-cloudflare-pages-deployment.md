@@ -7,7 +7,7 @@
 
 Host the static site on Cloudflare Pages. Use Direct Upload from GitHub Actions instead of Cloudflare's Git integration.
 
-The production branch is `main`. GitHub Actions builds and verifies `dist/`, then uploads that same directory with the Wrangler version pinned in `package.json`.
+The production branch is `main`. GitHub Actions builds and verifies `dist/`, stores that exact directory as a short-lived workflow artifact, and then pauses for approval through the protected `production` environment. After approval, a separate job downloads and uploads the artifact with the Wrangler version pinned in `package.json`.
 
 ## Reason
 
@@ -26,7 +26,8 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - Only a push to `main` may deploy production.
 - The full repository verification must pass before upload.
 - The deployment step must upload the `dist/` directory produced by that verification run. It must not rebuild it.
-- Cloudflare credentials remain GitHub Actions secrets and are unavailable to pull-request jobs.
+- Cloudflare credentials belong to protected GitHub environments, not repository-level Actions secrets, and are unavailable to pull-request and verification jobs.
+- Production deployment requires manual approval during the feedback phase. The approver confirms that the verified commit is intended for release; approval does not replace automated verification.
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
 - Do not add Pages Functions, Workers, R2, another server, or another build pipeline under this decision.
 - Pull requests do not receive public preview deployments. If previews are added later, search engines must be told not to index them, and they must not receive production-only secrets.
@@ -34,9 +35,10 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 ## Where it is used
 
 - `.github/workflows/ci.yml` verifies pull requests without deployment credentials.
-- `.github/workflows/deploy.yml` verifies pushes to `main` and uploads the resulting `dist/` directory.
+- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `dist/` directory between jobs, waits for production approval, and uploads it.
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
-- `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` repository secrets authorize the upload.
+- The `production` environment limits deployment to `main`, requires approval, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job.
+- The `feedback` environment reserves the same deployment configuration for a future preview workflow; no preview deployment is currently exposed.
 - Cloudflare Pages project `ahammed-nibras` serves `https://ahammed-nibras.pages.dev/`.
 
 ## Recovery and rollback
