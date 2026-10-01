@@ -20,6 +20,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - [Cloudflare documents Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/) for prebuilt assets and external CI systems.
 - The first production upload served the generated homepage, sitemap, `robots.txt`, security headers, and authored 404 response from `ahammed-nibras.pages.dev`.
 - The live 404 response returned HTTP 404 with `Cache-Control: no-store`.
+- The apex custom domain `ahammednibras.com` serves the Pages project over a valid Cloudflare-managed HTTPS certificate.
 
 ## Constraints
 
@@ -35,6 +36,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
 - Do not add Pages Functions, Workers, R2, another server, or another build pipeline under this decision.
 - Pull requests do not receive public preview deployments. Feedback previews are created only after a change reaches `main`, remain outside search indexes, and do not receive production-environment credentials.
+- The apex `https://ahammednibras.com` is canonical. `www` and the production `ahammed-nibras.pages.dev` hostname must redirect permanently while preserving paths and query strings. Hashed Pages preview URLs must remain reachable.
 
 ## Where it is used
 
@@ -43,7 +45,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
 - The `production` environment limits deployment to `main`, requires approval, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job.
 - The `feedback` environment is restricted to `main`, exposes deployment credentials only to the feedback job, and records the stable feedback alias as its deployment URL.
-- Cloudflare Pages project `ahammed-nibras` serves `https://ahammed-nibras.pages.dev/`.
+- Cloudflare Pages project `ahammed-nibras` serves the canonical `https://ahammednibras.com/` origin. Its `pages.dev` host remains the Pages service hostname and preview namespace.
 
 ## Recovery and rollback
 

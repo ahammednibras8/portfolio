@@ -2,9 +2,9 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, not a finished portfolio. It currently contains one case study and does not yet use a custom domain.
+Current version: `v0.1.0-rc.2`. It is ready for a controlled friends preview, not a finished portfolio. It currently contains one case study.
 
-Production: [ahammed-nibras.pages.dev](https://ahammed-nibras.pages.dev/)
+Production: [ahammednibras.com](https://ahammednibras.com/)
 
 ## How the site works
 
@@ -24,7 +24,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 - Pull requests run the quality checks but do not create public preview deployments.
 - A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. During the feedback phase, production approval is required before that artifact is uploaded to the `ahammed-nibras` Pages project.
 - Cloudflare keeps each successful production deployment. If a release is bad, select the previous production deployment in the Cloudflare dashboard and use **Rollback to this deployment**.
-- The current public address is the Cloudflare-provided `pages.dev` hostname. A custom domain can be added later without changing the build.
+- The canonical public address is `ahammednibras.com`. The Cloudflare-provided `pages.dev` hostname remains available until its production-host redirect is verified.
 
 ## Run it locally
 

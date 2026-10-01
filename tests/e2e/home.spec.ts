@@ -5,7 +5,7 @@ const homepageDescription =
   "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
 const homepageSocialImageAlt =
   "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.";
-const productionOrigin = "https://ahammed-nibras.pages.dev";
+const productionOrigin = "https://ahammednibras.com";
 
 test("the homepage explains the work in document order", async ({ page }) => {
   await page.goto("/");
