@@ -134,28 +134,23 @@ jobs:
             --environment preview \
             --json > "$deployments_file"
 
-          deployment="$(
+          short_sha="${GITHUB_SHA:0:7}"
+          deployment_url="$(
             jq -cer \
-              --arg sha "$GITHUB_SHA" \
+              --arg sha "$short_sha" \
               --arg branch "feedback" \
               "first(
                 .[]
                 | select(
-                    .deployment_trigger.metadata.commit_hash == \$sha
-                    and .deployment_trigger.metadata.branch == \$branch
+                    .Source == \$sha
+                    and .Branch == \$branch
+                    and .Environment == \"Preview\"
                   )
-              )" \
+              ) | .Deployment" \
               "$deployments_file"
           )"
 
-          deployment_url="$(jq -er '.url' <<< "$deployment")"
-          expected_feedback_url="https://feedback.${CLOUDFLARE_PAGES_PROJECT}.pages.dev"
-          feedback_url="$(
-            jq -er \
-              --arg expected "$expected_feedback_url" \
-              ".aliases[] | select(. == \$expected)" \
-              <<< "$deployment"
-          )"
+          feedback_url="https://feedback.${CLOUDFLARE_PAGES_PROJECT}.pages.dev"
 
           printf 'deployment_url=%s\n' "$deployment_url" >> "$GITHUB_OUTPUT"
           printf 'feedback_url=%s\n' "$feedback_url" >> "$GITHUB_OUTPUT"
