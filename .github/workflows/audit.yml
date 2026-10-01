@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SITE_URL: https://example.com
+  SITE_URL: ${{ vars.PRODUCTION_URL }}
   PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
 
 jobs:
