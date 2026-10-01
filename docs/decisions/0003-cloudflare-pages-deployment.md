@@ -7,7 +7,7 @@
 
 Host the static site on Cloudflare Pages. Use Direct Upload from GitHub Actions instead of Cloudflare's Git integration.
 
-The production branch is `main`. GitHub Actions builds and verifies `dist/`, stores that exact directory as a short-lived workflow artifact, and then pauses for approval through the protected `production` environment. After approval, a separate job downloads and uploads the artifact with the Wrangler version pinned in `package.json`.
+The production branch is `main`. GitHub Actions builds and verifies `dist/`, stores that exact directory as the SHA-qualified `portfolio-dist-<commit>` workflow artifact, and then pauses for approval through the protected `production` environment. After approval, a separate job downloads and uploads the artifact with the Wrangler version pinned in `package.json`.
 
 ## Reason
 
@@ -26,6 +26,8 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - Only a push to `main` may deploy production.
 - The full repository verification must pass before upload.
 - The deployment step must upload the `dist/` directory produced by that verification run. It must not rebuild it.
+- The deployable artifact contains only `dist/` and remains available for 14 days during the feedback period.
+- Playwright and Lighthouse output belongs in the separate `ci-reports-<commit>` artifact. Reports, caches, environment files, and credentials must never enter the deployable artifact.
 - Cloudflare credentials belong to protected GitHub environments, not repository-level Actions secrets, and are unavailable to pull-request and verification jobs.
 - Production deployment requires manual approval during the feedback phase. The approver confirms that the verified commit is intended for release; approval does not replace automated verification.
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
@@ -35,7 +37,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 ## Where it is used
 
 - `.github/workflows/ci.yml` verifies pull requests without deployment credentials.
-- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `dist/` directory between jobs, waits for production approval, and uploads it.
+- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, waits for production approval, and uploads the site artifact.
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
 - The `production` environment limits deployment to `main`, requires approval, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job.
 - The `feedback` environment reserves the same deployment configuration for a future preview workflow; no preview deployment is currently exposed.
