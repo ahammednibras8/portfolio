@@ -7,7 +7,7 @@
 
 Host the static site on Cloudflare Pages. Use Direct Upload from GitHub Actions instead of Cloudflare's Git integration.
 
-The production branch is `main`. GitHub Actions builds and verifies `dist/`, stores that exact directory as the SHA-qualified `portfolio-dist-<commit>` workflow artifact, and then pauses for approval through the protected `production` environment. After approval, a separate job downloads and uploads the artifact with the Wrangler version pinned in `package.json`.
+The production branch is `main`. GitHub Actions builds and verifies `dist/`, then stores that exact directory as the SHA-qualified `portfolio-dist-<commit>` workflow artifact. A separate job deploys the artifact to Cloudflare's `feedback` preview branch and verifies both its immutable deployment URL and stable feedback alias. Only then does the workflow pause for approval through the protected `production` environment. After approval, production receives the same artifact through the Wrangler version pinned in `package.json`.
 
 ## Reason
 
@@ -28,19 +28,21 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - The deployment step must upload the `dist/` directory produced by that verification run. It must not rebuild it.
 - The deployable artifact contains only `dist/` and remains available for 14 days during the feedback period.
 - Playwright and Lighthouse output belongs in the separate `ci-reports-<commit>` artifact. Reports, caches, environment files, and credentials must never enter the deployable artifact.
+- The feedback deployment must use Cloudflare's `feedback` preview branch and match the workflow commit SHA.
+- Both the immutable feedback URL and stable feedback alias must serve the built homepage with Cloudflare's `X-Robots-Tag: noindex` header before production can proceed.
 - Cloudflare credentials belong to protected GitHub environments, not repository-level Actions secrets, and are unavailable to pull-request and verification jobs.
 - Production deployment requires manual approval during the feedback phase. The approver confirms that the verified commit is intended for release; approval does not replace automated verification.
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
 - Do not add Pages Functions, Workers, R2, another server, or another build pipeline under this decision.
-- Pull requests do not receive public preview deployments. If previews are added later, search engines must be told not to index them, and they must not receive production-only secrets.
+- Pull requests do not receive public preview deployments. Feedback previews are created only after a change reaches `main`, remain outside search indexes, and do not receive production-environment credentials.
 
 ## Where it is used
 
 - `.github/workflows/ci.yml` verifies pull requests without deployment credentials.
-- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, waits for production approval, and uploads the site artifact.
+- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, deploys and verifies the feedback preview, waits for production approval, and uploads the same site artifact.
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
 - The `production` environment limits deployment to `main`, requires approval, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job.
-- The `feedback` environment reserves the same deployment configuration for a future preview workflow; no preview deployment is currently exposed.
+- The `feedback` environment is restricted to `main`, exposes deployment credentials only to the feedback job, and records the stable feedback alias as its deployment URL.
 - Cloudflare Pages project `ahammed-nibras` serves `https://ahammed-nibras.pages.dev/`.
 
 ## Recovery and rollback
