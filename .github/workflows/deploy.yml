@@ -16,8 +16,8 @@ env:
   SITE_URL: ${{ vars.PRODUCTION_URL }}
 
 jobs:
-  deploy:
-    name: Verify and deploy production
+  verify:
+    name: Verify production artifact
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -57,16 +57,65 @@ jobs:
       - name: Verify production artifact
         run: pnpm run verify
 
+      - name: Upload verified artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: production-dist-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    name: Deploy production
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          node-version-file: .node-version
+          cache: true
+          install: false
+
+      - name: Verify toolchain versions
+        run: |
+          test "$(node --version)" = "v24.21.0"
+          test "$(pnpm --version)" = "12.5.1"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download verified artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: production-dist-${{ github.sha }}
+          path: dist/
+
+      - name: Check verified artifact
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/_headers
+
       - name: Deploy verified artifact
         run: >-
           pnpm exec wrangler pages deploy dist
-          --project-name ahammed-nibras
+          --project-name "$CLOUDFLARE_PAGES_PROJECT"
           --branch main
           --commit-hash "$GITHUB_SHA"
           --commit-dirty=false
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
 
       - name: Smoke test production
         run: |
@@ -77,7 +126,9 @@ jobs:
             --retry-delay 2 \
             --retry-all-errors \
             --output "$production_body" \
-            "$SITE_URL"
+            "$PRODUCTION_URL"
 
           test -s "$production_body"
           grep -Fq "<title>Ahammed Nibras — Software engineer</title>" "$production_body"
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}

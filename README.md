@@ -22,7 +22,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 ## Deployment
 
 - Pull requests run the quality checks but do not create public preview deployments.
-- A push to `main` runs the full verification suite, then uploads that exact build to the `ahammed-nibras` Pages project.
+- A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. During the feedback phase, production approval is required before that artifact is uploaded to the `ahammed-nibras` Pages project.
 - Cloudflare keeps each successful production deployment. If a release is bad, select the previous production deployment in the Cloudflare dashboard and use **Rollback to this deployment**.
 - The current public address is the Cloudflare-provided `pages.dev` hostname. A custom domain can be added later without changing the build.
 
