@@ -23,8 +23,8 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 
 - Pull requests run the quality checks but do not create public preview deployments.
 - A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. During the feedback phase, production approval is required before that artifact is uploaded to the `ahammed-nibras` Pages project.
-- Cloudflare keeps each successful production deployment. If a release is bad, select the previous production deployment in the Cloudflare dashboard and use **Rollback to this deployment**.
-- The canonical public address is `ahammednibras.com`. The Cloudflare-provided `pages.dev` hostname remains available until its production-host redirect is verified.
+- Cloudflare keeps each successful production deployment. Follow the [production rollback runbook](docs/production-rollback.md) when a release must be reverted.
+- The canonical public address is `ahammednibras.com`. The production `pages.dev` hostname redirects to it while immutable preview deployments remain available.
 
 ## Run it locally
 
