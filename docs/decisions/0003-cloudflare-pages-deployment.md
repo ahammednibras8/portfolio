@@ -49,7 +49,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 
 ## Recovery and rollback
 
-Every successful production upload remains available as a Cloudflare Pages deployment. To recover from a bad release, open the project's deployment list, choose the last known-good production deployment, and select **Rollback to this deployment**. Cloudflare documents this process in its [rollback guide](https://developers.cloudflare.com/pages/configuration/rollbacks/).
+Every successful production upload remains available as a Cloudflare Pages deployment. Follow the [production rollback runbook](../production-rollback.md) to choose, promote, verify, and communicate a last known-good deployment. Cloudflare documents the underlying promotion in its [rollback guide](https://developers.cloudflare.com/pages/configuration/rollbacks/).
 
 After rollback, correct the repository and merge a new verified change. Do not make an unrecorded production-only edit to replace the repository state.
 
