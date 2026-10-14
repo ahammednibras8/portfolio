@@ -21,6 +21,7 @@ words:
   - crawlable
   - esbuild
   - fontsource
+  - GHSA
   - htmlvalidate
   - inspectable
   - lhci
