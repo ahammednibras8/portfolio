@@ -21,16 +21,22 @@ words:
   - crawlable
   - esbuild
   - fontsource
+  - Googlebot
   - htmlvalidate
   - inspectable
+  - itemprop
+  - itemscope
+  - itemtype
   - lhci
   - lighthouseci
   - lighthouserc
   - lycheeverse
+  - microdata
   - Nibras
   - nosniff
   - nums
   - Qwik
+  - recrawl
   - résumé
   - WCAG
   - workerd
