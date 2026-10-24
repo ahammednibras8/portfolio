@@ -359,6 +359,10 @@ article ul {
   text-decoration: none;
 }
 
+.primary-navigation a[aria-current="page"] {
+  text-decoration: underline;
+}
+
 .page a:visited,
 .site-footer a:visited {
   color: var(--color-action-visited);

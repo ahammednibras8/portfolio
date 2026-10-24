@@ -1,9 +1,9 @@
 ---
 import DocumentLayout from "../layouts/DocumentLayout.astro";
+import { profile } from "../data/profile";
 
-const title = "Ahammed Nibras — Software engineer";
-const description =
-  "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
+const title = `${profile.name} — ${profile.role}`;
+const description = profile.description;
 const canonical = new URL("/", Astro.site ?? Astro.url);
 const socialImage = {
   url: new URL("/social/home.png", Astro.site ?? Astro.url),
@@ -24,7 +24,20 @@ const socialImage = {
     class="introduction signature-band"
     aria-labelledby="introduction-heading"
   >
-    <h1 id="introduction-heading">Hi, I’m Nibras.</h1>
+    <h1 id="introduction-heading">
+      Hi, I’m <span itemprop="name">{profile.name}</span>.
+    </h1>
+
+    <p>
+      <span itemprop="jobTitle">{profile.role}</span> ·{" "}
+      <span
+        itemprop="homeLocation"
+        itemscope
+        itemtype="https://schema.org/Place"
+      >
+        <span itemprop="name">{profile.location}</span>
+      </span>
+    </p>
 
     <p>I build AI products and the backend systems they depend on.</p>
 
@@ -176,17 +189,26 @@ const socialImage = {
 
     <p>If you want to discuss a role or project, email me.</p>
 
+    <p>
+      I use <span itemprop="alternateName">{profile.username}</span> on GitHub
+      and LinkedIn.
+    </p>
+
     <ul class="link-list">
       <li>
-        <a href="mailto:ahammednibras737@gmail.com">
-          ahammednibras737@gmail.com
+        <a itemprop="email" href={`mailto:${profile.email}`}>
+          {profile.email}
         </a>
       </li>
       <li>
-        <a href="https://github.com/ahammednibras8">GitHub</a>
+        <a itemprop="sameAs" href={profile.github}>
+          GitHub
+        </a>
       </li>
       <li>
-        <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
+        <a itemprop="sameAs" href={profile.linkedin}>
+          LinkedIn
+        </a>
       </li>
     </ul>
   </section>

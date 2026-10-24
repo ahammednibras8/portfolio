@@ -12,7 +12,7 @@ test("the homepage explains the work in document order", async ({ page }) => {
 
   await expect(page).toHaveTitle(homepageTitle);
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed Nibras." }),
   ).toBeVisible();
 
   await expect(page.locator("main > section > h2")).toHaveText([
@@ -189,12 +189,12 @@ test("the primary navigation points to real homepage sections", async ({
   const navigation = page.getByRole("navigation", { name: "Primary" });
   const links = navigation.getByRole("link");
 
-  await expect(links).toHaveCount(3);
+  await expect(links).toHaveCount(4);
   expect(
     await links.evaluateAll((items) =>
       items.map((item) => item.getAttribute("href")),
     ),
-  ).toEqual(["#work", "#evidence", "#contact"]);
+  ).toEqual(["#work", "#evidence", "#contact", "/about/"]);
 
   await navigation.getByRole("link", { name: "Work", exact: true }).click();
   await expect(page).toHaveURL(/#work$/);
@@ -229,7 +229,7 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
     }),
   );
 
-  expect(linkBounds).toHaveLength(3);
+  expect(linkBounds).toHaveLength(4);
   expect(new Set(linkBounds.map(({ top }) => top)).size).toBe(1);
 
   for (const bounds of linkBounds) {
@@ -289,6 +289,9 @@ test("the vertical slice exposes one artifact and a complete keyboard path", asy
     page
       .getByRole("navigation", { name: "Primary" })
       .getByRole("link", { name: "Contact", exact: true }),
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "About", exact: true }),
     page.getByRole("link", { name: "Read the source documentation" }),
     page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
     page.getByRole("link", { name: "GitHub" }),
@@ -969,7 +972,7 @@ test("the complete homepage remains available without JavaScript", async ({
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
+    page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed Nibras." }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Cascade" }),

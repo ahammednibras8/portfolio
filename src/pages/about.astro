@@ -1,0 +1,80 @@
+---
+import { profile } from "../data/profile";
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+
+const title = `About ${profile.name} — ${profile.role}`;
+const canonical = new URL("/about/", Astro.site ?? Astro.url);
+---
+
+<DocumentLayout
+  title={title}
+  description={profile.description}
+  canonical={canonical}
+  pageType="ProfilePage"
+>
+  <section class="introduction signature-band" aria-labelledby="about-heading">
+    <h1 id="about-heading">
+      About <span itemprop="name">{profile.name}</span>
+    </h1>
+
+    <p>
+      <span itemprop="jobTitle">{profile.role}</span> ·{" "}
+      <span
+        itemprop="homeLocation"
+        itemscope
+        itemtype="https://schema.org/Place"
+      >
+        <span itemprop="name">{profile.location}</span>
+      </span>
+    </p>
+
+    <p>I build AI products and the backend systems they depend on.</p>
+  </section>
+
+  <section aria-labelledby="approach-heading">
+    <h2 id="approach-heading">How I work</h2>
+
+    <p>
+      My work often starts with an action on a screen. I follow it through the
+      API, database, queue, and worker, then back to the result or failure the
+      user sees.
+    </p>
+
+    <p>
+      Most of my work for employers cannot be shown publicly. Cascade is the
+      project I can open up, from its database schema to the browser test that
+      runs a real task.
+    </p>
+
+    <p>
+      <a href="/#work">Read the Cascade case study</a>
+    </p>
+  </section>
+
+  <section id="profile-links" aria-labelledby="profiles-heading">
+    <h2 id="profiles-heading">Public profiles</h2>
+
+    <p>
+      I use <span itemprop="alternateName">{profile.username}</span> on GitHub
+      and LinkedIn.
+    </p>
+
+    <ul class="link-list">
+      <li>
+        <a itemprop="sameAs" href={profile.github}>
+          GitHub
+        </a>
+      </li>
+      <li>
+        <a itemprop="sameAs" href={profile.linkedin}>
+          LinkedIn
+        </a>
+      </li>
+      <li>
+        <a itemprop="email" href={`mailto:${profile.email}`}>
+          {profile.email}
+        </a>
+      </li>
+    </ul>
+  </section>
+</DocumentLayout>
