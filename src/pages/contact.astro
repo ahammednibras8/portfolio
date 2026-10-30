@@ -8,27 +8,57 @@ const canonical = new URL("/contact/", Astro.site ?? Astro.url);
 ---
 
 <DocumentLayout title={title} description={description} canonical={canonical}>
-  <section class="introduction signature-band" aria-labelledby="page-heading">
+  <section
+    class="introduction signature-band exhibit-hero exhibit-hero-compact"
+    aria-labelledby="page-heading"
+  >
     <h1 id="page-heading">Contact</h1>
 
-    <p>If you want to discuss a role or project, email me.</p>
+    <div class="route-placard">
+      <p>If you want to discuss a role or project, email me.</p>
+    </div>
   </section>
 
-  <section aria-labelledby="contact-options-heading">
-    <h2 id="contact-options-heading">Where to reach me</h2>
+  <section
+    class="gallery-wall contact-wall"
+    aria-labelledby="contact-options-heading"
+  >
+    <header class="routes-introduction">
+      <h2 id="contact-options-heading">Where to reach me</h2>
+    </header>
 
-    <ul class="link-list">
-      <li>
-        <a href="mailto:ahammednibras737@gmail.com">
-          ahammednibras737@gmail.com
-        </a>
-      </li>
-      <li>
-        <a href="https://github.com/ahammednibras8">GitHub</a>
-      </li>
-      <li>
-        <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
-      </li>
-    </ul>
+    <nav aria-label="Contact options">
+      <ul class="route-list">
+        <li>
+          <a
+            class="route-link route-link-lead"
+            href="mailto:ahammednibras737@gmail.com"
+          >
+            <h3>Email</h3>
+            <div class="route-placard">
+              <span class="route-action">ahammednibras737@gmail.com</span>
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a class="route-link" href="https://github.com/ahammednibras8">
+            <h3>GitHub</h3>
+            <div class="route-placard">
+              <span class="route-action">github.com/ahammednibras8</span>
+            </div>
+          </a>
+        </li>
+
+        <li>
+          <a class="route-link" href="https://linkedin.com/in/ahammednibras8">
+            <h3>LinkedIn</h3>
+            <div class="route-placard">
+              <span class="route-action">linkedin.com/in/ahammednibras8</span>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </nav>
   </section>
 </DocumentLayout>

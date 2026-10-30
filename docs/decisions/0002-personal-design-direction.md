@@ -69,7 +69,9 @@ A 2024 study of short-story writing found that access to generative AI ideas imp
 
 The homepage presents its three routes as a gallery wall: white plates between dark-red rules, large titles, open space, and small museum-style labels. Nibras chose this on 2026-10-30 from three mockups (poster, single line, and gallery wall) because it looked clean and felt closer to art.
 
-The plates replace the numbered vertical connector on the homepage. The red-ruled band moves from the homepage introduction to the plates so it does not repeat. Each plate must lead to a real route, and every plate keeps its full title, description, and action in the built HTML. The plates are not a universal card. The introduction band on other pages does not change.
+The plates replace the numbered vertical connector on the homepage. Nibras extended the style to the Cascade, architecture, and contact routes on the same day. Each route opens with its title as an exhibit, with its introduction on a small placard. The homepage introduction stays on the canvas so the red-ruled band marks the plates and exhibits. Each plate must lead to a real destination and keep its full content in the built HTML. The plates are not a universal card.
+
+Two motions explain the path between routes, and both use CSS only. A route title carries into the page it opens through a cross-document view transition, and the placard rule draws on hover and keyboard focus. Reduced-motion visitors keep the same states without the movement.
 
 Art on the site comes from typography, space, and composition. Do not add AI-generated artwork to fill a plate. Reconsider the gallery wall when the homepage needs more routes than the plates can hold, or when human review shows the plates hide what Nibras does.
 

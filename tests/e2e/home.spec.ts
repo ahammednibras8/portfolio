@@ -401,6 +401,16 @@ test("route links preserve pointer, keyboard, reduced-motion, and forced-color s
     "underline",
   );
 
+  const placardRule = () =>
+    route
+      .locator(".route-placard")
+      .evaluate((placard) => getComputedStyle(placard, "::before").transform);
+
+  await expect.poll(placardRule).toBe("none");
+
+  await page.mouse.move(0, 0);
+  await expect.poll(placardRule).toBe("matrix(1, 0, 0, 0, 0, 0)");
+
   await route.focus();
   await expect(route).toHaveCSS("outline-style", "solid");
   await expect(route).toHaveCSS("outline-color", "rgb(0, 122, 115)");
@@ -481,6 +491,69 @@ test("Cascade gives its case study and lifecycle room on desktop", async ({
   await expect(page.locator(".run-path figcaption")).toContainText(
     "runtime path. Read the source documentation",
   );
+});
+
+test("route titles carry into their pages unless motion is reduced", async ({
+  page,
+}) => {
+  const transitionName = (name: string, level: number) =>
+    page
+      .getByRole("heading", { name, level, exact: true })
+      .evaluate((title) => getComputedStyle(title).viewTransitionName);
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  expect(await transitionName("Cascade", 3)).toBe("cascade-title");
+  expect(await transitionName("How this site runs", 3)).toBe(
+    "architecture-title",
+  );
+
+  await page.goto("/work/cascade/");
+  expect(await transitionName("Cascade", 1)).toBe("cascade-title");
+
+  await page.goto("/architecture/");
+  expect(await transitionName("How this site runs.", 1)).toBe(
+    "architecture-title",
+  );
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await transitionName("How this site runs.", 1)).toBe("none");
+});
+
+test("every route hangs its title as an exhibit", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  for (const route of ["/work/cascade/", "/architecture/", "/contact/"]) {
+    await page.goto(route);
+
+    const hero = await page.evaluate(() => {
+      const section = document.querySelector<HTMLElement>(".exhibit-hero");
+      const title = section?.querySelector("h1");
+      const placard = section?.querySelector(".route-placard");
+
+      if (!section || !title || !placard) {
+        throw new Error("Expected an exhibit hero with a title and placard.");
+      }
+
+      return {
+        height: section.getBoundingClientRect().height,
+        size: Number.parseFloat(getComputedStyle(title).fontSize),
+        titleAbovePlacard:
+          title.getBoundingClientRect().bottom <=
+          placard.getBoundingClientRect().top,
+      };
+    });
+
+    expect(hero.height).toBeGreaterThanOrEqual(
+      route === "/contact/" ? 280 : 540,
+    );
+    expect(hero.size).toBe(160);
+    expect(hero.titleAbovePlacard).toBe(true);
+  }
+
+  await expect(
+    page.getByRole("navigation", { name: "Contact options" }).getByRole("link"),
+  ).toHaveCount(3);
 });
 
 test("the infrastructure and contact routes expose their real content", async ({

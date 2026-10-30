@@ -8,13 +8,21 @@ const canonical = new URL("/work/cascade/", Astro.site ?? Astro.url);
 ---
 
 <DocumentLayout title={title} description={description} canonical={canonical}>
-  <section class="introduction signature-band" aria-labelledby="page-heading">
-    <h1 id="page-heading">Cascade</h1>
+  <section
+    class="introduction signature-band exhibit-hero"
+    aria-labelledby="page-heading"
+  >
+    <h1 id="page-heading" class="title-cascade">
+      Cascade
+    </h1>
 
-    <p>
-      Cascade runs background tasks and keeps a durable record of each run. I
-      started the project and maintain it.
-    </p>
+    <div class="route-placard">
+      <span class="route-label">Project</span>
+      <p>
+        Cascade runs background tasks and keeps a durable record of each run. I
+        started the project and maintain it.
+      </p>
+    </div>
   </section>
 
   <section id="work" aria-labelledby="case-study-heading">
