@@ -25,6 +25,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 - A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. After the feedback deployment passes its smoke test, production requires manual approval before that same artifact is uploaded to the `ahammed-nibras` Pages project.
 - Cloudflare keeps each successful production deployment. Follow the [production rollback runbook](docs/production-rollback.md) when a release must be reverted.
 - The canonical public address is `ahammednibras.com`. The production `pages.dev` hostname redirects to it while immutable preview deployments remain available.
+- To publish the beta preview at `beta.ahammednibras.com`, use the `beta` Pages branch. Its custom hostname points to `beta.ahammed-nibras.pages.dev` through proxied Cloudflare DNS. It keeps the production canonical URL and sends `X-Robots-Tag: noindex`. See [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md) for the upload and domain setup.
 
 ## Run it locally
 

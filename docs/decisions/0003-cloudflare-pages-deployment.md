@@ -47,6 +47,24 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - The `feedback` environment is restricted to `main`, exposes deployment credentials only to the feedback job, and records the stable feedback alias as its deployment URL.
 - Cloudflare Pages project `ahammed-nibras` serves the canonical `https://ahammednibras.com/` origin. Its `pages.dev` host remains the Pages service hostname and preview namespace.
 
+## Beta preview
+
+Nibras requested the current portfolio design at `beta.ahammednibras.com` on 2026-10-31. This is an explicitly requested preview of the design branch, separate from the `main` production release flow.
+
+Use the same Pages project and the repository-pinned Wrangler CLI. Run the full verification with `SITE_URL=https://ahammednibras.com`, then upload its `dist/` artifact to the Pages `beta` branch. Do not rebuild between verification and upload:
+
+```sh
+pnpm exec wrangler pages deploy dist \
+  --project-name ahammed-nibras \
+  --branch beta \
+  --commit-hash "$(git rev-parse HEAD)" \
+  --commit-dirty=false
+```
+
+Register `beta.ahammednibras.com` as a custom domain on the Pages project, then set its proxied CNAME target to `beta.ahammed-nibras.pages.dev`. Cloudflare requires a proxied DNS record to route a custom hostname to a preview branch; a record without the proxy serves the production branch instead. Follow [Cloudflare's custom branch alias instructions](https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/).
+
+The beta hostname keeps the production canonical URL and explicitly sends `X-Robots-Tag: noindex` through its hostname-specific rule in `public/_headers`. Verify the beta hostname over HTTPS, check that it serves the intended commit's content and assets, and confirm the noindex header. The beta upload does not promote a deployment or change the production branch. No additional hosting service, runtime, or automatic deployment workflow is introduced.
+
 ## Recovery and rollback
 
 Every successful production upload remains available as a Cloudflare Pages deployment. Follow the [production rollback runbook](../production-rollback.md) to choose, promote, verify, and communicate a last known-good deployment. Cloudflare documents the underlying promotion in its [rollback guide](https://developers.cloudflare.com/pages/configuration/rollbacks/).
