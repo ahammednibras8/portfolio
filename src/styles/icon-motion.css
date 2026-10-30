@@ -1,13 +1,14 @@
-/* Each Lucide icon keeps its original paths and has its own hover gesture. */
+/* Keep Lucide geometry unchanged. Move the detail that explains each icon. */
 
 @media screen and (hover: hover) and (prefers-reduced-motion: no-preference) {
   :where(.page .lucide) {
     overflow: visible;
-    transform-box: fill-box;
-    transform-origin: center;
   }
 
-  /* Also respond to the containing link, label, or lifecycle step. */
+  :where(.page .lucide > *) {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
 
   .page
     :where(
@@ -21,191 +22,263 @@
       .architecture-recovery:hover,
       .architecture-recovery:focus-within
     )
-    .lucide:not(.lucide-hand),
-  .page .lucide:not(.lucide-hand):hover {
-    animation: var(--icon-motion, none) var(--icon-duration, 750ms) ease-in-out
-      1;
+    .lucide
+    > *,
+  .page .lucide:hover > * {
+    animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
+      ease-in-out var(--icon-part-delay, 0ms) 1;
   }
 
-  .lucide-arrow-down {
-    --icon-motion: icon-arrow-down;
-    --icon-duration: 650ms;
+  .lucide-arrow-down > path {
+    --icon-part-motion: icon-direction;
+    --icon-y: 2px;
   }
 
-  .lucide-arrow-right {
-    --icon-motion: icon-arrow-right;
-    --icon-duration: 650ms;
+  .lucide-arrow-right > path {
+    --icon-part-motion: icon-direction;
+    --icon-x: 2px;
   }
 
-  .lucide-briefcase {
-    --icon-motion: icon-briefcase;
-    --icon-duration: 800ms;
+  /* Lift the handle, keeping its ends attached to the case. */
+  .lucide-briefcase > path {
+    --icon-part-motion: icon-handle;
+
+    transform-origin: 12px 20px;
   }
 
-  .lucide-circle-check {
-    --icon-motion: icon-check;
-    --icon-duration: 650ms;
+  .lucide-circle-check > path {
+    --icon-part-motion: icon-check-detail;
+    --icon-stroke-length: 16;
+
+    stroke-dasharray: var(--icon-stroke-length);
   }
 
-  .lucide-cloud-upload {
-    --icon-motion: icon-upload;
-    --icon-duration: 850ms;
+  /* The cloud stays still while only the two arrow strokes travel upward. */
+  .lucide-cloud-upload > path:where(:first-child),
+  .lucide-cloud-upload > path:where(:last-child) {
+    --icon-part-motion: icon-direction;
+    --icon-y: -2px;
   }
 
-  .lucide-code {
-    --icon-motion: icon-code;
-    --icon-duration: 700ms;
+  .lucide-code > path {
+    --icon-part-motion: icon-direction;
+    --icon-x: 1px;
   }
 
-  .lucide-cpu {
-    --icon-motion: icon-cpu;
-    --icon-duration: 750ms;
+  .lucide-code > path:where(:last-child) {
+    --icon-x: -1px;
   }
 
-  .lucide-database {
-    --icon-motion: icon-database;
-    --icon-duration: 800ms;
+  .lucide-cpu > rect:where(:last-child) {
+    --icon-part-motion: icon-core;
+
+    fill: currentcolor;
+    fill-opacity: 0;
   }
 
-  .lucide-eye {
-    --icon-motion: icon-eye;
-    --icon-duration: 850ms;
+  .lucide-database > path:where(:last-child) {
+    --icon-part-motion: icon-data-row;
   }
 
-  .lucide-git-branch {
-    --icon-motion: icon-branch;
-    --icon-duration: 800ms;
+  .lucide-eye > circle {
+    --icon-part-motion: icon-pupil;
   }
 
-  .lucide-globe {
-    --icon-motion: icon-globe;
-    --icon-duration: 950ms;
+  .lucide-git-branch > path {
+    --icon-part-motion: icon-branch-path;
   }
 
-  .lucide-layers {
-    --icon-motion: icon-layers;
-    --icon-duration: 850ms;
+  .lucide-git-branch > circle:where(:first-of-type) {
+    --icon-part-motion: icon-branch-node;
+    --icon-part-delay: 120ms;
+
+    transform-origin: 18px 6px;
   }
 
-  .lucide-layout-dashboard {
-    --icon-motion: icon-dashboard;
-    --icon-duration: 750ms;
+  /* Turn the meridian inside the fixed globe. */
+  .lucide-globe > path:where(:first-of-type) {
+    --icon-part-motion: icon-meridian;
+    --icon-part-duration: 800ms;
   }
 
-  .lucide-list-ordered {
-    --icon-motion: icon-list;
-    --icon-duration: 800ms;
+  .lucide-layers > path:where(:first-child) {
+    --icon-part-motion: icon-direction;
+    --icon-y: -1.5px;
   }
 
-  .lucide-mail {
-    --icon-motion: icon-mail;
-    --icon-duration: 850ms;
+  .lucide-layers > path:where(:last-child) {
+    --icon-part-motion: icon-direction;
+    --icon-y: 1.5px;
   }
 
-  .lucide-message-circle {
-    --icon-motion: icon-message;
-    --icon-duration: 750ms;
+  .lucide-layout-dashboard > rect {
+    --icon-part-motion: icon-panel;
+    --icon-part-duration: 460ms;
+
+    fill: currentcolor;
+    fill-opacity: 0;
   }
 
-  .lucide-package {
-    --icon-motion: icon-package;
-    --icon-duration: 850ms;
+  .lucide-layout-dashboard > rect:where(:nth-child(2)) {
+    --icon-part-delay: 60ms;
   }
 
-  .lucide-rocket {
-    --icon-motion: icon-rocket;
-    --icon-duration: 900ms;
-  }
-
-  .lucide-rotate-ccw {
-    --icon-motion: icon-recovery;
-    --icon-duration: 850ms;
-  }
-
-  .lucide-server {
-    --icon-motion: icon-server;
-    --icon-duration: 800ms;
-  }
-
-  .lucide-shield-check {
-    --icon-motion: icon-shield;
-    --icon-duration: 750ms;
-  }
-
-  .lucide-user-round {
-    --icon-motion: icon-user;
-    --icon-duration: 800ms;
-  }
-
-  /* Animate existing details, without changing the imported SVG paths. */
-  :where(.lucide-mail > path) {
-    transform-box: fill-box;
-    transform-origin: top center;
-  }
-
-  .lucide-layers > path:first-child {
-    --layer-direction: -1;
-  }
-
-  .lucide-layers > path:last-child {
-    --layer-direction: 1;
-  }
-
-  .lucide-list-ordered > path:nth-child(2) {
-    --icon-part-delay: 80ms;
-  }
-
-  .lucide-list-ordered > path:nth-child(3) {
-    --icon-part-delay: 160ms;
-  }
-
-  .lucide-server > line:last-child {
+  .lucide-layout-dashboard > rect:where(:nth-child(3)) {
     --icon-part-delay: 120ms;
   }
 
-  :is(.route-link:is(:hover, :focus-visible) .lucide-mail, .lucide-mail:hover)
-    > path {
-    animation: icon-mail-flap 850ms ease-in-out 1;
+  .lucide-layout-dashboard > rect:where(:nth-child(4)) {
+    --icon-part-delay: 180ms;
   }
 
-  :is(.sticker:hover .lucide-layers, .lucide-layers:hover) > path:first-child,
-  :is(.sticker:hover .lucide-layers, .lucide-layers:hover) > path:last-child {
-    animation: icon-layer-separate 850ms ease-in-out 1;
+  .lucide-list-ordered > path:where(:nth-child(-n + 3)) {
+    --icon-part-motion: icon-list-row;
+    --icon-part-duration: 460ms;
+
+    transform-origin: 11px 12px;
   }
 
-  :is(.run-path li:hover .lucide-list-ordered, .lucide-list-ordered:hover)
-    > path:nth-child(-n + 3) {
-    animation: icon-list-line 500ms ease-in-out var(--icon-part-delay, 0ms) 1
-      backwards;
+  .lucide-list-ordered > path:where(:nth-child(2)) {
+    --icon-part-delay: 80ms;
   }
 
-  :is(.sticker:hover .lucide-server, .lucide-server:hover) > line {
-    animation: icon-server-light 650ms ease-in-out var(--icon-part-delay, 0ms) 1;
+  .lucide-list-ordered > path:where(:nth-child(3)) {
+    --icon-part-delay: 160ms;
   }
 
-  @keyframes icon-arrow-down {
+  /* Fold the flap around its existing hinge, leaving the envelope fixed. */
+  .lucide-mail > path {
+    --icon-part-motion: icon-mail-flap;
+    --icon-part-duration: 720ms;
+
+    transform-origin: 12px 7px;
+  }
+
+  .lucide-message-circle-more > path:where(:not(:first-child)) {
+    --icon-part-motion: icon-typing-dot;
+    --icon-part-duration: 420ms;
+  }
+
+  .lucide-message-circle-more > path:where(:nth-child(3)) {
+    --icon-part-delay: 90ms;
+  }
+
+  .lucide-message-circle-more > path:where(:nth-child(4)) {
+    --icon-part-delay: 180ms;
+  }
+
+  /* Reveal the tape stroke across the lid; the box does not rotate. */
+  .lucide-package > path:where(:last-child) {
+    --icon-part-motion: icon-package-seal;
+    --icon-stroke-length: 11;
+
+    stroke-dasharray: var(--icon-stroke-length);
+  }
+
+  .lucide-rocket > path:where(:nth-child(2)) {
+    --icon-part-motion: icon-exhaust;
+    --icon-part-duration: 720ms;
+
+    transform-origin: 9px 15px;
+  }
+
+  .lucide-rotate-ccw > path {
+    --icon-part-motion: icon-undo;
+    --icon-part-duration: 720ms;
+  }
+
+  .lucide-server > line {
+    --icon-part-motion: icon-server-light;
+    --icon-part-duration: 440ms;
+  }
+
+  .lucide-server > line:where(:last-child) {
+    --icon-part-delay: 160ms;
+  }
+
+  .lucide-shield-check > path:where(:last-child) {
+    --icon-part-motion: icon-check-detail;
+    --icon-part-duration: 560ms;
+    --icon-stroke-length: 12;
+
+    stroke-dasharray: var(--icon-stroke-length);
+  }
+
+  .lucide-user-round > circle {
+    --icon-part-motion: icon-nod;
+  }
+
+  @keyframes icon-direction {
     0%,
     100% {
       translate: 0 0;
     }
 
-    45% {
-      translate: 0 3px;
+    45%,
+    60% {
+      translate: var(--icon-x, 0) var(--icon-y, 0);
+    }
+  }
+
+  @keyframes icon-handle {
+    0%,
+    100% {
+      scale: 1 1;
+    }
+
+    45%,
+    60% {
+      scale: 1 1.07;
+    }
+  }
+
+  @keyframes icon-check-detail {
+    0%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+
+    20% {
+      stroke-dashoffset: var(--icon-stroke-length);
     }
 
     70% {
-      translate: 0 -1px;
+      stroke-dashoffset: 0;
     }
   }
 
-  @keyframes icon-arrow-right {
+  @keyframes icon-core {
+    0%,
+    100% {
+      fill-opacity: 0;
+    }
+
+    35%,
+    65% {
+      fill-opacity: 0.24;
+    }
+  }
+
+  @keyframes icon-data-row {
     0%,
     100% {
       translate: 0 0;
     }
 
-    40% {
-      translate: 3px 0;
+    45%,
+    60% {
+      translate: 0 -1.5px;
+    }
+  }
+
+  @keyframes icon-pupil {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+
+    30% {
+      translate: 1.5px 0;
     }
 
     65% {
@@ -213,311 +286,58 @@
     }
   }
 
-  @keyframes icon-briefcase {
+  @keyframes icon-branch-path {
     0%,
     100% {
-      translate: 0 0;
-      rotate: 0deg;
+      stroke-opacity: 1;
     }
 
-    30% {
-      translate: 0 -3px;
-      rotate: -8deg;
-    }
-
-    60% {
-      translate: 0 -3px;
-      rotate: 5deg;
+    35% {
+      stroke-opacity: 0.45;
     }
   }
 
-  @keyframes icon-check {
+  @keyframes icon-branch-node {
     0%,
     100% {
       scale: 1;
-      rotate: 0deg;
     }
 
-    30% {
-      scale: 0.85;
-      rotate: -12deg;
-    }
-
-    65% {
+    45% {
       scale: 1.15;
-      rotate: 0deg;
     }
   }
 
-  @keyframes icon-upload {
-    0%,
-    100% {
-      translate: 0 0;
-    }
-
-    25% {
-      translate: 0 2px;
-    }
-
-    60% {
-      translate: 0 -4px;
-    }
-  }
-
-  @keyframes icon-code {
+  @keyframes icon-meridian {
     0%,
     100% {
       scale: 1 1;
     }
 
-    45%,
-    65% {
-      scale: 1.12 1;
+    50% {
+      scale: 0.3 1;
     }
   }
 
-  @keyframes icon-cpu {
+  @keyframes icon-panel {
     0%,
     100% {
-      scale: 1;
+      fill-opacity: 0;
     }
 
-    25%,
-    65% {
-      scale: 1.12;
-    }
-
-    45%,
-    80% {
-      scale: 0.96;
+    50% {
+      fill-opacity: 0.2;
     }
   }
 
-  @keyframes icon-database {
-    0%,
-    100% {
-      translate: 0 0;
-      scale: 1 1;
-    }
-
-    30% {
-      translate: 0 1px;
-      scale: 1.08 0.85;
-    }
-
-    65% {
-      translate: 0 -2px;
-      scale: 0.96 1.1;
-    }
-  }
-
-  @keyframes icon-eye {
-    0%,
-    25%,
-    65%,
-    100% {
-      scale: 1 1;
-    }
-
-    42% {
-      scale: 1 0.12;
-    }
-  }
-
-  @keyframes icon-branch {
-    0%,
-    100% {
-      rotate: 0deg;
-      scale: 1 1;
-    }
-
-    35% {
-      rotate: -8deg;
-      scale: 1.15 1;
-    }
-
-    65% {
-      rotate: 5deg;
-      scale: 1.05 1;
-    }
-  }
-
-  @keyframes icon-globe {
-    0% {
-      rotate: y 0turn;
-    }
-
-    100% {
-      rotate: y 1turn;
-    }
-  }
-
-  @keyframes icon-layers {
+  @keyframes icon-list-row {
     0%,
     100% {
       scale: 1 1;
     }
 
-    45%,
-    65% {
-      scale: 1 1.12;
-    }
-  }
-
-  @keyframes icon-dashboard {
-    0%,
-    100% {
-      rotate: 0deg;
-      scale: 1;
-    }
-
-    30% {
-      rotate: -4deg;
-      scale: 0.94;
-    }
-
-    65% {
-      rotate: 0deg;
-      scale: 1.08;
-    }
-  }
-
-  @keyframes icon-list {
-    0%,
-    100% {
-      translate: 0 0;
-    }
-
     35% {
-      translate: 2px 0;
-    }
-
-    65% {
-      translate: 0 0;
-    }
-  }
-
-  @keyframes icon-mail {
-    0%,
-    100% {
-      translate: 0 0;
-      rotate: 0deg;
-    }
-
-    40%,
-    65% {
-      translate: 0 -2px;
-      rotate: -4deg;
-    }
-  }
-
-  @keyframes icon-message {
-    0%,
-    100% {
-      scale: 1 1;
-    }
-
-    30% {
-      scale: 1.12 0.92;
-    }
-
-    60% {
-      scale: 0.96 1.12;
-    }
-  }
-
-  @keyframes icon-package {
-    0%,
-    100% {
-      rotate: y 0deg;
-    }
-
-    35% {
-      rotate: y -25deg;
-    }
-
-    65% {
-      rotate: y 20deg;
-    }
-  }
-
-  @keyframes icon-rocket {
-    0%,
-    100% {
-      translate: 0 0;
-      rotate: 0deg;
-    }
-
-    20% {
-      translate: -1px 1px;
-      rotate: -5deg;
-    }
-
-    55%,
-    70% {
-      translate: 4px -4px;
-      rotate: 5deg;
-    }
-  }
-
-  @keyframes icon-recovery {
-    0% {
-      rotate: 0turn;
-    }
-
-    100% {
-      rotate: -1turn;
-    }
-  }
-
-  @keyframes icon-server {
-    0%,
-    100% {
-      translate: 0 0;
-      scale: 1;
-    }
-
-    30% {
-      translate: 0 -1px;
-      scale: 1.04;
-    }
-
-    60% {
-      translate: 0 1px;
-      scale: 1;
-    }
-  }
-
-  @keyframes icon-shield {
-    0%,
-    100% {
-      scale: 1 1;
-    }
-
-    30% {
-      scale: 0.9 1.06;
-    }
-
-    60% {
-      scale: 1.12 0.96;
-    }
-  }
-
-  @keyframes icon-user {
-    0%,
-    100% {
-      rotate: 0deg;
-      translate: 0 0;
-    }
-
-    35% {
-      rotate: 8deg;
-      translate: 0 1px;
-    }
-
-    65% {
-      rotate: -3deg;
-      translate: 0 0;
+      scale: 0.65 1;
     }
   }
 
@@ -528,43 +348,92 @@
     }
 
     40%,
-    65% {
-      scale: 1 -0.45;
+    60% {
+      scale: 1 -0.4;
     }
   }
 
-  @keyframes icon-layer-separate {
+  @keyframes icon-typing-dot {
     0%,
     100% {
       translate: 0 0;
+      stroke-opacity: 1;
     }
 
-    45%,
-    65% {
-      translate: 0 calc(var(--layer-direction) * 1.5px);
+    45% {
+      translate: 0 -1px;
+      stroke-opacity: 0.5;
     }
   }
 
-  @keyframes icon-list-line {
+  @keyframes icon-package-seal {
     0%,
     100% {
-      translate: 0 0;
+      stroke-dashoffset: 0;
     }
 
-    40% {
-      translate: -2px 0;
+    25% {
+      stroke-dashoffset: var(--icon-stroke-length);
+    }
+
+    75% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes icon-exhaust {
+    0%,
+    100% {
+      scale: 1;
+      stroke-opacity: 1;
+    }
+
+    25% {
+      scale: 0.85;
+      stroke-opacity: 0.65;
+    }
+
+    50% {
+      scale: 1.12;
+      stroke-opacity: 1;
+    }
+
+    75% {
+      scale: 0.95;
+      stroke-opacity: 0.8;
+    }
+  }
+
+  @keyframes icon-undo {
+    0%,
+    100% {
+      rotate: 0deg;
+    }
+
+    50% {
+      rotate: -35deg;
     }
   }
 
   @keyframes icon-server-light {
     0%,
     100% {
-      opacity: 1;
+      stroke-opacity: 1;
     }
 
-    35%,
-    65% {
-      opacity: 0.25;
+    45% {
+      stroke-opacity: 0.3;
+    }
+  }
+
+  @keyframes icon-nod {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+
+    45% {
+      translate: 0 1px;
     }
   }
 }
