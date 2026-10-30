@@ -23,8 +23,8 @@ test("the built 404 artifact exists with meaningful recovery links", async ({
   const recovery = page.getByRole("navigation", { name: "Page recovery" });
 
   const homepage = recovery.locator('a[href="/"]');
-  const work = recovery.locator('a[href="/work/cascade/"]');
-  const contact = recovery.locator('a[href="/contact/"]');
+  const work = recovery.locator('a[href="/#work"]');
+  const contact = recovery.locator('a[href="/#contact"]');
 
   await expect(homepage.locator("strong")).toHaveText("Homepage");
   await expect(homepage.locator("span").last()).toHaveText(
@@ -63,7 +63,7 @@ test("unknown routes return the authored 404 with recovery paths", async ({
     await links.evaluateAll((items) =>
       items.map((item) => item.getAttribute("href")),
     ),
-  ).toEqual(["/", "/work/cascade/", "/contact/"]);
+  ).toEqual(["/", "/#work", "/#contact"]);
 });
 
 test("the 320px recovery path works without JavaScript", async ({

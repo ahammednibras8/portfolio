@@ -1,4 +1,31 @@
 ---
+import {
+  ArrowDown,
+  ArrowRight,
+  Briefcase,
+  CircleCheck,
+  CloudUpload,
+  Code,
+  Cpu,
+  Database,
+  Eye,
+  GitBranch,
+  Globe,
+  Hand,
+  Layers,
+  LayoutDashboard,
+  ListOrdered,
+  Mail,
+  MessageCircle,
+  Package,
+  Rocket,
+  RotateCcw,
+  Server,
+  ShieldCheck,
+  UserRound,
+} from "@lucide/astro";
+import { Image } from "astro:assets";
+import portrait from "../assets/portrait.jpg";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
 
 const title = "Ahammed Nibras — Software engineer";
@@ -7,11 +34,92 @@ const description =
 const canonical = new URL("/", Astro.site ?? Astro.url);
 const socialImage = {
   url: new URL("/social/home.png", Astro.site ?? Astro.url),
-  alt: "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.",
+  alt: "The portfolio homepage with the heading “Hi, I’m Nibras.”, the role Software engineer, and a framed portrait.",
   type: "image/png",
   width: 1200,
   height: 630,
 } as const;
+
+const buildPath = [
+  {
+    key: "source",
+    platform: "GitHub",
+    label: "Protected main",
+    detail: "A reviewed commit starts the workflow.",
+    relation: "starts",
+    href: "https://github.com/ahammednibras8/portfolio/commits/main",
+    Icon: GitBranch,
+  },
+  {
+    key: "verify",
+    platform: "GitHub Actions",
+    label: "Verify and build",
+    detail: "All checks run before one static build is kept.",
+    relation: "uploads once",
+    href: "https://github.com/ahammednibras8/portfolio/blob/main/.github/workflows/deploy.yml",
+    Icon: CircleCheck,
+  },
+  {
+    key: "artifact",
+    platform: "Workflow artifact",
+    label: "portfolio-dist-<SHA>",
+    detail: "The immutable build is retained for 14 days.",
+    relation: null,
+    href: "https://github.com/ahammednibras8/portfolio/actions/workflows/deploy.yml",
+    Icon: Package,
+  },
+];
+
+const feedbackPath = [
+  {
+    key: "feedback",
+    platform: "Cloudflare Pages",
+    label: "Feedback deploy",
+    detail: "Downloads and uploads the SHA-qualified artifact.",
+    relation: "checks both URLs",
+    href: "https://feedback.ahammed-nibras.pages.dev/",
+    Icon: CloudUpload,
+  },
+  {
+    key: "preview-checks",
+    platform: "Public checks",
+    label: "Preview verified",
+    detail: "The immutable URL and feedback alias must both respond.",
+    relation: "allows review",
+    href: "https://github.com/ahammednibras8/portfolio/blob/main/.github/workflows/deploy.yml",
+    Icon: Eye,
+  },
+  {
+    key: "approval",
+    platform: "GitHub environment",
+    label: "Production approval",
+    detail: "The protected production job waits at this gate.",
+    relation: null,
+    href: "https://github.com/ahammednibras8/portfolio/actions/workflows/deploy.yml",
+    Icon: ShieldCheck,
+  },
+];
+
+const productionPath = [
+  {
+    key: "production",
+    platform: "Cloudflare Pages",
+    label: "Production deploy",
+    detail: "Downloads the same artifact; it does not rebuild.",
+    relation: "smoke-tests",
+    href: "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+    Icon: CloudUpload,
+  },
+  {
+    key: "live",
+    platform: "Production",
+    label: "ahammednibras.com",
+    detail: "The canonical URL must respond after upload.",
+    relation: null,
+    href: "/",
+    Icon: Globe,
+  },
+];
 ---
 
 <DocumentLayout
@@ -20,77 +128,465 @@ const socialImage = {
   canonical={canonical}
   socialImage={socialImage}
 >
-  <section class="introduction" aria-labelledby="introduction-heading">
-    <h1 id="introduction-heading">Hi, I’m Nibras.</h1>
+  <section
+    class="introduction signature-band exhibit-hero exhibit-hero-portrait"
+    aria-labelledby="introduction-heading"
+  >
+    <h1 id="introduction-heading" class="title-sweep">
+      Hi, I’m Nibras.
+    </h1>
 
-    <p>I build AI products and the backend systems they depend on.</p>
+    <div class="hero-portrait">
+      <Image
+        src={portrait}
+        alt="Ahammed Nibras smiling in front of a carved stone wall."
+        widths={[280, 560]}
+        sizes="(width >= 72rem) 285px, (width >= 48rem) 30vw, min(55vw, 14rem)"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <span class="sticker sticker-wave" aria-hidden="true">
+        <Hand size={32} />
+      </span>
+    </div>
 
-    <p>
+    <div class="route-placard speech-bubble">
+      <span class="route-label">Software engineer</span>
+      <p>I build AI products and the backend systems they depend on.</p>
+      <div class="hero-actions">
+        <a class="hero-action" href="#work">
+          See my work
+          <ArrowDown class="action-arrow" size={16} aria-hidden="true" />
+        </a>
+        <a class="hero-contact" href="#contact">
+          Get in touch
+          <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+
+    <address class="print-contact">
+      <span>Ahammed Nibras · Kozhikode, Kerala, India</span>
+      <a href="mailto:ahammednibras737@gmail.com">ahammednibras737@gmail.com</a>
+      <a href="https://github.com/ahammednibras8">github.com/ahammednibras8</a>
+      <a href="https://linkedin.com/in/ahammednibras8">
+        linkedin.com/in/ahammednibras8
+      </a>
+    </address>
+  </section>
+
+  <section id="work" class="gallery-wall" aria-labelledby="work-heading">
+    <header class="routes-introduction">
+      <h2 id="work-heading" class="section-title">
+        <Rocket size={24} aria-hidden="true" />
+        Selected work
+      </h2>
+      <p>
+        Most of my work for employers cannot be shown publicly. Cascade is the
+        project I can open up, from its database schema to the browser test that
+        runs a real task.
+      </p>
+    </header>
+  </section>
+
+  <section
+    id="cascade"
+    class="introduction signature-band exhibit-hero"
+    aria-labelledby="cascade-heading"
+  >
+    <h2 id="cascade-heading">Cascade</h2>
+    <span class="sticker" aria-hidden="true">
+      <Layers size={40} />
+    </span>
+
+    <div class="route-placard speech-bubble">
+      <span class="route-label">Project</span>
+      <p>
+        Cascade runs background tasks and keeps a durable record of each run. I
+        started the project and maintain it.
+      </p>
+      <span class="project-stack">TypeScript · PostgreSQL · Redis</span>
+    </div>
+  </section>
+
+  <section class="case-study" aria-label="Cascade case study">
+    <article>
+      <header>
+        <h3>Background work that survives failure</h3>
+      </header>
+
+      <p>
+        A task starts in the TypeScript SDK, passes through the API and Redis
+        queue, runs in a worker, and appears in the dashboard with its output
+        and logs. It can be retried, scheduled, cancelled, or replayed.
+      </p>
+
+      <section aria-labelledby="cascade-context">
+        <h4 id="cascade-context">Why I built it</h4>
+        <p>
+          The project started with three questions: What happens if a worker
+          dies? What if the same request arrives twice? What if a deployment
+          changes while a task is still running? I built Cascade to answer them
+          in one system.
+        </p>
+      </section>
+
+      <section aria-labelledby="cascade-constraints">
+        <h4 id="cascade-constraints">What had to be true</h4>
+        <ul>
+          <li>A run could not disappear when a worker stopped.</li>
+          <li>Repeating a request could not create duplicate work.</li>
+          <li>One organization could never read another one’s data.</li>
+          <li>
+            The dashboard had to show stored system state, not temporary browser
+            state.
+          </li>
+          <li>Tests had to use the real SDK, API, queue, and worker path.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="cascade-decisions">
+        <h4 id="cascade-decisions">The important choices</h4>
+        <p>
+          PostgreSQL is the source of truth for runs and deployments. Redis
+          handles short-lived coordination such as queues, rate limits, and
+          concurrency. Large payloads can move to object storage. The dashboard
+          reads the same durable records used by the workers.
+        </p>
+      </section>
+
+      <section
+        id="evidence"
+        class="project-evidence signature-band"
+        aria-labelledby="cascade-evidence"
+      >
+        <h4 id="cascade-evidence">Run lifecycle</h4>
+
+        <figure class="run-path">
+          <ol aria-label="Cascade task run lifecycle">
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                01
+                <Code size={20} />
+              </span>
+              <strong>TypeScript SDK</strong>
+              <span>Sends a task trigger.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                02
+                <Database size={20} />
+              </span>
+              <strong>API + PostgreSQL</strong>
+              <span>Records a pending run before execution.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                03
+                <ListOrdered size={20} />
+              </span>
+              <strong>Redis</strong>
+              <span>Queues the run ID for a worker.</span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                04
+                <Cpu size={20} />
+              </span>
+              <strong>Worker</strong>
+              <span>
+                Claims the run and writes logs, heartbeats, and output.
+              </span>
+            </li>
+            <li>
+              <span class="run-path-step" aria-hidden="true">
+                05
+                <LayoutDashboard size={20} />
+              </span>
+              <strong>Dashboard</strong>
+              <span>Reloads the stored state for the user.</span>
+            </li>
+          </ol>
+
+          <figcaption>
+            Simplified from Cascade’s documented runtime path.{" "}
+            <a href="https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx">
+              Read the source documentation
+            </a>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section aria-labelledby="cascade-reflection">
+        <h4 id="cascade-reflection">What changed my approach</h4>
+        <p>
+          An early browser test created successful records directly in the
+          database. The screen passed even though that setup skipped the real
+          product. I replaced it with a test that starts from the SDK and
+          continues through the API, queue, worker, and dashboard.
+        </p>
+
+        <p>
+          The replacement is slower. It catches failures the old test could not
+          see.
+        </p>
+      </section>
+    </article>
+  </section>
+
+  <section
+    id="architecture"
+    class="introduction signature-band exhibit-hero"
+    aria-labelledby="architecture-heading"
+  >
+    <h2 id="architecture-heading">How this site runs.</h2>
+    <span class="sticker" aria-hidden="true">
+      <Server size={40} />
+    </span>
+
+    <div class="route-placard speech-bubble">
+      <span class="route-label">Infrastructure</span>
+      <p>
+        This portfolio is static HTML. GitHub Actions builds and tests it once,
+        then Cloudflare Pages serves the verified files.
+      </p>
+      <span class="project-stack">
+        Astro · GitHub Actions · Cloudflare Pages
+      </span>
+    </div>
+  </section>
+
+  <section class="architecture-system" aria-labelledby="deployment-heading">
+    <h3 id="deployment-heading">One artifact, two controlled paths</h3>
+
+    <figure
+      class="architecture-diagram"
+      aria-describedby="architecture-caption"
+    >
+      <ol class="architecture-build" aria-label="Build path">
+        {buildPath.map(({ Icon, ...node }) => (
+          <li class={`architecture-node architecture-node-${node.key}`}>
+            <a class="architecture-node-link" href={node.href}>
+              <Icon
+                class="architecture-node-icon"
+                size={32}
+                stroke-width={1.75}
+                aria-hidden="true"
+                focusable="false"
+              />
+
+              <span class="architecture-node-platform">{node.platform}</span>
+              <strong>{node.label}</strong>
+              <span class="architecture-node-detail">{node.detail}</span>
+            </a>
+
+            {node.relation && (
+              <span class="architecture-relation">{node.relation}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <p class="architecture-distribution">
+        <strong>Shared input</strong>
+        Both deployment jobs download the SHA-qualified artifact. Production
+        also waits for feedback and approval.
+      </p>
+
+      <div class="architecture-branches">
+        <section
+          class="architecture-branch architecture-branch-feedback"
+          aria-labelledby="feedback-path-heading"
+        >
+          <header>
+            <span class="architecture-branch-label">Feedback path</span>
+            <h3 id="feedback-path-heading">Deploy, then prove it</h3>
+          </header>
+
+          <ol class="architecture-path" aria-label="Feedback and approval path">
+            {feedbackPath.map(({ Icon, ...node }) => (
+              <li class={`architecture-node architecture-node-${node.key}`}>
+                <a class="architecture-node-link" href={node.href}>
+                  <Icon
+                    class="architecture-node-icon"
+                    size={32}
+                    stroke-width={1.75}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
+
+                  <span class="architecture-node-platform">
+                    {node.platform}
+                  </span>
+                  <strong>{node.label}</strong>
+                  <span class="architecture-node-detail">{node.detail}</span>
+                </a>
+
+                {node.relation && (
+                  <span class="architecture-relation">{node.relation}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <p class="architecture-gate">
+          <span class="architecture-gate-label">Required input</span>
+          <strong>Production approval unlocks this job.</strong>
+        </p>
+
+        <section
+          class="architecture-branch architecture-branch-production"
+          aria-labelledby="production-path-heading"
+        >
+          <header>
+            <span class="architecture-branch-label">Production path</span>
+            <h3 id="production-path-heading">Promote without rebuilding</h3>
+          </header>
+
+          <ol class="architecture-path" aria-label="Production deployment path">
+            {productionPath.map(({ Icon, ...node }) => (
+              <li class={`architecture-node architecture-node-${node.key}`}>
+                <a class="architecture-node-link" href={node.href}>
+                  <Icon
+                    class="architecture-node-icon"
+                    size={32}
+                    stroke-width={1.75}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
+
+                  <span class="architecture-node-platform">
+                    {node.platform}
+                  </span>
+                  <strong>{node.label}</strong>
+                  <span class="architecture-node-detail">{node.detail}</span>
+                </a>
+
+                {node.relation && (
+                  <span class="architecture-relation">{node.relation}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <div
+        class="architecture-recovery"
+        role="group"
+        aria-label="Manual recovery path"
+      >
+        <RotateCcw
+          size={24}
+          stroke-width={1.75}
+          aria-hidden="true"
+          focusable="false"
+        />
+        <span class="architecture-recovery-label">Separate recovery path</span>
+        <strong>Previous successful production</strong>
+        <span class="architecture-recovery-relation">
+          can manually replace the live deployment
+        </span>
+        <a href="https://developers.cloudflare.com/pages/configuration/rollbacks/">
+          Cloudflare rollback reference
+        </a>
+      </div>
+
+      <figcaption id="architecture-caption">
+        Solid connectors show workflow dependencies. The dashed recovery path is
+        manual. This diagram describes the system; it is not live deployment
+        status.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="about" aria-labelledby="about-heading">
+    <h2 id="about-heading" class="section-title">
+      <UserRound size={24} aria-hidden="true" />
+      About
+    </h2>
+
+    <p class="speech-bubble">
       My work often starts with an action on a screen. I follow it through the
       API, database, queue, and worker, then back to the result or failure the
       user sees.
     </p>
   </section>
 
-  <section id="routes" class="gallery-wall" aria-labelledby="routes-heading">
+  <section
+    id="contact"
+    class="gallery-wall gallery-wall-compact"
+    aria-labelledby="contact-heading"
+  >
     <header class="routes-introduction">
-      <span class="route-label">System index</span>
-      <h2 id="routes-heading">Follow the work</h2>
-      <p>
-        Move from the project, through the system behind this site, to a direct
-        way to get in touch.
-      </p>
+      <h2 id="contact-heading" class="section-title">
+        <MessageCircle size={24} aria-hidden="true" />
+        Contact
+      </h2>
+      <p>If you want to discuss a role or project, email me.</p>
     </header>
 
-    <nav aria-label="Portfolio routes">
+    <nav aria-label="Contact options">
       <ul class="route-list">
         <li>
-          <a class="route-link route-link-lead" href="/work/cascade/">
-            <h3 class="title-cascade">Cascade</h3>
+          <a class="route-link" href="mailto:ahammednibras737@gmail.com">
+            <h3>Email</h3>
+            <span class="sticker" aria-hidden="true">
+              <Mail size={24} />
+            </span>
             <div class="route-placard">
-              <span class="route-label">
-                <span aria-hidden="true">01 ·&nbsp;</span>
-                Project
+              <span class="route-action">
+                ahammednibras737@gmail.com
+                <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
               </span>
-              <p>
-                A background-task system designed around durable records,
-                retries, isolation, and recovery.
-              </p>
-              <span class="route-action">Read the case study</span>
             </div>
           </a>
         </li>
 
         <li>
-          <a class="route-link" href="/architecture/">
-            <h3 class="title-architecture">How this site runs</h3>
+          <a class="route-link" href="https://github.com/ahammednibras8">
+            <h3>GitHub</h3>
+            <span class="sticker" aria-hidden="true">
+              <GitBranch size={24} />
+            </span>
             <div class="route-placard">
-              <span class="route-label">
-                <span aria-hidden="true">02 ·&nbsp;</span>
-                Infrastructure
+              <span class="route-action">
+                View profile
+                <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
               </span>
-              <p>
-                The static build, verification pipeline, preview gate, and
-                Cloudflare deployment behind this portfolio.
-              </p>
-              <span class="route-action">Inspect the architecture</span>
             </div>
           </a>
         </li>
 
         <li>
-          <a class="route-link" href="/contact/">
-            <h3>Start a conversation</h3>
+          <a class="route-link" href="https://linkedin.com/in/ahammednibras8">
+            <h3>LinkedIn</h3>
+            <span class="sticker" aria-hidden="true">
+              <Briefcase size={24} />
+            </span>
             <div class="route-placard">
-              <span class="route-label">
-                <span aria-hidden="true">03 ·&nbsp;</span>
-                Contact
+              <span class="route-action">
+                View profile
+                <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
               </span>
-              <p>
-                Email, GitHub, and LinkedIn for roles, projects, or
-                collaboration.
-              </p>
-              <span class="route-action">Choose a contact path</span>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a
+            class="route-link"
+            href="https://discord.com/users/877244168009830481"
+          >
+            <h3>Discord</h3>
+            <span class="sticker" aria-hidden="true">
+              <MessageCircle size={24} />
+            </span>
+            <div class="route-placard">
+              <span class="route-action">
+                View profile
+                <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
+              </span>
             </div>
           </a>
         </li>

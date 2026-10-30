@@ -1,50 +1,100 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 const homepageTitle = "Ahammed Nibras — Software engineer";
 const homepageDescription =
   "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
 const homepageSocialImageAlt =
-  "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.";
+  "The portfolio homepage with the heading “Hi, I’m Nibras.”, the role Software engineer, and a framed portrait.";
 const productionOrigin = "https://ahammednibras.com";
-const navigationRoutes = ["/", "/work/cascade/", "/architecture/", "/contact/"];
+const primaryLinks = ["/", "/#work", "/#about", "/#contact"];
 
-test("the homepage is an index of real portfolio routes", async ({ page }) => {
+const underlineHidden = "inset(0px 100% 0px 0px)";
+const underlineDrawn = "inset(0px)";
+const underlineClip = (element: Locator) =>
+  element.evaluate((node) => getComputedStyle(node, "::after").clipPath);
+
+// Hover assertions need the pointer to stay put, so scrolling must settle first.
+const settleScrolling = (page: Page) =>
+  page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+  });
+
+test("the whole portfolio reads as one continuous page", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(homepageTitle);
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Nibras." }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 2, name: "Follow the work" }),
-  ).toBeVisible();
-
-  const routes = page.getByRole("navigation", { name: "Portfolio routes" });
-  const links = routes.getByRole("link");
-
-  await expect(links).toHaveCount(3);
   expect(
-    await links.evaluateAll((items) =>
-      items.map((item) => item.getAttribute("href")),
-    ),
-  ).toEqual(navigationRoutes.slice(1));
-  await expect(
-    routes.getByRole("heading", { level: 3, name: "Cascade" }),
-  ).toBeVisible();
-  await expect(
-    routes.getByRole("heading", { level: 3, name: "How this site runs" }),
-  ).toBeVisible();
-  await expect(
-    routes.getByRole("heading", { level: 3, name: "Start a conversation" }),
-  ).toBeVisible();
+    await page
+      .getByRole("heading", { level: 2 })
+      .evaluateAll((headings) =>
+        headings.map((heading) => heading.textContent?.trim()),
+      ),
+  ).toEqual([
+    "Selected work",
+    "Cascade",
+    "How this site runs.",
+    "About",
+    "Contact",
+  ]);
 
-  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "See my work" })).toHaveAttribute(
+    "href",
+    "#work",
+  );
   await expect(
-    page.getByRole("heading", { name: "Run lifecycle" }),
-  ).toHaveCount(0);
+    page.getByRole("link", { name: "Get in touch" }),
+  ).toHaveAttribute("href", "#contact");
+
+  await expect(page.locator('a[href^="/work"]')).toHaveCount(0);
+  await expect(page.locator('a[href^="/architecture"]')).toHaveCount(0);
+  await expect(page.locator('a[href="/contact/"]')).toHaveCount(0);
+  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByText("TypeScript · PostgreSQL · Redis")).toBeVisible();
   await expect(page.locator("footer")).toContainText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
+});
+
+test("the page runs from work through about to contact without clicks", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  const layout = await page.evaluate(() => {
+    const top = (selector: string) => {
+      const element = document.querySelector(selector);
+
+      if (!element) {
+        throw new Error(`Expected ${selector}.`);
+      }
+
+      return element.getBoundingClientRect().top;
+    };
+
+    return {
+      order: ["#work", "#cascade", "#architecture", "#about", "#contact"].map(
+        top,
+      ),
+      viewportHeight: window.innerHeight,
+      documentHeight: document.documentElement.scrollHeight,
+    };
+  });
+
+  expect(layout.order).toEqual([...layout.order].sort((a, b) => a - b));
+  expect(layout.documentHeight).toBeGreaterThan(layout.viewportHeight * 4);
+
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "About" })
+    .click();
+  await expect(page).toHaveURL(/#about$/);
+  await expect(
+    page.getByRole("heading", { level: 2, name: "About" }),
+  ).toBeInViewport();
 });
 
 test("the homepage publishes canonical, social, and favicon metadata", async ({
@@ -181,29 +231,445 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("the shared navigation points to real routes and marks the current page", async ({
+test("pop-outs answer hover and stay still while scrolling", async ({
   page,
 }) => {
-  for (const route of navigationRoutes) {
-    await page.goto(route);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
 
-    const navigation = page.getByRole("navigation", { name: "Primary" });
-    const links = navigation.getByRole("link");
+  const bubble = page.locator("#about .speech-bubble");
+  const label = page.locator("article > section > h4").first();
+  const read = (element: typeof bubble) =>
+    element.evaluate((node) => {
+      const style = getComputedStyle(node);
 
-    await expect(links).toHaveCount(4);
-    expect(
-      await links.evaluateAll((items) =>
-        items.map((item) => item.getAttribute("href")),
+      return { animation: style.animationName, scale: style.scale };
+    });
+
+  expect(await read(bubble)).toEqual({ animation: "none", scale: "none" });
+
+  await page.locator("#about").evaluate((section) => {
+    section.scrollIntoView({ block: "center" });
+  });
+  await page.mouse.move(0, 0);
+  expect(await read(bubble)).toEqual({ animation: "none", scale: "none" });
+
+  await bubble.hover();
+  await expect.poll(async () => (await read(bubble)).scale).toBe("1.05");
+
+  await label.hover();
+  await expect.poll(async () => (await read(label)).scale).toBe("1.05");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.mouse.move(0, 0);
+  await bubble.hover();
+  expect((await read(bubble)).scale).toBe("none");
+});
+
+test("every animation starts and ends cleanly", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  const keyframes = await page.evaluate(() =>
+    [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .flatMap((rule) =>
+        rule instanceof CSSMediaRule ? [...rule.cssRules] : [rule],
+      )
+      .filter((rule) => rule instanceof CSSKeyframesRule)
+      .map((rule) =>
+        [...(rule as CSSKeyframesRule).cssRules].flatMap((frame) =>
+          (frame as CSSKeyframeRule).keyText.split(", "),
+        ),
       ),
-    ).toEqual(navigationRoutes);
+  );
 
-    const current = navigation.locator('[aria-current="page"]');
-    await expect(current).toHaveCount(1);
-    await expect(current).toHaveAttribute("href", route);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      `${productionOrigin}${route}`,
+  expect(keyframes.length).toBeGreaterThan(0);
+
+  for (const stops of keyframes) {
+    expect(stops).toContain("0%");
+    expect(stops).toContain("100%");
+  }
+
+  const sticker = page.locator("#cascade .sticker");
+  const stickerStyle = (name: "animationName" | "rotate") =>
+    sticker.evaluate((element, key) => getComputedStyle(element)[key], name);
+
+  await sticker.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await sticker.hover();
+  await expect.poll(() => stickerStyle("rotate")).toBe("6deg");
+  expect(await stickerStyle("animationName")).toBe("none");
+
+  await page.mouse.move(0, 0);
+  await expect.poll(() => stickerStyle("rotate")).toBe("-6deg");
+
+  const plate = page
+    .getByRole("navigation", { name: "Contact options" })
+    .getByRole("link", { name: /Email/ });
+  const plateTiming = () =>
+    plate.evaluate((element) => {
+      const style = getComputedStyle(element);
+
+      return {
+        duration: style.transitionDuration,
+        property: style.transitionProperty,
+        timing: style.transitionTimingFunction,
+      };
+    });
+
+  const atRest = await plateTiming();
+
+  expect(atRest.property).toBe("translate, rotate, box-shadow");
+  expect(atRest.duration).toBe("0.36s, 0.36s, 0.18s");
+  expect(atRest.timing).toContain("cubic-bezier(0.2, 0, 0, 1)");
+
+  const title = plate.getByRole("heading", { name: "Email" });
+
+  expect(await underlineClip(title)).toBe(underlineHidden);
+
+  await plate.hover();
+  await expect.poll(() => underlineClip(title)).toBe(underlineDrawn);
+  expect((await plateTiming()).timing).toContain(
+    "cubic-bezier(0.34, 1.56, 0.64, 1)",
+  );
+
+  await page.mouse.move(0, 0);
+  await expect.poll(() => underlineClip(title)).toBe(underlineHidden);
+});
+
+test("printing gives a clean two-page document", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(browserName !== "chromium", "PDF output is Chromium-only.");
+
+  await page.goto("/");
+
+  const printContact = page.locator(".print-contact");
+
+  await expect(printContact).toBeHidden();
+
+  await page.emulateMedia({ media: "print" });
+
+  await expect(page.locator(".site-header")).toBeHidden();
+  await expect(page.locator(".site-footer")).toBeHidden();
+  await expect(page.locator("#contact")).toBeHidden();
+  await expect(page.locator(".hero-actions")).toBeHidden();
+  await expect(page.locator(".sticker").first()).toBeHidden();
+  await expect(page.locator(".hero-portrait")).toBeHidden();
+  await expect(printContact).toBeVisible();
+  await expect(printContact.getByRole("link")).toHaveCount(3);
+  await expect(
+    printContact.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+  ).toHaveAttribute("href", "mailto:ahammednibras737@gmail.com");
+  await expect(page.getByRole("article")).toBeVisible();
+  await expect(page.locator(".architecture-diagram")).toBeVisible();
+  await expect(page.locator("#about")).toBeVisible();
+  await expect(page.locator(".speech-bubble").first()).toHaveCSS(
+    "box-shadow",
+    "none",
+  );
+
+  const pdf = await page.pdf({ format: "A4", preferCSSPageSize: true });
+  const pages = pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? [];
+
+  expect(pages).toHaveLength(2);
+});
+
+test("the hero shows an optimized portrait in a cartoon frame", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  const frame = page.locator(".hero-portrait");
+  const portrait = frame.getByRole("img", {
+    name: "Ahammed Nibras smiling in front of a carved stone wall.",
+  });
+
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveAttribute("src", /^\/_astro\/.*\.webp$/);
+  await expect(portrait).toHaveCSS("border-top-width", "3px");
+  expect(
+    await portrait.evaluate((image: HTMLImageElement) => image.naturalWidth),
+  ).toBeGreaterThan(0);
+
+  const placement = () =>
+    page.evaluate(() => {
+      const box = (selector: string) => {
+        const element = document.querySelector(selector);
+
+        if (!element) {
+          throw new Error(`Expected ${selector}.`);
+        }
+
+        return element.getBoundingClientRect();
+      };
+      const image = box(".hero-portrait img");
+      const title = box("h1");
+      const bubble = box(".exhibit-hero-portrait .speech-bubble");
+
+      return {
+        besideBubble: bubble.right < image.left,
+        besideTitle: title.right <= image.left,
+        aboveTitle: image.bottom < title.top,
+      };
+    });
+
+  expect(await placement()).toMatchObject({
+    besideBubble: true,
+    besideTitle: true,
+  });
+
+  const rotate = () =>
+    frame.evaluate((element) => getComputedStyle(element).rotate);
+
+  expect(await rotate()).toBe("2deg");
+
+  await frame.hover();
+  await expect.poll(rotate).toBe("0deg");
+
+  await page.mouse.move(0, 0);
+  await expect.poll(rotate).toBe("2deg");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await placement()).toMatchObject({ aboveTitle: true });
+});
+
+test("the headline sweeps on load and hover and stays readable", async ({
+  browserName,
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+
+  const headline = page.getByRole("heading", { level: 1 });
+  const keyframes = await headline.evaluate((element) => {
+    const effect = element.getAnimations()[0]?.effect as KeyframeEffect;
+
+    return effect.getKeyframes().map((frame) => frame.backgroundPositionX);
+  });
+
+  // A falling position moves the band left to right across the text.
+  expect(keyframes).toEqual(["100%", "0%"]);
+
+  const style = () =>
+    headline.evaluate((element) => {
+      const computed = getComputedStyle(element);
+
+      return {
+        animation: computed.animationName,
+        clip: computed.backgroundClip,
+        color: computed.color,
+        position: computed.backgroundPositionX,
+      };
+    });
+  const ended = () =>
+    headline.evaluate((element) =>
+      element
+        .getAnimations()
+        .every(
+          (animation) =>
+            !(animation instanceof CSSAnimation) ||
+            animation.playState === "finished",
+        ),
     );
+
+  expect(await style()).toMatchObject({
+    animation: "title-sweep",
+    clip: "text",
+    color: "rgba(0, 0, 0, 0)",
+  });
+
+  await expect.poll(ended, { timeout: 4000 }).toBe(true);
+  expect((await style()).position).toBe("100%");
+
+  await headline.hover();
+  await expect
+    .poll(async () => (await style()).position, { timeout: 3000 })
+    .toBe("0%");
+
+  await page.mouse.move(0, 700);
+  await expect
+    .poll(async () => (await style()).position, { timeout: 3000 })
+    .toBe("100%");
+
+  const ordinaryText = {
+    animation: "none",
+    clip: "border-box",
+    color: "rgb(23, 25, 26)",
+  };
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await style()).toMatchObject(ordinaryText);
+
+  await page.emulateMedia({ reducedMotion: "no-preference", media: "print" });
+  expect(await style()).toMatchObject(ordinaryText);
+
+  test.skip(
+    browserName !== "chromium",
+    "Forced-colors emulation is Chromium-only.",
+  );
+  await page.emulateMedia({ media: "screen", forcedColors: "active" });
+  expect(await style()).toMatchObject({
+    animation: "none",
+    clip: "border-box",
+  });
+});
+
+test("hover underlines draw from the start and retract back to it", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  const link = page.getByRole("link", {
+    name: "Read the source documentation",
+  });
+  await link.scrollIntoViewIfNeeded();
+  const line = () =>
+    link.evaluate((element) => getComputedStyle(element).backgroundSize);
+  const rightInset = () =>
+    link.evaluate((element) => {
+      const clip = getComputedStyle(element, "::after").clipPath;
+
+      return Number.parseFloat(clip.split(" ")[1] ?? "0");
+    });
+  const watch = () =>
+    link.evaluate(
+      (element) =>
+        new Promise<number[]>((resolve) => {
+          const insets: number[] = [];
+          const started = performance.now();
+          const tick = () => {
+            const clip = getComputedStyle(element, "::after").clipPath;
+
+            insets.push(Number.parseFloat(clip.split(" ")[1] ?? "0"));
+
+            if (performance.now() - started < 450) {
+              requestAnimationFrame(tick);
+            } else {
+              resolve(insets);
+            }
+          };
+
+          requestAnimationFrame(tick);
+        }),
+    );
+
+  expect(await underlineClip(link)).toBe(underlineHidden);
+  expect(await line()).toBe("100% 1px");
+
+  const box = await link.boundingBox();
+
+  if (!box) {
+    throw new Error("Expected the link to have a box.");
+  }
+
+  const drawing = watch();
+
+  await page.mouse.move(box.x + 8, box.y + 8);
+
+  const drawn = await drawing;
+
+  expect(drawn.at(-1)).toBeLessThan(1);
+  expect(drawn.some((inset) => inset > 5 && inset < 95)).toBe(true);
+  expect(drawn).toEqual([...drawn].sort((a, b) => b - a));
+  expect(await line()).toBe("0% 1px");
+
+  const retracting = watch();
+
+  await page.mouse.move(0, 790);
+
+  const retracted = await retracting;
+
+  expect(retracted.at(-1)).toBeGreaterThan(99);
+  expect(retracted.some((inset) => inset > 5 && inset < 95)).toBe(true);
+  expect(retracted).toEqual([...retracted].sort((a, b) => a - b));
+  expect(await line()).toBe("100% 1px");
+  expect(await rightInset()).toBe(100);
+});
+
+test("diagram underlines stay between titles and descriptions at every width", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  for (const width of [320, 768, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+
+    const labels = await page
+      .locator(".architecture-node-link")
+      .evaluateAll((links) =>
+        links.map((link) => {
+          const title = link.querySelector("strong");
+          const detail = link.querySelector(".architecture-node-detail");
+
+          if (!title || !detail) {
+            throw new Error("Expected a diagram title and description.");
+          }
+
+          const box = title.getBoundingClientRect();
+          const line = getComputedStyle(title, "::after");
+          const top = box.top + Number.parseFloat(line.top);
+
+          return {
+            text: title.textContent,
+            titleBottom: box.bottom,
+            lineTop: top,
+            lineBottom: top + Number.parseFloat(line.height),
+            detailTop: detail.getBoundingClientRect().top,
+          };
+        }),
+      );
+
+    for (const label of labels) {
+      expect(label.lineTop, `${width}px: ${label.text}`).toBeGreaterThan(
+        label.titleBottom,
+      );
+      expect(label.lineBottom, `${width}px: ${label.text}`).toBeLessThan(
+        label.detailTop,
+      );
+    }
+  }
+});
+
+test("the shared navigation points to real sections and marks the page", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const navigation = page.getByRole("navigation", { name: "Primary" });
+  const links = navigation.getByRole("link");
+
+  await expect(links).toHaveCount(4);
+  expect(
+    await links.evaluateAll((items) =>
+      items.map((item) => item.getAttribute("href")),
+    ),
+  ).toEqual(primaryLinks);
+
+  const current = navigation.locator("[aria-current]");
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute("href", "/");
+  await expect(current).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    `${productionOrigin}/`,
+  );
+
+  for (const target of ["work", "about", "contact"]) {
+    await expect(page.locator(`#${target}`)).toHaveCount(1);
   }
 });
 
@@ -237,7 +703,7 @@ test("the 320px index keeps navigation and route choices usable", async ({
   expect(layout.scrollWidth).toBe(layout.clientWidth);
   expect(layout.navigation).toHaveLength(4);
   expect(new Set(layout.navigation.map(({ top }) => top)).size).toBe(1);
-  expect(layout.routes).toHaveLength(3);
+  expect(layout.routes).toHaveLength(4);
 
   for (const item of [...layout.navigation, ...layout.routes]) {
     expect(item.left).toBeGreaterThanOrEqual(0);
@@ -253,75 +719,147 @@ test("the 320px index keeps navigation and route choices usable", async ({
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
 
-  for (let index = 0; index < 5; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     await page.keyboard.press("Tab");
   }
 
-  await expect(
-    page
-      .getByRole("navigation", { name: "Portfolio routes" })
-      .getByRole("link", { name: /Cascade/ }),
-  ).toBeFocused();
+  await expect(page.getByRole("link", { name: "Get in touch" })).toBeFocused();
 });
 
-test("the desktop index hangs the routes as a gallery wall to scroll through", async ({
+test("every interactive element answers a hover without needing motion", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  const transform = (selector: string) => () =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((element) => getComputedStyle(element).transform);
+  const work = page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Work" });
+  const plate = page
+    .getByRole("navigation", { name: "Contact options" })
+    .getByRole("link", { name: /Email/ });
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  await work.hover();
+  await expect
+    .poll(() => work.evaluate((link) => getComputedStyle(link).backgroundSize))
+    .toBe("100% 2px");
+
+  await page.getByRole("link", { name: "See my work" }).hover();
+  await expect
+    .poll(transform(".hero-action .action-arrow"))
+    .toBe("matrix(1, 0, 0, 1, 0, 2)");
+
+  await plate.hover();
+  await expect
+    .poll(transform("#contact .route-link h3"))
+    .toBe("matrix(1, 0, 0, 1, 8, 0)");
+  await expect
+    .poll(transform("#contact .route-link .action-arrow"))
+    .toBe("matrix(1, 0, 0, 1, 4, 0)");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.mouse.move(0, 0);
+  await plate.hover();
+  expect(await transform("#contact .route-link h3")()).toBe("none");
+  expect(
+    await underlineClip(plate.getByRole("heading", { name: "Email" })),
+  ).toBe(underlineDrawn);
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+  await page.locator(".architecture-node-link").first().hover();
+  await expect
+    .poll(transform(".architecture-node-icon"))
+    .toBe("matrix(1.12, 0, 0, 1.12, 0, 0)");
+});
+
+test("cartoon details stay decorative and respect reduced motion", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+
   await page.goto("/");
 
-  const layout = await page.evaluate(() => {
-    const links = [...document.querySelectorAll<HTMLElement>(".route-link")];
+  const stickers = page.locator(".sticker");
 
-    if (links.length !== 3) {
-      throw new Error("Expected the homepage route index.");
+  expect(await stickers.count()).toBeGreaterThan(0);
+  await expect(page.locator(".sticker:not([aria-hidden='true'])")).toHaveCount(
+    0,
+  );
+  await expect(stickers.locator("svg").first()).toBeVisible();
+  await expect(page.locator(".speech-bubble").first()).toBeVisible();
+
+  const hand = page.locator(".sticker-wave svg");
+  const portrait = page.locator(".hero-portrait");
+
+  await expect(hand).toHaveCSS("animation-name", "none");
+  await settleScrolling(page);
+  await portrait.hover();
+  await expect(hand).toHaveCSS("animation-name", "hand-wave");
+  await expect(hand).toHaveCSS("animation-iteration-count", "infinite");
+
+  await page.mouse.move(0, 0);
+  await expect(hand).toHaveCSS("animation-name", "none");
+  await portrait.hover();
+  await expect(hand).toHaveCSS("animation-name", "hand-wave");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".sticker-wave svg")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+});
+
+test("each icon type has its own hover gesture and respects reduced motion", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  const types = await page
+    .locator("main svg.lucide")
+    .evaluateAll((icons) => [
+      ...new Set(
+        icons.map((icon) =>
+          [...icon.classList].find((name) => name.startsWith("lucide-")),
+        ),
+      ),
+    ]);
+  const gestures = new Set<string>();
+
+  for (const type of types) {
+    if (!type) {
+      throw new Error("Expected a Lucide icon type.");
     }
 
-    return {
-      viewportHeight: window.innerHeight,
-      documentHeight: document.documentElement.scrollHeight,
-      links: links.map((link) => {
-        const bounds = link.getBoundingClientRect();
-        const title = link.querySelector("h3");
-        const placard = link.querySelector(".route-placard");
+    const icon = page.locator(`main svg.${type}`).first();
+    await icon.hover();
+    const gesture = await icon.evaluate(
+      (element) => getComputedStyle(element).animationName,
+    );
 
-        if (!title || !placard) {
-          throw new Error("Expected every plate to have a title and placard.");
-        }
-
-        return {
-          top: Math.round(bounds.top),
-          width: Math.round(bounds.width),
-          height: Math.round(bounds.height),
-          background: getComputedStyle(link).backgroundColor,
-          border: getComputedStyle(link).borderBlockStartWidth,
-          titleAbovePlacard:
-            title.getBoundingClientRect().bottom <=
-            placard.getBoundingClientRect().top,
-        };
-      }),
-    };
-  });
-
-  const [first, second, third] = layout.links;
-
-  if (!first || !second || !third) {
-    throw new Error("Expected three gallery plates.");
+    expect(gesture, type).not.toBe("none");
+    expect(gestures.has(gesture), type).toBe(false);
+    gestures.add(gesture);
   }
 
-  expect(layout.documentHeight).toBeGreaterThan(layout.viewportHeight * 2);
-  expect(second.top).toBeGreaterThan(first.top + first.height - 1);
-  expect(third.top).toBe(second.top);
-  expect(first.width).toBeGreaterThan(second.width);
-  expect(second.width).toBeGreaterThan(third.width);
-  expect(third.height).toBe(second.height);
-
-  for (const plate of layout.links) {
-    expect(plate.height).toBeGreaterThanOrEqual(540);
-    expect(plate.background).toBe("rgb(255, 255, 255)");
-    expect(plate.border).toBe("4px");
-    expect(plate.titleAbovePlacard).toBe(true);
-  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator('#contact a[href^="mailto:"]').hover();
+  expect(
+    await page
+      .locator("main svg, main svg *")
+      .evaluateAll((parts) =>
+        parts.every((part) => getComputedStyle(part).animationName === "none"),
+      ),
+  ).toBe(true);
 });
 
 test("the index preserves the typography, color, spacing, and depth contracts", async ({
@@ -375,10 +913,10 @@ test("the index preserves the typography, color, spacing, and depth contracts", 
     bodyUsesReadingFont: true,
     bodySize: "16px",
     bodyBackground: "rgb(243, 241, 237)",
-    introductionBackground: "rgba(0, 0, 0, 0)",
-    introductionBorder: "0px",
-    routePadding: "48px",
-    routeShadow: "none",
+    introductionBackground: "rgb(255, 255, 255)",
+    introductionBorder: "4px",
+    routePadding: "24px",
+    routeShadow: "rgb(23, 25, 26) 4px 4px 0px 0px",
     labelUsesTechnicalFont: true,
     labelColor: "rgb(161, 31, 53)",
   });
@@ -390,27 +928,18 @@ test("route links preserve pointer, keyboard, reduced-motion, and forced-color s
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
+  await settleScrolling(page);
 
   const route = page
-    .getByRole("navigation", { name: "Portfolio routes" })
-    .getByRole("link", { name: /Cascade/ });
+    .getByRole("navigation", { name: "Contact options" })
+    .getByRole("link", { name: /Email/ });
 
   await route.hover();
-  await expect(route.getByRole("heading", { name: "Cascade" })).toHaveCSS(
-    "text-decoration-line",
-    "underline",
-  );
-
-  const placardRule = () =>
-    route
-      .locator(".route-placard")
-      .evaluate((placard) => getComputedStyle(placard, "::before").transform);
-
-  await expect.poll(placardRule).toBe("none");
+  await expect
+    .poll(() => underlineClip(route.getByRole("heading", { name: "Email" })))
+    .toBe(underlineDrawn);
 
   await page.mouse.move(0, 0);
-  await expect.poll(placardRule).toBe("matrix(1, 0, 0, 0, 0, 0)");
-
   await route.focus();
   await expect(route).toHaveCSS("outline-style", "solid");
   await expect(route).toHaveCSS("outline-color", "rgb(0, 122, 115)");
@@ -442,11 +971,10 @@ test("route links preserve pointer, keyboard, reduced-motion, and forced-color s
 test("Cascade keeps the complete case study and public evidence", async ({
   page,
 }) => {
-  await page.goto("/work/cascade/");
+  await page.goto("/");
 
-  await expect(page).toHaveTitle("Cascade — Ahammed Nibras");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Cascade" }),
+    page.getByRole("heading", { level: 2, name: "Cascade" }),
   ).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(1);
   await expect(
@@ -458,14 +986,14 @@ test("Cascade keeps the complete case study and public evidence", async ({
     "href",
     "https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx",
   );
-  await expect(page.locator(".signature-band")).toHaveCount(2);
+  await expect(page.locator(".signature-band")).toHaveCount(4);
 });
 
 test("Cascade gives its case study and lifecycle room on desktop", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/work/cascade/");
+  await page.goto("/");
 
   const layout = await page.evaluate(() => {
     const steps = [...document.querySelectorAll(".run-path li")];
@@ -493,45 +1021,16 @@ test("Cascade gives its case study and lifecycle room on desktop", async ({
   );
 });
 
-test("route titles carry into their pages unless motion is reduced", async ({
-  page,
-}) => {
-  const transitionName = (name: string, level: number) =>
-    page
-      .getByRole("heading", { name, level, exact: true })
-      .evaluate((title) => getComputedStyle(title).viewTransitionName);
-
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-  expect(await transitionName("Cascade", 3)).toBe("cascade-title");
-  expect(await transitionName("How this site runs", 3)).toBe(
-    "architecture-title",
-  );
-
-  await page.goto("/work/cascade/");
-  expect(await transitionName("Cascade", 1)).toBe("cascade-title");
-
-  await page.goto("/architecture/");
-  expect(await transitionName("How this site runs.", 1)).toBe(
-    "architecture-title",
-  );
-
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  expect(await transitionName("How this site runs.", 1)).toBe("none");
-});
-
-test("every route hangs its title as an exhibit", async ({ page }) => {
+test("every major section hangs its title as an exhibit", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
 
-  for (const route of ["/work/cascade/", "/architecture/", "/contact/"]) {
-    await page.goto(route);
+  const heroes = await page.locator(".exhibit-hero").evaluateAll((sections) =>
+    sections.map((section) => {
+      const title = section.querySelector("h1, h2");
+      const placard = section.querySelector(".route-placard");
 
-    const hero = await page.evaluate(() => {
-      const section = document.querySelector<HTMLElement>(".exhibit-hero");
-      const title = section?.querySelector("h1");
-      const placard = section?.querySelector(".route-placard");
-
-      if (!section || !title || !placard) {
+      if (!title || !placard) {
         throw new Error("Expected an exhibit hero with a title and placard.");
       }
 
@@ -542,24 +1041,26 @@ test("every route hangs its title as an exhibit", async ({ page }) => {
           title.getBoundingClientRect().bottom <=
           placard.getBoundingClientRect().top,
       };
-    });
+    }),
+  );
 
-    expect(hero.height).toBeGreaterThanOrEqual(
-      route === "/contact/" ? 280 : 540,
-    );
-    expect(hero.size).toBe(160);
+  expect(heroes).toHaveLength(3);
+
+  for (const hero of heroes) {
+    expect(hero.height).toBeGreaterThanOrEqual(430);
+    expect(hero.size).toBe(88);
     expect(hero.titleAbovePlacard).toBe(true);
   }
 
   await expect(
     page.getByRole("navigation", { name: "Contact options" }).getByRole("link"),
-  ).toHaveCount(3);
+  ).toHaveCount(4);
 });
 
-test("the infrastructure and contact routes expose their real content", async ({
+test("the infrastructure and contact sections expose their real content", async ({
   page,
 }) => {
-  await page.goto("/architecture/");
+  await page.goto("/");
   const buildPath = page.getByRole("list", {
     name: "Build path",
   });
@@ -611,41 +1112,41 @@ test("the infrastructure and contact routes expose their real content", async ({
     "none",
   );
 
-  await page.goto("/contact/");
+  const contact = page.getByRole("navigation", { name: "Contact options" });
+
   await expect(
-    page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+    contact.getByRole("link", { name: "ahammednibras737@gmail.com" }),
   ).toHaveAttribute("href", "mailto:ahammednibras737@gmail.com");
-  await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+  await expect(contact.getByRole("link", { name: "GitHub" })).toHaveAttribute(
     "href",
     "https://github.com/ahammednibras8",
   );
-  await expect(page.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+  await expect(contact.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
     "href",
     "https://linkedin.com/in/ahammednibras8",
   );
+  await expect(contact.getByRole("link", { name: /Discord/ })).toHaveAttribute(
+    "href",
+    "https://discord.com/users/877244168009830481",
+  );
 });
 
-test("the complete route system works without JavaScript", async ({
-  browser,
-}) => {
+test("the complete page works without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
 
-  for (const route of navigationRoutes) {
-    await page.goto(route);
-    await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(0);
-    await expect(
-      page.getByRole("navigation", { name: "Primary" }),
-    ).toBeVisible();
-  }
-
   await page.goto("/");
-  await page
-    .getByRole("navigation", { name: "Portfolio routes" })
-    .getByRole("link", { name: /Cascade/ })
-    .click();
-  await expect(page).toHaveURL(/\/work\/cascade\/$/);
+  await expect(page.locator("h1")).toBeVisible();
+  await expect(page.locator("script")).toHaveCount(0);
+
+  const navigation = page.getByRole("navigation", { name: "Primary" });
+
+  await expect(navigation).toBeVisible();
+  await navigation.getByRole("link", { name: "Contact" }).click();
+  await expect(page).toHaveURL(/#contact$/);
+  await expect(
+    page.getByRole("navigation", { name: "Contact options" }),
+  ).toBeVisible();
 
   await context.close();
 });
