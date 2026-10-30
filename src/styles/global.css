@@ -22,6 +22,14 @@
   );
   --border-width-default: 1px;
   --border-width-emphasis: 0.25rem;
+  --border-width-ink: 0.1875rem;
+
+  /* Cartoon: drawn outlines and hard offset shadows in the ink role. */
+  --border-ink: var(--border-width-ink) solid var(--color-ink-primary);
+  --radius-sketch: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --radius-sketch-alt: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  --shadow-pop: 0.25rem 0.25rem 0 var(--color-ink-primary);
+  --shadow-pop-large: 0.625rem 0.625rem 0 var(--color-ink-primary);
   --color-action: #a11f35;
   --color-action-visited: #6f4350;
   --color-action-active: #641426;
@@ -35,6 +43,7 @@
     "IBM Plex Sans", "Helvetica Neue", helvetica, arial, sans-serif;
   --font-technical:
     "IBM Plex Mono", "SFMono-Regular", consolas, "Liberation Mono", monospace;
+  --font-size-display: clamp(2.5rem, 8vw, 5.5rem);
 
   /* Interface rhythm: controls, labels, and internal spacing. */
   --space-interface: 0.5rem;
@@ -53,7 +62,9 @@
   --motion-standard: 180ms;
   --motion-deliberate: 220ms;
   --motion-route: 360ms;
+  --motion-sweep: 1100ms;
   --motion-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   font-family: var(--font-reading);
   font-synthesis: none;
@@ -227,7 +238,7 @@ article > header {
 }
 
 article > header h3 {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
@@ -246,11 +257,14 @@ article > section {
 }
 
 article > section > h4 {
-  align-self: start;
-  padding-inline-start: var(--space-component);
-  border-inline-start: var(--border-width-default) solid
-    var(--color-rule-strong);
+  place-self: start;
+  padding: var(--space-interface) var(--space-component);
+  background: var(--color-surface-raised);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop);
   color: var(--color-action);
+  rotate: -1deg;
 }
 
 article ul {
@@ -265,7 +279,9 @@ article ul {
   display: grid;
   margin: 0;
   padding: 0;
-  border: var(--border-width-default) solid var(--color-rule-structural);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop);
   list-style: none;
 }
 
@@ -299,6 +315,9 @@ article ul {
 }
 
 .run-path-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   color: var(--color-action);
   font-family: var(--font-technical);
   font-size: 0.8125rem;
@@ -331,7 +350,8 @@ article ul {
 
 .route-list {
   display: grid;
-  gap: var(--space-editorial);
+  grid-auto-rows: 1fr;
+  gap: var(--space-component);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -340,31 +360,84 @@ article ul {
 .route-link {
   display: grid;
   height: 100%;
-  min-block-size: max(26rem, 62svh);
-  grid-template-rows: 1fr auto;
-  gap: var(--space-section);
-  padding: var(--space-section) var(--space-component);
+  min-block-size: 10rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-component);
+  padding: var(--space-editorial);
   background: var(--color-surface-raised);
-  border-block: var(--border-width-emphasis) solid var(--color-action);
+  border: var(--border-ink);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-pop);
   color: var(--color-ink-primary);
   text-decoration: none;
 }
 
-.route-link h3 {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+.sticker {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-self: start;
+  background: var(--color-action);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-surface-raised);
+  place-items: center;
+  rotate: -6deg;
 }
 
-.route-link-lead h3 {
-  font-size: clamp(3rem, 14vw, 10rem);
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+.section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-interface);
+}
+
+.section-title svg {
+  flex: none;
+  color: var(--color-action);
+}
+
+.speech-bubble {
+  position: relative;
+  padding: var(--space-component) var(--space-editorial);
+  background: var(--color-surface-raised);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch-alt);
+  box-shadow: var(--shadow-pop);
+}
+
+.speech-bubble::after {
+  position: absolute;
+  inset-block-start: -0.75rem;
+  inset-inline-start: 2rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: rotate(45deg);
+  background: var(--color-surface-raised);
+  border-block-start: var(--border-ink);
+  border-inline-start: var(--border-ink);
+  content: "";
+}
+
+.route-link h3 {
+  align-self: center;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.project-stack {
+  color: var(--color-ink-secondary);
+  font-family: var(--font-technical);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .route-placard {
   position: relative;
   display: grid;
+  grid-column: 1 / -1;
   gap: var(--space-interface);
   max-width: 26rem;
   padding-inline-start: var(--space-component);
@@ -381,6 +454,10 @@ article ul {
   transform-origin: bottom;
   background: var(--color-action);
   content: "";
+}
+
+.gallery-wall-compact .route-placard::before {
+  content: none;
 }
 
 .route-link:focus-visible .route-placard::before {
@@ -405,16 +482,35 @@ article ul {
   text-transform: uppercase;
 }
 
-.contact-wall .route-link {
-  min-block-size: 13rem;
+.route-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-interface);
 }
 
-.contact-wall .route-link-lead {
-  min-block-size: 18rem;
+.gallery-wall-compact .sticker {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  box-shadow: none;
+  rotate: none;
 }
 
-.contact-wall .route-action {
-  font-size: 0.9375rem;
+.gallery-wall-compact .route-placard {
+  align-self: end;
+  max-width: none;
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+.gallery-wall-compact .route-action {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-ink-secondary);
+  font-family: var(--font-reading);
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 .routes-introduction {
@@ -432,7 +528,9 @@ article ul {
   margin: 0;
   padding: var(--space-component);
   background: var(--color-surface-raised);
-  border-block: var(--border-width-emphasis) solid var(--color-action);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch-alt);
+  box-shadow: var(--shadow-pop-large);
 }
 
 .architecture-build,
@@ -463,10 +561,12 @@ article ul {
   min-block-size: 6.75rem;
   grid-template-columns: 2.5rem minmax(0, 1fr);
   grid-template-rows: repeat(3, auto);
-  column-gap: var(--space-component);
+  gap: var(--space-interface) var(--space-component);
   padding: var(--space-component);
   background: var(--color-surface-raised);
-  border: var(--border-width-default) solid var(--color-rule-structural);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop);
   color: var(--color-ink-primary);
   text-decoration: none;
 }
@@ -690,6 +790,10 @@ article ul {
   list-style: none;
 }
 
+.primary-navigation ul > :first-child {
+  margin-inline-end: auto;
+}
+
 .primary-navigation a {
   color: var(--color-ink-primary);
   display: flex;
@@ -698,6 +802,14 @@ article ul {
   font-size: 0.8125rem;
   font-weight: 700;
   text-decoration: none;
+  background-image: linear-gradient(currentcolor, currentcolor);
+  background-position: 0 calc(100% - 0.6875rem);
+  background-repeat: no-repeat;
+  background-size: 0 0.125rem;
+}
+
+.primary-navigation a[aria-current] {
+  background-size: 100% 0.125rem;
 }
 
 .page a:visited,
@@ -711,35 +823,41 @@ article ul {
 }
 
 @media (hover: hover) {
-  a:hover {
-    text-decoration-thickness: 0.13em;
-  }
-
   .primary-navigation a:hover {
     color: var(--color-action);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    background-size: 100% 0.125rem;
   }
 
-  .route-link:hover h3 {
-    text-decoration: underline;
-    text-decoration-thickness: 0.13em;
-    text-underline-offset: 0.2em;
+  .route-link:hover {
+    box-shadow: 0.375rem 0.375rem 0 var(--color-action);
+  }
+
+  .speech-bubble:hover,
+  article > section > h4:hover {
+    box-shadow: 0.375rem 0.375rem 0 var(--color-action);
+  }
+
+  .hero-portrait:hover img {
+    box-shadow: 0.875rem 0.875rem 0 var(--color-action);
   }
 
   .route-link:hover .route-placard::before {
     transform: none;
   }
 
-  .architecture-node-link:hover {
+  .hero-actions .hero-action:hover {
+    background: var(--color-action-active);
+  }
+
+  .hero-actions .hero-contact:hover {
     background: var(--color-surface-recessed);
     border-color: var(--color-action);
   }
 
-  .architecture-node-link:hover strong {
-    text-decoration: underline;
-    text-decoration-thickness: 0.13em;
-    text-underline-offset: 0.2em;
+  .architecture-node-link:hover {
+    background: var(--color-surface-recessed);
+    border-color: var(--color-action);
+    box-shadow: 0.375rem 0.375rem 0 var(--color-action);
   }
 }
 
@@ -756,35 +874,212 @@ article ul {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @view-transition {
-    navigation: auto;
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes title-sweep {
+    0% {
+      background-position-x: 100%;
+    }
+
+    100% {
+      background-position-x: 0%;
+    }
   }
 
-  ::view-transition-group(*) {
-    animation-duration: var(--motion-route);
-    animation-timing-function: var(--motion-ease-out);
+  @keyframes hand-wave {
+    0%,
+    100% {
+      rotate: 0deg;
+    }
+
+    20%,
+    60% {
+      rotate: 16deg;
+    }
+
+    40%,
+    80% {
+      rotate: -8deg;
+    }
   }
 
-  .title-cascade {
-    view-transition-name: cascade-title;
+  .sticker-wave svg {
+    transform-origin: bottom center;
   }
+}
 
-  .title-architecture {
-    view-transition-name: architecture-title;
+/*
+ * The band starts and ends beyond the text, so both ends look the same at rest.
+ * Print, forced colors, and reduced motion keep ordinary text.
+ */
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  @supports (background-clip: text) {
+    .title-sweep {
+      justify-self: start;
+      margin-block: -0.1em;
+      padding-block: 0.1em;
+      background-image: linear-gradient(
+        105deg,
+        var(--color-ink-primary) 40%,
+        var(--color-action) 50%,
+        var(--color-ink-primary) 60%
+      );
+      background-position-x: 100%;
+      background-clip: text;
+      background-size: 300% 100%;
+      color: transparent;
+      animation: title-sweep var(--motion-sweep) ease-in-out 300ms backwards;
+    }
+
+    .title-sweep::selection {
+      background: var(--color-action);
+      color: var(--color-surface-raised);
+    }
   }
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .route-placard::before {
+  /*
+   * Each element declares its transition at rest, so it eases back as well as
+   * forward. Hover swaps in the bounce: lively on arrival, calm on return.
+   */
+  .title-sweep {
+    transition: background-position-x var(--motion-sweep) ease-in-out;
+  }
+
+  .title-sweep:hover {
+    background-position-x: 0%;
+  }
+
+  .sticker {
+    transition:
+      rotate var(--motion-route) var(--motion-ease-out),
+      scale var(--motion-route) var(--motion-ease-out);
+  }
+
+  .sticker:hover,
+  .hero-portrait:hover .sticker,
+  .route-link:is(:hover, :focus-visible) .sticker {
+    transition-timing-function: var(--motion-ease-bounce);
+    rotate: 6deg;
+    scale: 1.12;
+  }
+
+  .hero-portrait {
+    transition:
+      rotate var(--motion-route) var(--motion-ease-out),
+      scale var(--motion-route) var(--motion-ease-out);
+  }
+
+  .hero-portrait:hover {
+    transition-timing-function: var(--motion-ease-bounce);
+    rotate: 0deg;
+    scale: 1.03;
+  }
+
+  .hero-portrait:hover .sticker-wave svg {
+    animation: hand-wave 1.2s ease-in-out infinite;
+  }
+
+  .hero-portrait img {
+    transition: box-shadow var(--motion-standard) var(--motion-ease-out);
+  }
+
+  .speech-bubble,
+  article > section > h4 {
+    transition:
+      scale var(--motion-route) var(--motion-ease-out),
+      box-shadow var(--motion-standard) var(--motion-ease-out);
+  }
+
+  .speech-bubble:hover,
+  article > section > h4:hover {
+    transition-timing-function: var(--motion-ease-bounce);
+    scale: 1.05;
+  }
+
+  .page .route-link {
+    transition:
+      translate var(--motion-route) var(--motion-ease-out),
+      rotate var(--motion-route) var(--motion-ease-out),
+      box-shadow var(--motion-standard) var(--motion-ease-out);
+  }
+
+  .route-list li .route-link:is(:hover, :focus-visible) {
+    transition-timing-function: var(--motion-ease-bounce);
+    translate: -0.25rem -0.25rem;
+    rotate: 0deg;
+  }
+
+  .route-list li .route-link:active {
+    translate: 0.25rem 0.25rem;
+  }
+
+  .route-placard::before,
+  .action-arrow,
+  .architecture-node-icon,
+  .route-link h3,
+  .recovery-link strong {
     transition: transform var(--motion-route) var(--motion-ease-out);
   }
 
   .page a,
-  .primary-navigation a,
   .site-footer a {
     transition:
       color var(--motion-standard) var(--motion-ease-out),
-      text-decoration-thickness var(--motion-standard) var(--motion-ease-out);
+      background-size var(--motion-route) ease-in-out;
+  }
+
+  .primary-navigation a {
+    transition:
+      color var(--motion-standard) var(--motion-ease-out),
+      background-size var(--motion-route) var(--motion-ease-out);
+  }
+
+  .page .hero-actions .hero-action,
+  .page .hero-actions .hero-contact,
+  .page .architecture-node-link {
+    transition:
+      background-color var(--motion-standard) var(--motion-ease-out),
+      border-color var(--motion-standard) var(--motion-ease-out),
+      box-shadow var(--motion-standard) var(--motion-ease-out),
+      translate var(--motion-route) var(--motion-ease-out);
+  }
+
+  .page .hero-actions .hero-action:hover,
+  .page .hero-actions .hero-contact:is(:hover, :focus-visible),
+  .page .architecture-node-link:is(:hover, :focus-visible) {
+    transition-timing-function: var(--motion-ease-bounce);
+    translate: -0.125rem -0.125rem;
+  }
+
+  .page .hero-actions .hero-action:active {
+    translate: 0.125rem 0.125rem;
+    box-shadow: none;
+  }
+
+  .route-link:is(:hover, :focus-visible) h3 {
+    transform: translateX(0.5rem);
+  }
+
+  .route-link:is(:hover, :focus-visible) .action-arrow {
+    transform: translateX(0.25rem);
+  }
+
+  .hero-action:is(:hover, :focus-visible) .action-arrow {
+    transform: translateY(0.125rem);
+  }
+
+  .architecture-node-link:is(:hover, :focus-visible) .architecture-node-icon {
+    transform: scale(1.12);
+  }
+
+  .recovery-link:is(:hover, :focus-visible) strong {
+    transform: translateX(0.25rem);
   }
 
   .page a:active,
@@ -850,23 +1145,116 @@ article > .project-evidence > h4 {
   margin-block-end: var(--space-editorial);
 }
 
+.hero-portrait {
+  position: relative;
+  justify-self: start;
+  width: min(55%, 14rem);
+  order: -1;
+  rotate: 2deg;
+}
+
+.hero-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop-large);
+}
+
+.hero-portrait .sticker {
+  position: absolute;
+  inset-block-end: -0.75rem;
+  inset-inline-end: -0.75rem;
+}
+
 .page > .exhibit-hero {
-  min-block-size: max(26rem, 62svh);
-  grid-template-rows: 1fr auto;
-  gap: var(--space-section);
+  min-block-size: max(22rem, 48svh);
+  grid-template-rows: auto auto 1fr;
+  gap: var(--space-editorial);
+  background-image: radial-gradient(
+    var(--color-rule-structural) 0.09rem,
+    transparent 0.1rem
+  );
+  background-size: 1rem 1rem;
+}
+
+.page > .exhibit-hero > .sticker {
+  width: 4.5rem;
+  height: 4.5rem;
+  order: -1;
+}
+
+.page > .exhibit-hero > .route-placard {
+  align-self: end;
+  margin-block-start: var(--space-editorial);
+}
+
+.page > .architecture-system > h3 {
+  margin-block-end: var(--space-section);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.print-contact {
+  display: none;
 }
 
 .page > .exhibit-hero-compact {
   min-block-size: 0;
 }
 
-.exhibit-hero h1 {
-  font-size: clamp(3rem, 14vw, 10rem);
+.exhibit-hero :is(h1, h2) {
+  font-size: var(--font-size-display);
   line-height: 0.95;
 }
 
 .exhibit-hero p {
   font-size: 1.125rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-interface) var(--space-editorial);
+  margin-block-start: var(--space-interface);
+}
+
+.page .hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--touch-target);
+}
+
+.action-arrow {
+  flex: none;
+}
+
+.hero-actions .hero-action {
+  gap: var(--space-interface);
+  padding-inline: var(--space-editorial);
+  background: var(--color-action);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch-alt);
+  box-shadow: var(--shadow-pop);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.page .hero-action,
+.page .hero-action:visited {
+  color: var(--color-surface-raised);
+}
+
+.hero-actions .hero-contact {
+  gap: var(--space-interface);
+  padding-inline: var(--space-component);
+  border: 0.125rem solid var(--color-rule-strong);
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .introduction {
@@ -926,17 +1314,93 @@ article > .project-evidence > h4 {
   text-transform: uppercase;
 }
 
-@media (hover: hover) {
-  .recovery-link:hover strong {
-    text-decoration: underline;
-    text-decoration-thickness: 0.13em;
-    text-underline-offset: 0.2em;
+/*
+ * A thin stroke draws below the label and eases back on exit. Card titles
+ * reserve a row gap so the stroke cannot run through the description.
+ */
+@media screen and (hover: hover) and (forced-colors: none) {
+  .site-footer a,
+  .page a:not([class]) {
+    position: relative;
+    background-image: linear-gradient(currentcolor, currentcolor);
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 0.0625rem;
+    text-decoration: none;
+  }
+
+  .site-footer a:is(:hover, :focus-visible),
+  .page a:not([class]):is(:hover, :focus-visible) {
+    background-size: 0% 0.0625rem;
+  }
+
+  .route-link h3,
+  .architecture-node-link strong,
+  .recovery-link strong {
+    position: relative;
+    justify-self: start;
+  }
+
+  .route-link h3::after,
+  .architecture-node-link strong::after,
+  .recovery-link strong::after,
+  .site-footer a::after,
+  .page a:not([class])::after {
+    position: absolute;
+    inset-block-start: calc(100% + 0.125rem);
+    inset-inline: 0;
+    height: clamp(0.0625rem, 0.055em, 0.1875rem);
+    border-radius: 999px;
+    clip-path: inset(0 100% 0 0);
+    background: currentcolor;
+    content: "";
+    pointer-events: none;
+  }
+
+  .route-link:is(:hover, :focus-visible) h3::after,
+  .architecture-node-link:is(:hover, :focus-visible) strong::after,
+  .recovery-link:is(:hover, :focus-visible) strong::after,
+  .site-footer a:is(:hover, :focus-visible)::after,
+  .page a:not([class]):is(:hover, :focus-visible)::after {
+    clip-path: inset(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .route-link h3::after,
+    .architecture-node-link strong::after,
+    .recovery-link strong::after,
+    .site-footer a::after,
+    .page a:not([class])::after {
+      transition: clip-path var(--motion-route) ease-in-out;
+    }
+
+    .route-link:is(:hover, :focus-visible) h3::after,
+    .architecture-node-link:is(:hover, :focus-visible) strong::after,
+    .recovery-link:is(:hover, :focus-visible) strong::after,
+    .site-footer a:is(:hover, :focus-visible)::after,
+    .page a:not([class]):is(:hover, :focus-visible)::after {
+      transition-duration: 420ms;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
   }
 }
 
 @media (forced-colors: active) {
   .recovery-label {
     color: LinkText;
+  }
+
+  /* Forced colors use a system underline in place of the animated stroke. */
+  .route-link h3::after,
+  .architecture-node-link strong::after,
+  .recovery-link strong::after {
+    display: none;
+  }
+
+  .route-link:is(:hover, :focus-visible) h3,
+  .architecture-node-link:is(:hover, :focus-visible) strong,
+  .recovery-link:is(:hover, :focus-visible) strong {
+    text-decoration-line: underline;
   }
 }
 
@@ -1000,18 +1464,10 @@ article > .project-evidence > h4 {
   }
 
   .route-list {
-    grid-template-columns: 3fr 2fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .route-list li:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .route-link-lead .route-placard {
-    justify-self: end;
-  }
-
-  #work > article {
+  .page > .case-study > article {
     grid-column: 1 / -1;
   }
 
@@ -1038,21 +1494,52 @@ article > .project-evidence > h4 {
     grid-column: 1 / -1;
   }
 
-  .page > .exhibit-hero > h1 {
-    grid-column: 1 / -1;
+  .page > .exhibit-hero {
+    grid-template-rows: 1fr auto;
+  }
+
+  .page > .exhibit-hero > :is(h1, h2) {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+
+  .page > .exhibit-hero > .sticker {
+    grid-column: 6;
+    grid-row: 1;
+    justify-self: end;
   }
 
   .page > .exhibit-hero > .route-placard {
     grid-column: 3 / -1;
+    grid-row: 2;
   }
 
-  .page > .architecture-system > h2,
+  .page > .exhibit-hero-portrait > h1 {
+    grid-column: 1 / span 4;
+  }
+
+  .page > .exhibit-hero-portrait > .route-placard {
+    grid-column: 1 / span 4;
+    justify-self: end;
+  }
+
+  .page > .exhibit-hero-portrait > .hero-portrait {
+    grid-column: 5 / -1;
+    grid-row: 1 / span 2;
+    place-self: center end;
+    width: 100%;
+  }
+
+  .exhibit-hero-portrait .speech-bubble::after {
+    inset-block-start: 2rem;
+    inset-inline: auto -0.8rem;
+    border-inline-start: 0;
+    border-inline-end: var(--border-ink);
+  }
+
+  .page > .architecture-system > h3,
   .page > .architecture-system > figure {
     grid-column: 1 / -1;
-  }
-
-  .page > .architecture-system > h2 {
-    margin-block-end: var(--space-section);
   }
 
   .page > .not-found-introduction > .not-found-status {
@@ -1087,7 +1574,7 @@ article > .project-evidence > h4 {
   }
 
   .primary-navigation ul {
-    grid-column: 2 / -1;
+    grid-column: 2 / span 10;
   }
 
   .page > .introduction > h1 {
@@ -1103,14 +1590,29 @@ article > .project-evidence > h4 {
     margin-block-start: 0;
   }
 
-  .page > .exhibit-hero > h1 {
-    grid-column: 2 / span 10;
+  .page > .exhibit-hero > :is(h1, h2) {
+    grid-column: 2 / span 9;
     grid-row: 1;
+  }
+
+  .page > .exhibit-hero > .sticker {
+    grid-column: 11;
   }
 
   .page > .exhibit-hero > .route-placard {
     grid-column: 7 / span 5;
-    grid-row: 2;
+  }
+
+  .page > .exhibit-hero-portrait > h1 {
+    grid-column: 2 / span 7;
+  }
+
+  .page > .exhibit-hero-portrait > .route-placard {
+    grid-column: 2 / span 7;
+  }
+
+  .page > .exhibit-hero-portrait > .hero-portrait {
+    grid-column: 9 / span 3;
   }
 
   .page > section:not(.introduction) > :where(h2, .routes-introduction) {
@@ -1123,7 +1625,7 @@ article > .project-evidence > h4 {
     grid-column: 4 / span 6;
   }
 
-  .page > .architecture-system > h2,
+  .page > .architecture-system > h3,
   .page > .architecture-system > figure {
     grid-column: 2 / span 10;
   }
@@ -1133,16 +1635,7 @@ article > .project-evidence > h4 {
     grid-column: 2 / span 10;
   }
 
-  .route-link {
-    min-block-size: max(26rem, 62svh);
-    padding: var(--space-section) var(--space-editorial);
-  }
-
-  .route-link-lead {
-    min-block-size: max(32rem, 78svh);
-  }
-
-  #work > article {
+  .page > .case-study > article {
     grid-column: 1 / -1;
   }
 
@@ -1295,5 +1788,289 @@ article > .project-evidence > h4 {
   .recovery-list li + li {
     border-inline-start: var(--border-width-default) solid
       var(--color-rule-structural);
+  }
+}
+
+/* Print: one plain document with the contact details first. */
+@media print {
+  @page {
+    margin: 1.25cm 1.5cm;
+  }
+
+  :root {
+    --font-size-display: 2rem;
+  }
+
+  html {
+    font-size: 81.25%;
+  }
+
+  body {
+    background: none;
+    line-height: 1.4;
+  }
+
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .sticker,
+  .hero-portrait,
+  .hero-actions,
+  .action-arrow,
+  .section-title svg,
+  .run-path-step svg,
+  .architecture-node-icon,
+  .architecture-recovery svg,
+  .route-placard::before,
+  .speech-bubble::after,
+  .architecture-relation::before,
+  .architecture-relation::after,
+  .architecture-gate::before,
+  .architecture-gate::after,
+  .page > #contact {
+    display: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+
+  article > section,
+  article > .signature-band {
+    display: block;
+    padding-block: var(--space-interface);
+    background: none;
+    border: 0;
+    break-inside: avoid;
+  }
+
+  .page {
+    width: auto;
+    border: 0;
+  }
+
+  .page > section,
+  .page > .signature-band,
+  .page > .exhibit-hero {
+    display: block;
+    min-block-size: 0;
+    padding: 0 0 var(--space-component);
+    background: none;
+    border: 0;
+  }
+
+  .print-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-component);
+    margin-block-start: var(--space-interface);
+    font-size: 0.9375rem;
+    font-style: normal;
+  }
+
+  .print-contact span {
+    flex-basis: 100%;
+  }
+
+  .page a {
+    min-block-size: 0;
+    color: var(--color-ink-primary);
+    text-decoration: none;
+  }
+
+  .architecture-recovery a,
+  .run-path figcaption a {
+    display: inline;
+  }
+
+  .page a:visited {
+    color: var(--color-ink-primary);
+  }
+
+  .architecture-recovery a::after,
+  .run-path figcaption a::after {
+    content: " (" attr(href) ")";
+  }
+
+  .page > .exhibit-hero > .route-placard,
+  .speech-bubble {
+    max-width: none;
+    margin: var(--space-interface) 0 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .section-title {
+    display: block;
+  }
+
+  .routes-introduction {
+    margin-block-end: 0;
+  }
+
+  .exhibit-hero :is(h1, h2) {
+    line-height: 1.1;
+  }
+
+  .page > .exhibit-hero h2 {
+    padding-block-start: var(--space-component);
+    border-block-start: var(--border-width-default) solid
+      var(--color-ink-primary);
+  }
+
+  article {
+    display: block;
+    margin: 0;
+  }
+
+  article > header {
+    padding-block: 0 var(--space-interface);
+  }
+
+  article > header h3 {
+    font-size: 1.25rem;
+  }
+
+  article > p {
+    padding-block-end: var(--space-interface);
+  }
+
+  article li + li {
+    margin-block-start: 0;
+  }
+
+  article > section > h4 {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--color-ink-primary);
+    rotate: 0deg;
+  }
+
+  article > .project-evidence {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .run-path ol,
+  .architecture-diagram,
+  .architecture-node-link {
+    border: var(--border-width-default) solid var(--color-rule-strong);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .run-path ol {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .run-path li {
+    padding: var(--space-interface);
+  }
+
+  .run-path li + li {
+    border-block-start: 0;
+    border-inline-start: var(--border-width-default) solid
+      var(--color-rule-strong);
+  }
+
+  .run-path figcaption {
+    max-width: none;
+    margin-block-start: var(--space-interface);
+  }
+
+  .page > .architecture-system > h3 {
+    margin-block-end: var(--space-interface);
+    font-size: 1.25rem;
+  }
+
+  .architecture-diagram {
+    padding: var(--space-interface);
+    break-inside: avoid;
+  }
+
+  .architecture-diagram > figcaption {
+    max-width: none;
+    margin-block-start: var(--space-interface);
+    padding-block-start: var(--space-interface);
+  }
+
+  .architecture-branch header {
+    margin-block-end: var(--space-interface);
+    padding-block-end: 0;
+  }
+
+  .architecture-build,
+  .architecture-branches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-interface);
+  }
+
+  .architecture-build {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .architecture-node,
+  .architecture-build .architecture-node {
+    padding-block-end: var(--space-interface);
+    break-inside: avoid;
+  }
+
+  .architecture-node-link {
+    display: block;
+    min-block-size: 0;
+    padding: var(--space-interface);
+  }
+
+  .architecture-node-link > :not(svg) {
+    display: block;
+  }
+
+  .architecture-relation {
+    position: static;
+    display: block;
+    block-size: auto;
+    padding: 0;
+  }
+
+  .architecture-distribution {
+    margin-block: var(--space-interface);
+    padding: var(--space-interface);
+  }
+
+  .architecture-branch-feedback {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .architecture-gate {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    padding: var(--space-interface);
+  }
+
+  .architecture-branch-production {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .architecture-recovery {
+    display: block;
+    margin-block-start: var(--space-interface);
+    padding: var(--space-interface);
+  }
+
+  .architecture-recovery > :not(svg) {
+    display: block;
   }
 }

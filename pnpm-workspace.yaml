@@ -8,6 +8,7 @@ overrides:
   tmp: 0.2.7
 allowBuilds:
   esbuild: true
+  sharp: false
   workerd: true
 minimumReleaseAgeExclude:
   - "@lucide/astro@1.58.0"

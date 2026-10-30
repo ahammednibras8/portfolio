@@ -3,6 +3,7 @@ import "@fontsource/ibm-plex-sans/latin-400.css";
 import "@fontsource/ibm-plex-sans/latin-700.css";
 import "@fontsource/ibm-plex-mono/latin-600.css";
 import "../styles/global.css";
+import "../styles/icon-motion.css";
 
 interface SocialImage {
   url: URL;
@@ -24,16 +25,15 @@ const { title, description, canonical, socialImage } = Astro.props;
 const canonicalUrl = canonical?.href;
 const socialImageUrl = socialImage?.url.href;
 const navigation = [
-  { href: "/", label: "Home" },
-  { href: "/work/cascade/", label: "Cascade" },
-  { href: "/architecture/", label: "Architecture" },
-  { href: "/contact/", label: "Contact" },
+  {
+    href: "/",
+    label: "Ahammed Nibras",
+    current: Astro.url.pathname === "/" && "page",
+  },
+  { href: "/#work", label: "Work", current: false },
+  { href: "/#about", label: "About", current: false },
+  { href: "/#contact", label: "Contact", current: false },
 ] as const;
-
-const isCurrentRoute = (href: string) =>
-  href === "/"
-    ? Astro.url.pathname === href
-    : Astro.url.pathname.startsWith(href);
 ---
 
 <!doctype html>
@@ -93,12 +93,9 @@ const isCurrentRoute = (href: string) =>
     <header class="site-header">
       <nav class="primary-navigation" aria-label="Primary">
         <ul>
-          {navigation.map(({ href, label }) => (
+          {navigation.map(({ href, label, current }) => (
             <li>
-              <a
-                href={href}
-                aria-current={isCurrentRoute(href) ? "page" : undefined}
-              >
+              <a href={href} aria-current={current || undefined}>
                 {label}
               </a>
             </li>
