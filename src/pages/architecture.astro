@@ -99,13 +99,21 @@ const productionPath = [
 ---
 
 <DocumentLayout title={title} description={description} canonical={canonical}>
-  <section class="introduction signature-band" aria-labelledby="page-heading">
-    <h1 id="page-heading">How this site runs.</h1>
+  <section
+    class="introduction signature-band exhibit-hero"
+    aria-labelledby="page-heading"
+  >
+    <h1 id="page-heading" class="title-architecture">
+      How this site runs.
+    </h1>
 
-    <p>
-      This portfolio is static HTML. GitHub Actions builds and tests it once,
-      then Cloudflare Pages serves the verified files.
-    </p>
+    <div class="route-placard">
+      <span class="route-label">Infrastructure</span>
+      <p>
+        This portfolio is static HTML. GitHub Actions builds and tests it once,
+        then Cloudflare Pages serves the verified files.
+      </p>
+    </div>
   </section>
 
   <section class="architecture-system" aria-labelledby="deployment-heading">
