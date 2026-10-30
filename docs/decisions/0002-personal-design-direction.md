@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-23
-- Updated: 2026-10-01
+- Updated: 2026-10-30
 
 ## Decision
 
@@ -64,6 +64,14 @@ A 2024 study of short-story writing found that access to generative AI ideas imp
 - Use motion only when it explains a state or path change. Never hide content in preparation for animation.
 - Keep the red-ruled evidence treatment, but stop using it as the only signal for every important moment.
 - Make the first reading layer understandable to recruiters and hiring managers while leaving technical depth available to engineers and curious developers.
+
+## Homepage gallery wall
+
+The homepage presents its three routes as a gallery wall: white plates between dark-red rules, large titles, open space, and small museum-style labels. Nibras chose this on 2026-10-30 from three mockups (poster, single line, and gallery wall) because it looked clean and felt closer to art.
+
+The plates replace the numbered vertical connector on the homepage. The red-ruled band moves from the homepage introduction to the plates so it does not repeat. Each plate must lead to a real route, and every plate keeps its full title, description, and action in the built HTML. The plates are not a universal card. The introduction band on other pages does not change.
+
+Art on the site comes from typography, space, and composition. Do not add AI-generated artwork to fill a plate. Reconsider the gallery wall when the homepage needs more routes than the plates can hold, or when human review shows the plates hide what Nibras does.
 
 ## Constraints
 

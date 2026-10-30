@@ -23,8 +23,17 @@ const { title, description, canonical, socialImage } = Astro.props;
 
 const canonicalUrl = canonical?.href;
 const socialImageUrl = socialImage?.url.href;
-const sectionHref = (id: string) =>
-  Astro.url.pathname === "/" ? `#${id}` : `/#${id}`;
+const navigation = [
+  { href: "/", label: "Home" },
+  { href: "/work/cascade/", label: "Cascade" },
+  { href: "/architecture/", label: "Architecture" },
+  { href: "/contact/", label: "Contact" },
+] as const;
+
+const isCurrentRoute = (href: string) =>
+  href === "/"
+    ? Astro.url.pathname === href
+    : Astro.url.pathname.startsWith(href);
 ---
 
 <!doctype html>
@@ -84,15 +93,16 @@ const sectionHref = (id: string) =>
     <header class="site-header">
       <nav class="primary-navigation" aria-label="Primary">
         <ul>
-          <li>
-            <a href={sectionHref("work")}>Work</a>
-          </li>
-          <li>
-            <a href={sectionHref("evidence")}>Evidence</a>
-          </li>
-          <li>
-            <a href={sectionHref("contact")}>Contact</a>
-          </li>
+          {navigation.map(({ href, label }) => (
+            <li>
+              <a
+                href={href}
+                aria-current={isCurrentRoute(href) ? "page" : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
     </header>
