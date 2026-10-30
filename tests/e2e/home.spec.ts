@@ -302,7 +302,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   await sticker.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
   await sticker.hover();
-  await expect.poll(() => stickerStyle("rotate")).toBe("6deg");
+  await expect.poll(() => stickerStyle("rotate")).toBe("-6deg");
   expect(await stickerStyle("animationName")).toBe("none");
 
   await page.mouse.move(0, 0);
@@ -753,9 +753,7 @@ test("every interactive element answers a hover without needing motion", async (
     .toBe("100% 2px");
 
   await page.getByRole("link", { name: "See my work" }).hover();
-  await expect
-    .poll(transform(".hero-action .action-arrow"))
-    .toBe("matrix(1, 0, 0, 1, 0, 2)");
+  await expect.poll(transform(".hero-action .action-arrow")).toBe("none");
 
   await plate.hover();
   await expect
@@ -763,7 +761,7 @@ test("every interactive element answers a hover without needing motion", async (
     .toBe("matrix(1, 0, 0, 1, 8, 0)");
   await expect
     .poll(transform("#contact .route-link .action-arrow"))
-    .toBe("matrix(1, 0, 0, 1, 4, 0)");
+    .toBe("none");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.mouse.move(0, 0);
@@ -777,9 +775,7 @@ test("every interactive element answers a hover without needing motion", async (
   await page.goto("/");
   await settleScrolling(page);
   await page.locator(".architecture-node-link").first().hover();
-  await expect
-    .poll(transform(".architecture-node-icon"))
-    .toBe("matrix(1.12, 0, 0, 1.12, 0, 0)");
+  await expect.poll(transform(".architecture-node-icon")).toBe("none");
 });
 
 test("cartoon details stay decorative and respect reduced motion", async ({
@@ -805,7 +801,10 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   await settleScrolling(page);
   await portrait.hover();
   await expect(hand).toHaveCSS("animation-name", "hand-wave");
-  await expect(hand).toHaveCSS("animation-iteration-count", "infinite");
+  await expect(hand).toHaveCSS("animation-iteration-count", "1");
+  await expect
+    .poll(() => hand.evaluate((icon) => icon.getAnimations().length))
+    .toBe(0);
 
   await page.mouse.move(0, 0);
   await expect(hand).toHaveCSS("animation-name", "none");
@@ -819,7 +818,7 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   );
 });
 
-test("each icon type has its own hover gesture and respects reduced motion", async ({
+test("icon details animate once while the SVG and its outline stay still", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -835,23 +834,61 @@ test("each icon type has its own hover gesture and respects reduced motion", asy
         ),
       ),
     ]);
-  const gestures = new Set<string>();
 
   for (const type of types) {
-    if (!type) {
-      throw new Error("Expected a Lucide icon type.");
-    }
+    if (!type) throw new Error("Expected a Lucide icon type.");
+    if (type === "lucide-hand") continue;
 
     const icon = page.locator(`main svg.${type}`).first();
     await icon.hover();
-    const gesture = await icon.evaluate(
-      (element) => getComputedStyle(element).animationName,
-    );
+    const state = await icon.evaluate((element) => ({
+      animation: getComputedStyle(element).animationName,
+      transform: getComputedStyle(element).transform,
+      details: [...element.children].map((part) => ({
+        animation: getComputedStyle(part).animationName,
+        iterations: getComputedStyle(part).animationIterationCount,
+      })),
+    }));
 
-    expect(gesture, type).not.toBe("none");
-    expect(gestures.has(gesture), type).toBe(false);
-    gestures.add(gesture);
+    expect(state.animation, type).toBe("none");
+    expect(state.transform, type).toBe("none");
+    const moving = state.details.filter((part) => part.animation !== "none");
+    expect(moving.length, type).toBeGreaterThan(0);
+    expect(
+      moving.every((part) => part.iterations === "1"),
+      type,
+    ).toBe(true);
   }
+
+  const fixedOutlines = [
+    ".lucide-mail > rect",
+    ".lucide-cloud-upload > path:nth-child(2)",
+    ".lucide-message-circle-more > path:first-child",
+    ".lucide-server > rect",
+    ".lucide-shield-check > path:first-child",
+    ".lucide-eye > path",
+    ".lucide-globe > circle",
+    ".lucide-cpu > rect:first-of-type",
+  ];
+
+  for (const selector of fixedOutlines) {
+    const outline = page.locator(`main ${selector}`).first();
+    await outline.locator("..").hover();
+    await expect(outline, selector).toHaveCSS("animation-name", "none");
+    await expect(outline, selector).toHaveCSS("transform", "none");
+  }
+
+  // Keyboard focus triggers the same internal detail, keeping the card legible.
+  await page.mouse.move(0, 0);
+  await page.locator('#contact a[href^="mailto:"]').focus();
+  await expect(page.locator(".lucide-mail > path")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await expect(page.locator(".lucide-mail > rect")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.locator('#contact a[href^="mailto:"]').hover();

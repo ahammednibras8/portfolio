@@ -898,12 +898,12 @@ article ul {
 
     20%,
     60% {
-      rotate: 16deg;
+      rotate: 12deg;
     }
 
     40%,
     80% {
-      rotate: -8deg;
+      rotate: -6deg;
     }
   }
 
@@ -955,20 +955,6 @@ article ul {
     background-position-x: 0%;
   }
 
-  .sticker {
-    transition:
-      rotate var(--motion-route) var(--motion-ease-out),
-      scale var(--motion-route) var(--motion-ease-out);
-  }
-
-  .sticker:hover,
-  .hero-portrait:hover .sticker,
-  .route-link:is(:hover, :focus-visible) .sticker {
-    transition-timing-function: var(--motion-ease-bounce);
-    rotate: 6deg;
-    scale: 1.12;
-  }
-
   .hero-portrait {
     transition:
       rotate var(--motion-route) var(--motion-ease-out),
@@ -982,7 +968,7 @@ article ul {
   }
 
   .hero-portrait:hover .sticker-wave svg {
-    animation: hand-wave 1.2s ease-in-out infinite;
+    animation: hand-wave 900ms ease-in-out 1;
   }
 
   .hero-portrait img {
@@ -1020,8 +1006,6 @@ article ul {
   }
 
   .route-placard::before,
-  .action-arrow,
-  .architecture-node-icon,
   .route-link h3,
   .recovery-link strong {
     transition: transform var(--motion-route) var(--motion-ease-out);
@@ -1064,18 +1048,6 @@ article ul {
 
   .route-link:is(:hover, :focus-visible) h3 {
     transform: translateX(0.5rem);
-  }
-
-  .route-link:is(:hover, :focus-visible) .action-arrow {
-    transform: translateX(0.25rem);
-  }
-
-  .hero-action:is(:hover, :focus-visible) .action-arrow {
-    transform: translateY(0.125rem);
-  }
-
-  .architecture-node-link:is(:hover, :focus-visible) .architecture-node-icon {
-    transform: scale(1.12);
   }
 
   .recovery-link:is(:hover, :focus-visible) strong {
