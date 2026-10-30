@@ -1,0 +1,255 @@
+---
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+import {
+  CircleCheck,
+  CloudUpload,
+  Eye,
+  GitBranch,
+  Globe,
+  Package,
+  RotateCcw,
+  ShieldCheck,
+} from "@lucide/astro";
+
+const title = "Portfolio infrastructure — Ahammed Nibras";
+const description =
+  "How this portfolio is built, tested, reviewed, and deployed as static HTML.";
+const canonical = new URL("/architecture/", Astro.site ?? Astro.url);
+
+const buildPath = [
+  {
+    key: "source",
+    platform: "GitHub",
+    label: "Protected main",
+    detail: "A reviewed commit starts the workflow.",
+    relation: "starts",
+    href: "https://github.com/ahammednibras8/portfolio/commits/main",
+    Icon: GitBranch,
+  },
+  {
+    key: "verify",
+    platform: "GitHub Actions",
+    label: "Verify and build",
+    detail: "All checks run before one static build is kept.",
+    relation: "uploads once",
+    href: "https://github.com/ahammednibras8/portfolio/blob/main/.github/workflows/deploy.yml",
+    Icon: CircleCheck,
+  },
+  {
+    key: "artifact",
+    platform: "Workflow artifact",
+    label: "portfolio-dist-<SHA>",
+    detail: "The immutable build is retained for 14 days.",
+    relation: null,
+    href: "https://github.com/ahammednibras8/portfolio/actions/workflows/deploy.yml",
+    Icon: Package,
+  },
+];
+
+const feedbackPath = [
+  {
+    key: "feedback",
+    platform: "Cloudflare Pages",
+    label: "Feedback deploy",
+    detail: "Downloads and uploads the SHA-qualified artifact.",
+    relation: "checks both URLs",
+    href: "https://feedback.ahammed-nibras.pages.dev/",
+    Icon: CloudUpload,
+  },
+  {
+    key: "preview-checks",
+    platform: "Public checks",
+    label: "Preview verified",
+    detail: "The immutable URL and feedback alias must both respond.",
+    relation: "allows review",
+    href: "https://github.com/ahammednibras8/portfolio/blob/main/.github/workflows/deploy.yml",
+    Icon: Eye,
+  },
+  {
+    key: "approval",
+    platform: "GitHub environment",
+    label: "Production approval",
+    detail: "The protected production job waits at this gate.",
+    relation: null,
+    href: "https://github.com/ahammednibras8/portfolio/actions/workflows/deploy.yml",
+    Icon: ShieldCheck,
+  },
+];
+
+const productionPath = [
+  {
+    key: "production",
+    platform: "Cloudflare Pages",
+    label: "Production deploy",
+    detail: "Downloads the same artifact; it does not rebuild.",
+    relation: "smoke-tests",
+    href: "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+    Icon: CloudUpload,
+  },
+  {
+    key: "live",
+    platform: "Production",
+    label: "ahammednibras.com",
+    detail: "The canonical URL must respond after upload.",
+    relation: null,
+    href: "/",
+    Icon: Globe,
+  },
+];
+---
+
+<DocumentLayout title={title} description={description} canonical={canonical}>
+  <section class="introduction signature-band" aria-labelledby="page-heading">
+    <h1 id="page-heading">How this site runs.</h1>
+
+    <p>
+      This portfolio is static HTML. GitHub Actions builds and tests it once,
+      then Cloudflare Pages serves the verified files.
+    </p>
+  </section>
+
+  <section class="architecture-system" aria-labelledby="deployment-heading">
+    <h2 id="deployment-heading">One artifact, two controlled paths</h2>
+
+    <figure
+      class="architecture-diagram"
+      aria-describedby="architecture-caption"
+    >
+      <ol class="architecture-build" aria-label="Build path">
+        {buildPath.map(({ Icon, ...node }) => (
+          <li class={`architecture-node architecture-node-${node.key}`}>
+            <a class="architecture-node-link" href={node.href}>
+              <Icon
+                class="architecture-node-icon"
+                size={32}
+                stroke-width={1.75}
+                aria-hidden="true"
+                focusable="false"
+              />
+
+              <span class="architecture-node-platform">{node.platform}</span>
+              <strong>{node.label}</strong>
+              <span class="architecture-node-detail">{node.detail}</span>
+            </a>
+
+            {node.relation && (
+              <span class="architecture-relation">{node.relation}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <p class="architecture-distribution">
+        <strong>Shared input</strong>
+        Both deployment jobs download the SHA-qualified artifact. Production
+        also waits for feedback and approval.
+      </p>
+
+      <div class="architecture-branches">
+        <section
+          class="architecture-branch architecture-branch-feedback"
+          aria-labelledby="feedback-path-heading"
+        >
+          <header>
+            <span class="architecture-branch-label">Feedback path</span>
+            <h3 id="feedback-path-heading">Deploy, then prove it</h3>
+          </header>
+
+          <ol class="architecture-path" aria-label="Feedback and approval path">
+            {feedbackPath.map(({ Icon, ...node }) => (
+              <li class={`architecture-node architecture-node-${node.key}`}>
+                <a class="architecture-node-link" href={node.href}>
+                  <Icon
+                    class="architecture-node-icon"
+                    size={32}
+                    stroke-width={1.75}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
+
+                  <span class="architecture-node-platform">
+                    {node.platform}
+                  </span>
+                  <strong>{node.label}</strong>
+                  <span class="architecture-node-detail">{node.detail}</span>
+                </a>
+
+                {node.relation && (
+                  <span class="architecture-relation">{node.relation}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <p class="architecture-gate">
+          <span class="architecture-gate-label">Required input</span>
+          <strong>Production approval unlocks this job.</strong>
+        </p>
+
+        <section
+          class="architecture-branch architecture-branch-production"
+          aria-labelledby="production-path-heading"
+        >
+          <header>
+            <span class="architecture-branch-label">Production path</span>
+            <h3 id="production-path-heading">Promote without rebuilding</h3>
+          </header>
+
+          <ol class="architecture-path" aria-label="Production deployment path">
+            {productionPath.map(({ Icon, ...node }) => (
+              <li class={`architecture-node architecture-node-${node.key}`}>
+                <a class="architecture-node-link" href={node.href}>
+                  <Icon
+                    class="architecture-node-icon"
+                    size={32}
+                    stroke-width={1.75}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
+
+                  <span class="architecture-node-platform">
+                    {node.platform}
+                  </span>
+                  <strong>{node.label}</strong>
+                  <span class="architecture-node-detail">{node.detail}</span>
+                </a>
+
+                {node.relation && (
+                  <span class="architecture-relation">{node.relation}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <div
+        class="architecture-recovery"
+        role="group"
+        aria-label="Manual recovery path"
+      >
+        <RotateCcw
+          size={24}
+          stroke-width={1.75}
+          aria-hidden="true"
+          focusable="false"
+        />
+        <span class="architecture-recovery-label">Separate recovery path</span>
+        <strong>Previous successful production</strong>
+        <span class="architecture-recovery-relation">
+          can manually replace the live deployment
+        </span>
+        <a href="https://developers.cloudflare.com/pages/configuration/rollbacks/">
+          Cloudflare rollback reference
+        </a>
+      </div>
+
+      <figcaption id="architecture-caption">
+        Solid connectors show workflow dependencies. The dashed recovery path is
+        manual. This diagram describes the system; it is not live deployment
+        status.
+      </figcaption>
+    </figure>
+  </section>
+</DocumentLayout>

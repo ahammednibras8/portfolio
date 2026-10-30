@@ -1,0 +1,34 @@
+---
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+
+const title = "Contact — Ahammed Nibras";
+const description =
+  "Contact Ahammed Nibras about engineering roles, projects, or collaboration.";
+const canonical = new URL("/contact/", Astro.site ?? Astro.url);
+---
+
+<DocumentLayout title={title} description={description} canonical={canonical}>
+  <section class="introduction signature-band" aria-labelledby="page-heading">
+    <h1 id="page-heading">Contact</h1>
+
+    <p>If you want to discuss a role or project, email me.</p>
+  </section>
+
+  <section aria-labelledby="contact-options-heading">
+    <h2 id="contact-options-heading">Where to reach me</h2>
+
+    <ul class="link-list">
+      <li>
+        <a href="mailto:ahammednibras737@gmail.com">
+          ahammednibras737@gmail.com
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/ahammednibras8">GitHub</a>
+      </li>
+      <li>
+        <a href="https://linkedin.com/in/ahammednibras8">LinkedIn</a>
+      </li>
+    </ul>
+  </section>
+</DocumentLayout>

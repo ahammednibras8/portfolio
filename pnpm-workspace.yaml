@@ -9,3 +9,5 @@ overrides:
 allowBuilds:
   esbuild: true
   workerd: true
+minimumReleaseAgeExclude:
+  - "@lucide/astro@1.58.0"

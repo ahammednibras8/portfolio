@@ -8,6 +8,12 @@ Read the files related to the task before making changes. Check the tests, confi
 - Important content and navigation must be present in the built HTML.
 - Do not add React, Vue, Svelte, server rendering, Pages Functions, a database, or an application server without a new accepted decision record.
 - Use semantic HTML, Astro components, and CSS first.
+- Do not invent, trace, or hand-write SVG icon paths. Research and use an
+  established, maintained, appropriately licensed icon source. Import only the
+  icons the site uses, keep their path data unchanged, and animate the imported
+  icon with CSS when motion has a clear purpose.
+- Use an official asset for a company or product mark; never approximate a
+  brand mark. Icons must not replace visible text that carries meaning.
 - Put routes in `src/pages/`.
 - Put shared page shells in `src/layouts/`.
 - Put reusable presentation in `src/components/`.
