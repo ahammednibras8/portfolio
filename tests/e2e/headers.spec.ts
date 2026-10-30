@@ -21,6 +21,9 @@ test("the build includes the Cloudflare Pages header rules", async () => {
   X-Content-Type-Options: ${expectedHeaders["x-content-type-options"]}
   Referrer-Policy: ${expectedHeaders["referrer-policy"]}
   Permissions-Policy: ${expectedHeaders["permissions-policy"]}
+
+https://beta.ahammednibras.com/*
+  X-Robots-Tag: noindex
 `);
 });
 
