@@ -283,7 +283,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
       .filter((rule) => rule instanceof CSSKeyframesRule)
       .map((rule) =>
         [...(rule as CSSKeyframesRule).cssRules].flatMap((frame) =>
-          (frame as CSSKeyframeRule).keyText.split(", "),
+          (frame as CSSKeyframeRule).keyText.split(/,\s*/),
         ),
       ),
   );
@@ -674,6 +674,7 @@ test("the shared navigation points to real sections and marks the page", async (
 });
 
 test("the 320px index keeps navigation and route choices usable", async ({
+  browserName,
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -714,13 +715,14 @@ test("the 320px index keeps navigation and route choices usable", async ({
     expect(item.height).toBeGreaterThanOrEqual(44);
   }
 
-  await page.keyboard.press("Tab");
+  const nextLink = browserName === "webkit" ? "Alt+Tab" : "Tab";
+  await page.keyboard.press(nextLink);
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
 
   for (let index = 0; index < 6; index += 1) {
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(nextLink);
   }
 
   await expect(page.getByRole("link", { name: "Get in touch" })).toBeFocused();
