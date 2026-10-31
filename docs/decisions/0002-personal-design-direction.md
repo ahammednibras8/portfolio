@@ -93,6 +93,8 @@ The homepage hero shows Nibras's own portrait in a cartoon frame beside the name
 
 Nibras asked to redesign the homepage heading, which read as plain text beside a cartoon page. “Hi, I’m” now leads in quietly, and “Nibras.” lands in white on a tilted red title plate with the same ink outline and hard shadow as the stickers. It pops once on load and straightens on hover. The two lines stay one heading, so assistive technology still reads “Hi, I’m Nibras.” The portrait grew and the speech bubble now lines up under the name. On phones the name comes first, because a visitor should meet the person before the photo. Print keeps plain text.
 
+Nibras asked for the site to work on every device. The layout now fits from a 240px screen to a 3840px monitor, and with browser text at 200%, so never set a minimum page width. Phones on their side move the portrait beside the words, and short screens tighten the hero so the buttons stay close. Screens from 2560px scale the type up instead of leaving a narrow column. The build rewrites newer CSS syntax for older browsers, and colors avoid relative color syntax, so older iPhones and iPads keep the dots, rules, and wide layouts.
+
 Every SVG comes unchanged from Lucide. Stickers are decorative, stay hidden from assistive technology, and never replace visible text. Do not hand-draw SVG paths or approximate a brand mark: GitHub and LinkedIn use generic Lucide icons until an official asset is added.
 
 Art on the site comes from typography, space, and composition. Do not add AI-generated artwork to fill a plate. Reconsider the gallery wall when the homepage needs more routes than the plates can hold, or when human review shows the plates hide what Nibras does.
