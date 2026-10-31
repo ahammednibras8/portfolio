@@ -1,0 +1,353 @@
+/*
+ * The page reads as full-width color bands that carry the hero's comic style
+ * down the site. Screen only, so print keeps its plain document.
+ */
+@media screen {
+  :root {
+    --page-gutter: var(--space-component);
+    --band-edge: max(
+      var(--page-gutter),
+      calc((100% - var(--page-measure)) / 2 + var(--page-gutter))
+    );
+  }
+
+  /* Case study: a reading lead, then cards you can scan. */
+  .page > .case-study {
+    padding-block: var(--space-section);
+  }
+
+  .case-study article {
+    gap: var(--space-section) var(--grid-gap);
+    margin-block-start: 0;
+  }
+
+  article > header {
+    padding-block: 0;
+  }
+
+  article > header h3 {
+    font-size: clamp(1.75rem, 5vw, 3rem);
+  }
+
+  article > p {
+    padding-block-end: 0;
+    font-size: 1.1875rem;
+    line-height: 1.55;
+  }
+
+  article > section {
+    position: relative;
+    display: block;
+    padding: var(--space-section) var(--space-editorial) var(--space-editorial);
+    background: var(--color-surface-raised);
+    border: var(--border-ink);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-pop);
+  }
+
+  article > section > h4 {
+    position: absolute;
+    inset-block-start: -1rem;
+    inset-inline-start: var(--space-component);
+    max-width: calc(100% - 2rem);
+    background: var(--color-action);
+    color: var(--color-surface-raised);
+  }
+
+  article > section > h4 + * {
+    margin-block-start: 0;
+  }
+
+  .page {
+    width: 100%;
+    border-inline: 0;
+  }
+
+  .page > section {
+    padding-inline: var(--band-edge);
+    border-block-end: 0;
+  }
+
+  article > section:last-child {
+    background: var(--color-aqua);
+  }
+
+  /* The lifecycle becomes the case study's navy centerpiece. */
+  article > .project-evidence {
+    --color-focus: var(--color-aqua);
+
+    margin-inline: 0;
+    padding-inline: var(--space-component);
+    background: var(--color-action);
+    border-block: var(--border-ink);
+    box-shadow: 0.5rem 0.5rem 0 var(--color-aqua);
+    color: var(--color-surface-raised);
+  }
+
+  article > .project-evidence > h4 {
+    background: var(--color-aqua);
+    color: var(--color-action);
+  }
+
+  .run-path ol {
+    gap: var(--space-component);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .run-path li,
+  .run-path li + li {
+    padding: var(--space-component);
+    background: var(--color-surface-raised);
+    border: var(--border-ink);
+    border-radius: 0.75rem;
+    color: var(--color-ink-primary);
+  }
+
+  .run-path figcaption {
+    color: var(--color-canvas);
+  }
+
+  /* Header and footer frame the page in navy. */
+  .site-footer {
+    --color-focus: var(--color-aqua);
+
+    width: 100%;
+    padding-inline: var(--band-edge);
+    background: var(--color-action-active);
+    border: 0;
+    color: var(--color-surface-raised);
+  }
+
+  .site-footer-location {
+    color: var(--color-canvas);
+  }
+
+  .primary-navigation a {
+    color: var(--color-surface-raised);
+  }
+
+  .site-footer a {
+    color: var(--color-aqua);
+  }
+
+  .primary-navigation a:visited {
+    color: var(--color-surface-raised);
+  }
+
+  .site-footer a:visited {
+    color: var(--color-aqua);
+  }
+
+  .site-footer a:active {
+    color: var(--color-surface-raised);
+  }
+
+  .site-header {
+    --color-focus: var(--color-aqua);
+
+    background: var(--color-action);
+    border-block-end: 0;
+  }
+
+  /* Section titles speak up instead of sitting like document headings. */
+  .section-title {
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+    letter-spacing: -0.03em;
+  }
+
+  .section-title svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  .routes-introduction p {
+    max-width: 44rem;
+    font-size: 1.125rem;
+  }
+
+  .page > .gallery-wall {
+    padding-block-end: var(--space-editorial);
+  }
+
+  .page > .gallery-wall-compact {
+    padding-block-end: var(--space-section);
+  }
+
+  /* Navy bands: white words, aqua details, and a focus ring that still shows. */
+  .page > .band-navy {
+    --color-focus: var(--color-aqua);
+    --color-rule-structural: rgb(255 255 255 / 16%);
+    --shadow-pop: 0.25rem 0.25rem 0 var(--color-aqua);
+
+    background-color: var(--color-action);
+    border-block: 0;
+    color: var(--color-surface-raised);
+  }
+
+  .band-navy .routes-introduction p {
+    color: var(--color-canvas);
+  }
+
+  .band-navy .section-title svg {
+    color: var(--color-aqua);
+  }
+
+  .band-navy > .sticker {
+    background: var(--color-aqua);
+    color: var(--color-action);
+  }
+
+  .band-navy .speech-bubble,
+  .band-aqua .speech-bubble {
+    color: var(--color-ink-primary);
+  }
+
+  .band-navy .route-link:is(:hover, :focus-visible) {
+    box-shadow: 0.375rem 0.375rem 0 var(--color-aqua);
+  }
+
+  /* Exhibit titles stack over their note, with a sticker big enough to answer. */
+  .page > .exhibit-hero:not(.exhibit-hero-portrait) {
+    min-block-size: 0;
+    row-gap: var(--space-section);
+  }
+
+  .page > .exhibit-hero > .sticker {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .page > .exhibit-hero > .sticker svg {
+    width: 55%;
+    height: 55%;
+  }
+
+  /* The diagram sits on the canvas as one large plate. */
+  .page > .architecture-system {
+    padding-block-start: var(--space-section);
+  }
+
+  .architecture-diagram {
+    background-image: none;
+  }
+
+  /* About: one big speech bubble on a band of its own. */
+  .page > .band-aqua {
+    background: var(--color-aqua);
+  }
+
+  .band-aqua .speech-bubble {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .page .run-path figcaption a,
+  .page .run-path figcaption a:visited {
+    color: var(--color-aqua);
+  }
+
+  .not-found-message {
+    margin-block-start: var(--space-editorial);
+  }
+
+  .run-path {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  @media (width >= 48rem) {
+    :root {
+      --page-gutter: var(--space-editorial);
+    }
+
+    article > .project-evidence {
+      padding-inline: var(--space-editorial);
+    }
+
+    .case-study article {
+      grid-template-rows: auto;
+    }
+
+    article > header,
+    article > p {
+      grid-column: 1 / -1;
+    }
+
+    article > section {
+      grid-column: span 3;
+    }
+
+    article > .project-evidence,
+    article > section:last-child {
+      grid-column: 1 / -1;
+    }
+
+    article > section:nth-of-type(2) {
+      grid-row: span 2;
+    }
+
+    .band-navy.gallery-wall-compact .route-list {
+      gap: var(--space-editorial);
+    }
+
+    .page > .exhibit-hero:not(.exhibit-hero-portrait) > .route-placard {
+      grid-column: 1 / span 4;
+      justify-self: start;
+    }
+
+    .not-found-message {
+      margin-block-start: 0;
+    }
+  }
+
+  @media (width >= 72rem) {
+    .page > .exhibit-hero:not(.exhibit-hero-portrait) > :is(h1, h2) {
+      grid-column: 2 / span 8;
+    }
+
+    .page > .exhibit-hero:not(.exhibit-hero-portrait) > .sticker {
+      grid-column: 10 / span 2;
+    }
+
+    .page > .exhibit-hero:not(.exhibit-hero-portrait) > .route-placard {
+      grid-column: 2 / span 6;
+      justify-self: start;
+      max-width: 34rem;
+    }
+
+    article > header,
+    article > p {
+      grid-column: 2 / span 8;
+    }
+
+    article > section {
+      grid-column: 2 / span 5;
+    }
+
+    article > section:nth-of-type(2) {
+      grid-column: 7 / span 5;
+    }
+
+    article > .project-evidence,
+    article > section:last-child {
+      grid-column: 2 / span 10;
+    }
+
+    article > .project-evidence > h4,
+    article > .project-evidence > :not(h4) {
+      grid-column: auto;
+    }
+
+    .band-aqua > h2 {
+      grid-column: 2 / span 3;
+    }
+
+    .page > .band-aqua > .speech-bubble {
+      grid-column: 5 / span 7;
+    }
+  }
+}

@@ -1086,6 +1086,42 @@ test.describe("on a touch screen", () => {
   });
 });
 
+test("color bands run edge to edge on any width", async ({ page }) => {
+  for (const width of [390, 1440, 2560]) {
+    await page.setViewportSize({ height: 900, width });
+    await page.goto("/");
+
+    const bands = await page
+      .locator("#cascade, #about, #contact, .site-header, .site-footer")
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const { left, right } = element.getBoundingClientRect();
+
+          return { left, right };
+        }),
+      );
+    const edge = await page.evaluate(
+      () => document.documentElement.clientWidth,
+    );
+
+    expect(bands).toHaveLength(5);
+
+    for (const { left, right } of bands) {
+      expect(left, `at ${width}`).toBe(0);
+      expect(right, `at ${width}`).toBe(edge);
+    }
+  }
+
+  await expect(page.locator("#cascade")).toHaveCSS(
+    "background-color",
+    "rgb(1, 58, 99)",
+  );
+  await expect(page.locator("#about")).toHaveCSS(
+    "background-color",
+    "rgb(143, 216, 220)",
+  );
+});
+
 test("every screen size and large text fit without sideways scrolling", async ({
   page,
 }) => {
@@ -1299,7 +1335,7 @@ test("the index preserves the typography, color, spacing, and depth contracts", 
     introductionBackground: "rgb(255, 255, 255)",
     introductionBorder: "4px",
     routePadding: "24px",
-    routeShadow: "rgb(23, 25, 26) 4px 4px 0px 0px",
+    routeShadow: "rgb(143, 216, 220) 4px 4px 0px 0px",
     labelUsesTechnicalFont: true,
     labelColor: "rgb(1, 58, 99)",
   });
@@ -1325,7 +1361,8 @@ test("route links preserve pointer, keyboard, reduced-motion, and forced-color s
   await page.mouse.move(0, 0);
   await route.focus();
   await expect(route).toHaveCSS("outline-style", "solid");
-  await expect(route).toHaveCSS("outline-color", "rgb(0, 122, 115)");
+  // Contact sits on navy, where only the aqua focus ring stays visible.
+  await expect(route).toHaveCSS("outline-color", "rgb(143, 216, 220)");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   expect(
