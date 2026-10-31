@@ -38,5 +38,14 @@ if (
 export default defineConfig({
   output: "static",
   site: siteUrl.href,
+  image: {
+    // Matches the sharpness of the default WebP at fewer bytes.
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+      config: { avif: { quality: 65 } },
+    },
+  },
   integrations: [sitemap()],
+  // The security policy blocks inline scripts, so every script must be a file.
+  vite: { build: { assetsInlineLimit: 0 } },
 });

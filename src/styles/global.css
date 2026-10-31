@@ -335,19 +335,6 @@ article ul {
   margin-block-start: var(--space-component);
 }
 
-.link-list {
-  padding: 0;
-  list-style: none;
-}
-
-.link-list li + li {
-  margin-block-start: var(--space-interface);
-}
-
-.link-list a {
-  padding-block: var(--space-interface);
-}
-
 .route-list {
   display: grid;
   grid-auto-rows: 1fr;
@@ -910,6 +897,10 @@ article ul {
   .sticker-wave svg {
     transform-origin: bottom center;
   }
+
+  .sticker-wave svg.is-playing {
+    animation: hand-wave 900ms ease-in-out 1;
+  }
 }
 
 /*
@@ -1140,6 +1131,19 @@ article > .project-evidence > h4 {
   inset-inline-end: -0.75rem;
 }
 
+/* touch-motion.ts sets these from how the phone is held. */
+@media screen and (hover: none) and (prefers-reduced-motion: no-preference) {
+  .hero-portrait {
+    translate: var(--tilt-x, 0) var(--tilt-y, 0);
+    transition: translate var(--motion-short) ease-out;
+  }
+
+  .hero-portrait .sticker {
+    translate: calc(var(--tilt-x, 0px) * -0.75) calc(var(--tilt-y, 0px) * -0.75);
+    transition: translate var(--motion-short) ease-out;
+  }
+}
+
 .page > .exhibit-hero {
   min-block-size: max(22rem, 48svh);
   grid-template-rows: auto auto 1fr;
@@ -1149,6 +1153,86 @@ article > .project-evidence > h4 {
     transparent 0.1rem
   );
   background-size: 1rem 1rem;
+}
+
+/* Rolls the dots from the phase and lifts them as far as the reach allows. */
+@property --wave-phase {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --wave-reach {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  @keyframes dot-wave {
+    0% {
+      --wave-phase: 0deg;
+    }
+
+    100% {
+      --wave-phase: 360deg;
+    }
+  }
+
+  /*
+   * One sliding gradient can only move the whole grid, so each of the twelve
+   * columns in one wavelength is its own layer. They line up with the plain
+   * dots at rest. Pausing on exit keeps the phase, so the wave flattens where
+   * it is, and it paints nothing until a heading is hovered or touch-motion.ts starts it. Each extra layer
+   * repaints the whole section on every frame, so keep the count low.
+   */
+  .page > .dot-wave {
+    --wave-dot: radial-gradient(
+      circle at 0.5rem 0.5rem,
+      var(--color-rule-structural) 0.09rem,
+      transparent 0.1rem
+    );
+
+    background-image:
+      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot),
+      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot),
+      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot);
+    background-position:
+      0 calc(var(--wave-reach) * sin(var(--wave-phase) - 0deg)),
+      1rem calc(var(--wave-reach) * sin(var(--wave-phase) - 30deg)),
+      2rem calc(var(--wave-reach) * sin(var(--wave-phase) - 60deg)),
+      3rem calc(var(--wave-reach) * sin(var(--wave-phase) - 90deg)),
+      4rem calc(var(--wave-reach) * sin(var(--wave-phase) - 120deg)),
+      5rem calc(var(--wave-reach) * sin(var(--wave-phase) - 150deg)),
+      6rem calc(var(--wave-reach) * sin(var(--wave-phase) - 180deg)),
+      7rem calc(var(--wave-reach) * sin(var(--wave-phase) - 210deg)),
+      8rem calc(var(--wave-reach) * sin(var(--wave-phase) - 240deg)),
+      9rem calc(var(--wave-reach) * sin(var(--wave-phase) - 270deg)),
+      10rem calc(var(--wave-reach) * sin(var(--wave-phase) - 300deg)),
+      11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
+    background-size: 12rem 1rem;
+    transition: --wave-reach var(--motion-sweep) ease-in-out;
+    animation: dot-wave 4s linear infinite paused;
+  }
+
+  .page > .dot-wave.is-waving {
+    --wave-reach: 0.4rem;
+
+    animation-play-state: running;
+  }
+
+  @media (hover: hover) {
+    .page > .dot-wave:has(> :is(h1, h2):hover) {
+      --wave-reach: 0.4rem;
+
+      animation-play-state: running;
+    }
+
+    /* Only the words start the wave, not the empty space beside them. */
+    .page > .dot-wave > h2 {
+      justify-self: start;
+    }
+  }
 }
 
 .page > .exhibit-hero > .sticker {
@@ -1171,10 +1255,6 @@ article > .project-evidence > h4 {
 
 .print-contact {
   display: none;
-}
-
-.page > .exhibit-hero-compact {
-  min-block-size: 0;
 }
 
 .exhibit-hero :is(h1, h2) {

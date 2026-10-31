@@ -63,6 +63,8 @@ pnpm exec wrangler pages deploy dist \
 
 Register `beta.ahammednibras.com` as a custom domain on the Pages project, then set its proxied CNAME target to `beta.ahammed-nibras.pages.dev`. Cloudflare requires a proxied DNS record to route a custom hostname to a preview branch; a record without the proxy serves the production branch instead. Follow [Cloudflare's custom branch alias instructions](https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/).
 
+Files under `/_astro/` are cached for a year as immutable, because Astro puts a content hash in every name, so a changed file always gets a new URL. Everything placed there must stay content-hashed. HTML keeps the default revalidation, so a deploy or rollback reaches returning visitors on their next request.
+
 The beta hostname keeps the production canonical URL and explicitly sends `X-Robots-Tag: noindex` through its hostname-specific rule in `public/_headers`. Verify the beta hostname over HTTPS, check that it serves the intended commit's content and assets, and confirm the noindex header. The beta upload does not promote a deployment or change the production branch. No additional hosting service, runtime, or automatic deployment workflow is introduced.
 
 ## Recovery and rollback

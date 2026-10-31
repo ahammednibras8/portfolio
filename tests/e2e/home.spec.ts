@@ -901,6 +901,263 @@ test("icon details animate once while the SVG and its outline stay still", async
   ).toBe(true);
 });
 
+test.describe("on a phone-sized screen", () => {
+  test.use({ deviceScaleFactor: 1.75, viewport: { height: 823, width: 412 } });
+
+  test("the portrait downloads at the size it renders", async ({ page }) => {
+    await page.goto("/");
+
+    const portrait = page.locator(".hero-portrait img");
+    const chosenWidth = () =>
+      portrait.evaluate((image: HTMLImageElement) => {
+        const chosen = new URL(image.currentSrc).pathname;
+        const sources = image.parentElement?.querySelectorAll("source") ?? [];
+
+        return [...sources, image]
+          .flatMap((source) => source.srcset.split(","))
+          .map((candidate) => candidate.trim().split(" "))
+          .find(([url]) => url === chosen)?.[1];
+      });
+
+    await expect(page.locator(".hero-portrait source").first()).toHaveAttribute(
+      "type",
+      "image/avif",
+    );
+    await expect.poll(chosenWidth).toBe("400w");
+  });
+});
+
+test.describe("on a touch screen", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "Only Chromium emulates a touch-only pointer.",
+  );
+  test.use({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { height: 915, width: 412 },
+  });
+
+  test("icons play once in view and the hero dots roll", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+
+    const blocked: string[] = [];
+
+    page.on("console", (message) => {
+      if (message.type() === "error") blocked.push(message.text());
+    });
+    await page.goto("/");
+    await settleScrolling(page);
+
+    const hero = page.locator(".exhibit-hero-portrait");
+    const flap = page.locator("#contact .lucide-mail > path");
+
+    // The script must really run under the production security policy.
+    await expect(hero).toHaveClass(/is-waving/);
+    expect(blocked).toEqual([]);
+    await expect(hero).not.toHaveClass(/is-waving/, { timeout: 7000 });
+    await expect(flap).toHaveCSS("animation-name", "none");
+
+    await flap.scrollIntoViewIfNeeded();
+    await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
+    await expect(flap).toHaveCSS("animation-name", "none");
+
+    await page.locator("#introduction-heading").tap();
+    await expect(hero).toHaveClass(/is-waving/);
+  });
+
+  const tiltPhone = (page: Page) =>
+    page.evaluate(() => {
+      window.dispatchEvent(
+        new DeviceOrientationEvent("deviceorientation", {
+          beta: 75,
+          gamma: 30,
+        }),
+      );
+    });
+  const portraitLean = (page: Page) =>
+    page
+      .locator(".hero-portrait")
+      .evaluate((portrait) => getComputedStyle(portrait).translate);
+
+  test("a tap buzzes and the portrait leans with the phone", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "vibrate", {
+        value: (duration: number) => {
+          document.documentElement.dataset.buzzed = String(duration);
+
+          return true;
+        },
+      });
+    });
+    await page.goto("/");
+    await settleScrolling(page);
+
+    await expect
+      .poll(async () => {
+        await tiltPhone(page);
+
+        return portraitLean(page);
+      })
+      .toBe("6px 6px");
+
+    await page.locator("#introduction-heading").tap();
+    await expect(page.locator("html")).toHaveAttribute("data-buzzed", "10");
+  });
+
+  test("the tilt sensor permission is only requested by a portrait tap", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      Object.assign(DeviceOrientationEvent, {
+        requestPermission: async () => {
+          document.documentElement.dataset.asked = "true";
+
+          return "granted";
+        },
+      });
+    });
+    await page.goto("/");
+    await settleScrolling(page);
+
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-asked",
+      "true",
+    );
+
+    await page.locator(".hero-portrait img").tap();
+    await expect(page.locator("html")).toHaveAttribute("data-asked", "true");
+    await expect
+      .poll(async () => {
+        await tiltPhone(page);
+
+        return portraitLean(page);
+      })
+      .toBe("6px 6px");
+  });
+
+  test("reduced motion keeps the page still", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await settleScrolling(page);
+    await tiltPhone(page);
+    expect(await portraitLean(page)).toBe("none");
+    await page.locator("#contact").scrollIntoViewIfNeeded();
+    await page.locator("#introduction-heading").tap();
+
+    await expect(page.locator(".is-waving, .is-playing")).toHaveCount(0);
+  });
+});
+
+test("the verify and approval checks finish after the pointer leaves", async ({
+  browserName,
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  for (const node of ["verify", "approval"]) {
+    const link = page.locator(
+      `.architecture-node-${node} .architecture-node-link`,
+    );
+    const check = link.locator("svg.lucide > path").last();
+    const playing = () =>
+      check.evaluate((part) =>
+        part
+          .getAnimations()
+          .some(
+            (animation) =>
+              animation instanceof CSSAnimation &&
+              animation.playState === "running",
+          ),
+      );
+
+    await link.hover();
+    await expect.poll(playing, node).toBe(true);
+    await page.mouse.move(0, 0);
+
+    // Firefox cannot hold the style query, so its check ends with the hover.
+    expect(await playing(), node).toBe(browserName !== "firefox");
+    await expect(check).toHaveCSS("animation-name", "none");
+
+    await link.hover();
+    await expect.poll(playing, node).toBe(true);
+    await page.mouse.move(0, 0);
+  }
+
+  // Every other icon keeps the standard ease and ends with the hover.
+  const mail = page.locator('#contact a[href^="mailto:"]');
+  const flap = mail.locator(".lucide-mail > path");
+
+  await mail.hover();
+  await expect(flap).toHaveCSS("animation-timing-function", "ease-in-out");
+  await page.mouse.move(0, 0);
+  expect(
+    await flap.evaluate((part) => getComputedStyle(part).animationName),
+  ).toBe("none");
+});
+
+test("hovering a hero heading rolls a wave through its dots", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settleScrolling(page);
+
+  const wave = (section: Locator) =>
+    section.evaluate((element) => {
+      const style = getComputedStyle(element);
+
+      return {
+        layers: style.backgroundImage.split("radial-gradient").length - 1,
+        reach: Number.parseFloat(style.getPropertyValue("--wave-reach")),
+        state: style.animationPlayState,
+      };
+    });
+
+  for (const heading of ["#introduction-heading", "#cascade-heading"]) {
+    const section = page.locator(`section:has(> ${heading})`);
+
+    await section.locator(".speech-bubble").hover();
+    expect(await wave(section), heading).toEqual({
+      layers: 12,
+      reach: 0,
+      state: "paused",
+    });
+
+    await page.locator(heading).hover();
+    await expect.poll(async () => (await wave(section)).state).toBe("running");
+    await expect
+      .poll(async () => (await wave(section)).reach)
+      .toBeGreaterThan(0);
+
+    await page.mouse.move(0, 0);
+    await expect.poll(async () => (await wave(section)).state).toBe("paused");
+    await expect.poll(async () => (await wave(section)).reach).toBe(0);
+  }
+
+  // The site diagram hero keeps still, and reduced motion keeps the plain dots.
+  const still = page.locator(".exhibit-hero:not(.dot-wave)");
+
+  await still.locator("h2").hover();
+  expect((await wave(still)).layers).toBe(1);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await wave(page.locator(".exhibit-hero-portrait"))).toMatchObject({
+    layers: 1,
+  });
+  await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+});
+
 test("the index preserves the typography, color, spacing, and depth contracts", async ({
   page,
 }) => {
@@ -1176,7 +1433,8 @@ test("the complete page works without JavaScript", async ({ browser }) => {
 
   await page.goto("/");
   await expect(page.locator("h1")).toBeVisible();
-  await expect(page.locator("script")).toHaveCount(0);
+  // The security policy blocks inline scripts, so one would silently never run.
+  await expect(page.locator("script:not([src])")).toHaveCount(0);
 
   const navigation = page.getByRole("navigation", { name: "Primary" });
 
