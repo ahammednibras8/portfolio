@@ -1174,6 +1174,12 @@ article > .project-evidence > h4 {
   initial-value: transparent;
 }
 
+@property --wave-size {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0;
+}
+
 @media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   @keyframes dot-wave {
     0% {
@@ -1182,6 +1188,19 @@ article > .project-evidence > h4 {
 
     100% {
       --wave-phase: 360deg;
+    }
+  }
+
+  @keyframes dot-bold {
+    0%,
+    100% {
+      --wave-ink: var(--color-rule-structural);
+      --wave-size: 0.09rem;
+    }
+
+    15% {
+      --wave-ink: var(--color-action);
+      --wave-size: 0.18rem;
     }
   }
 
@@ -1194,10 +1213,11 @@ article > .project-evidence > h4 {
    */
   .page > .dot-wave {
     --wave-ink: var(--color-rule-structural);
+    --wave-size: 0.09rem;
     --wave-dot: radial-gradient(
       circle at 0.5rem 0.5rem,
-      var(--wave-ink) 0.09rem,
-      transparent 0.1rem
+      var(--wave-ink) var(--wave-size),
+      transparent calc(var(--wave-size) + 0.01rem)
     );
 
     background-image:
@@ -1218,21 +1238,22 @@ article > .project-evidence > h4 {
       10rem calc(var(--wave-reach) * sin(var(--wave-phase) - 300deg)),
       11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
     background-size: 12rem 1rem;
-    transition:
-      --wave-reach var(--motion-sweep) ease-in-out,
-      --wave-ink var(--motion-sweep) ease-in-out;
+    transition: --wave-reach var(--motion-sweep) ease-in-out;
     animation: dot-wave 4s linear infinite paused;
   }
 
   /*
-   * Phones get red dots because the pale ones barely show on a small screen.
-   * Past half the 1rem spacing, a dot would read as part of the next row.
+   * Pale dots barely show on a phone, so they swell bold and red, then fade back
+   * as they roll. The fade must match waveDuration in touch-motion.ts. Hover
+   * stays pale because leaving mid-fade would snap the dots back. Past half the
+   * 1rem spacing, a dot would read as part of the next row.
    */
   .page > .dot-wave.is-waving {
-    --wave-ink: var(--color-action);
     --wave-reach: 0.45rem;
 
-    animation-play-state: running;
+    animation:
+      dot-wave 4s linear infinite,
+      dot-bold 8s ease-in-out 1;
   }
 
   @media (hover: hover) {
