@@ -419,7 +419,7 @@ test("the hero shows an optimized portrait in a cartoon frame", async ({
       return {
         besideBubble: bubble.right < image.left,
         besideTitle: title.right <= image.left,
-        aboveTitle: image.bottom < title.top,
+        belowTitle: image.top > title.bottom,
       };
     });
 
@@ -440,7 +440,7 @@ test("the hero shows an optimized portrait in a cartoon frame", async ({
   await expect.poll(rotate).toBe("2deg");
 
   await page.setViewportSize({ width: 390, height: 844 });
-  expect(await placement()).toMatchObject({ aboveTitle: true });
+  expect(await placement()).toMatchObject({ belowTitle: true });
 });
 
 test("the headline sweeps on load and hover and stays readable", async ({
@@ -923,7 +923,7 @@ test.describe("on a phone-sized screen", () => {
       "type",
       "image/avif",
     );
-    await expect.poll(chosenWidth).toBe("400w");
+    await expect.poll(chosenWidth).toBe("520w");
   });
 });
 

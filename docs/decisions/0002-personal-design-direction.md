@@ -91,6 +91,8 @@ Nibras then asked to try three extras on phones after hearing the case against t
 
 The homepage hero shows Nibras's own portrait in a cartoon frame beside the name, so the speech bubble reads as Nibras speaking. Store the portrait in `src/assets/` with its metadata removed. Printing is the exception to the cartoon style. Nibras asked for a clean print layout, so the print stylesheet removes the portrait, stickers, shadows, and controls, moves the contact details to the top, and keeps the content to two A4 pages.
 
+Nibras asked to redesign the homepage heading, which read as plain text beside a cartoon page. “Hi, I’m” now leads in quietly, and “Nibras.” lands in white on a tilted red title plate with the same ink outline and hard shadow as the stickers. It pops once on load and straightens on hover. The two lines stay one heading, so assistive technology still reads “Hi, I’m Nibras.” The portrait grew and the speech bubble now lines up under the name. On phones the name comes first, because a visitor should meet the person before the photo. Print keeps plain text.
+
 Every SVG comes unchanged from Lucide. Stickers are decorative, stay hidden from assistive technology, and never replace visible text. Do not hand-draw SVG paths or approximate a brand mark: GitHub and LinkedIn use generic Lucide icons until an official asset is added.
 
 Art on the site comes from typography, space, and composition. Do not add AI-generated artwork to fill a plate. Reconsider the gallery wall when the homepage needs more routes than the plates can hold, or when human review shows the plates hide what Nibras does.
