@@ -1,0 +1,251 @@
+/*
+ * Depth for the slide parts. Faint halftone orbs drift behind each part and
+ * short parts rise into place, both driven by scroll where the browser supports
+ * it. Everything here is decoration: orbs stay faint and away from the words,
+ * and the rise animates scale only, because animating border-radius repaints a
+ * whole screen of background on every frame. Do not make parts sticky so the
+ * next one slides over them: the covered part would still take keyboard focus.
+ */
+
+/* Print keeps its plain document, so the HUD only exists on screen. */
+.part-hud {
+  display: none;
+}
+
+@media screen {
+  .part-orb {
+    --orb-ink: rgb(1 58 99 / 12%);
+
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  .part-orb.band-navy {
+    --orb-ink: rgb(143 216 220 / 20%);
+  }
+
+  .part-orb.band-aqua {
+    --orb-ink: rgb(1 58 99 / 16%);
+  }
+
+  .part-orb::after {
+    position: absolute;
+    z-index: -1;
+    width: min(70vw, 34rem);
+    aspect-ratio: 1;
+    background: radial-gradient(var(--orb-ink) 0.13rem, transparent 0.14rem) 0
+      0 / 0.85rem 0.85rem;
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
+
+  #work::after {
+    inset-block-end: -10rem;
+    inset-inline-end: -8rem;
+  }
+
+  #cascade::after {
+    inset-block-end: -12rem;
+    inset-inline-end: -6rem;
+  }
+
+  #architecture::after {
+    inset-block-end: -12rem;
+    inset-inline-end: -6rem;
+  }
+
+  #about::after {
+    inset-block-end: -14rem;
+    inset-inline-start: -10rem;
+  }
+
+  #contact::after {
+    inset-block-start: -12rem;
+    inset-inline-end: -10rem;
+  }
+
+  @media (forced-colors: active) {
+    .part-orb::after {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      @keyframes part-rise {
+        0% {
+          scale: 0.93;
+        }
+
+        100% {
+          scale: 1;
+        }
+      }
+
+      @keyframes orb-drift {
+        0% {
+          transform: translateY(-14vh);
+        }
+
+        100% {
+          transform: translateY(14vh);
+        }
+      }
+
+      .part-orb {
+        view-timeline: --part block;
+      }
+
+      .part-orb::after {
+        animation: orb-drift linear both;
+        animation-range: cover;
+        animation-timeline: --part;
+      }
+
+      .part-rise {
+        transform-origin: 50% 0;
+        animation: part-rise linear both;
+        animation-range: entry 0% entry 100%;
+        animation-timeline: --part;
+      }
+
+      /* The Cascade band already rolls its dots, so it runs both together. */
+      .page > .dot-wave.part-rise {
+        animation:
+          dot-wave 4s linear infinite paused,
+          part-rise linear both;
+        animation-range:
+          normal,
+          entry 0% entry 100%;
+        animation-timeline: auto, --part;
+      }
+    }
+  }
+
+  /* Progress runs along the foot of the header. */
+  .site-header {
+    --page-progress: 0;
+  }
+
+  .site-header::after {
+    position: absolute;
+    inset: auto 0 0;
+    block-size: 0.25rem;
+    background: var(--color-aqua);
+    content: "";
+    pointer-events: none;
+    transform: scaleX(var(--page-progress));
+    transform-origin: 0 50%;
+  }
+
+  .part-hud {
+    position: fixed;
+    z-index: 4;
+    inset-block-end: max(1rem, env(safe-area-inset-bottom));
+    inset-inline-start: var(--band-edge);
+    display: flex;
+    align-items: center;
+    background: var(--color-action);
+    border: var(--border-width-ink) solid var(--color-surface-raised);
+    border-radius: 999px;
+    box-shadow: var(--shadow-pop);
+    color: var(--color-surface-raised);
+    opacity: 0;
+    translate: 0 1.5rem;
+    visibility: hidden;
+  }
+
+  .part-hud[hidden] {
+    display: none;
+  }
+
+  .part-hud.is-shown {
+    opacity: 1;
+    translate: 0 0;
+    visibility: visible;
+  }
+
+  .part-hud-status {
+    margin: 0;
+    padding-inline: 0.25rem;
+    font-family: var(--font-technical);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .part-hud-name {
+    display: none;
+    margin-inline-start: var(--space-interface);
+    color: var(--color-aqua);
+    text-transform: uppercase;
+  }
+
+  .part-hud-step {
+    display: grid;
+    width: var(--touch-target);
+    height: var(--touch-target);
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+    place-items: center;
+  }
+
+  .part-hud-step::before {
+    width: 0.65rem;
+    height: 0.65rem;
+    border: solid currentcolor;
+    content: "";
+    rotate: 45deg;
+  }
+
+  .part-hud-step[data-step="-1"]::before {
+    border-width: 0.2rem 0 0 0.2rem;
+    translate: 0 0.15rem;
+  }
+
+  .part-hud-step[data-step="1"]::before {
+    border-width: 0 0.2rem 0.2rem 0;
+    translate: 0 -0.15rem;
+  }
+
+  .part-hud-step:disabled {
+    cursor: default;
+    opacity: 0.35;
+  }
+
+  .part-hud-step:focus-visible {
+    outline: 0.1875rem solid var(--color-surface-raised);
+    outline-offset: -0.375rem;
+  }
+
+  /* Focus must never land under the HUD. */
+  html:has(.part-hud) {
+    scroll-padding-block-end: 5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .part-hud {
+      transition:
+        opacity var(--motion-route) var(--motion-ease-out),
+        translate var(--motion-route) var(--motion-ease-out),
+        visibility 0s var(--motion-route);
+    }
+
+    .part-hud.is-shown {
+      transition-delay: 0s;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .part-hud-name {
+      display: inline;
+    }
+  }
+}
