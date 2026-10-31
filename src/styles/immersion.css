@@ -21,6 +21,12 @@
     overflow: clip;
   }
 
+  @supports not (overflow: clip) {
+    .part-orb {
+      overflow: hidden;
+    }
+  }
+
   .part-orb.band-navy {
     --orb-ink: rgb(143 216 220 / 20%);
   }
@@ -215,7 +221,8 @@
     translate: 0 -0.15rem;
   }
 
-  .part-hud-step:disabled {
+  /* aria-disabled, not disabled, so focus stays on the button at either end. */
+  .part-hud-step[aria-disabled="true"] {
     cursor: default;
     opacity: 0.35;
   }

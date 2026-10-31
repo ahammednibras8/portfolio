@@ -33,13 +33,18 @@
     margin-block-start: 0;
   }
 
+  /*
+   * A full 24px square to tap, with the dot kept at the screen edge so it never
+   * touches the words. The extra width only overlaps the page gutter.
+   */
   .part-rail a {
     position: relative;
     display: grid;
-    width: 1rem;
+    width: 1.5rem;
     height: 1.5rem;
+    padding-inline-end: 0.25rem;
     color: var(--color-action);
-    place-items: center;
+    place-items: center end;
     text-decoration: none;
   }
 
@@ -76,8 +81,29 @@
     opacity: 1;
   }
 
+  /* The rail floats over pale and navy parts alike, so the ring has two tones. */
+  .part-rail a:focus-visible {
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0 0.375rem var(--color-action);
+    outline: 0.1875rem solid var(--color-surface-raised);
+    outline-offset: 0;
+  }
+
+  @media (forced-colors: active) {
+    .part-rail a:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
   .page {
     overflow-x: clip;
+  }
+
+  /* Safari before 16 has no clip, and the drifting pieces must not scroll the page. */
+  @supports not (overflow: clip) {
+    .page {
+      overflow-x: hidden;
+    }
   }
 
   /* Every part lands flush under the header, however it was reached. */
@@ -118,7 +144,8 @@
     }
 
     .part-rail a {
-      width: 1.5rem;
+      padding-inline-end: 0;
+      place-items: center;
     }
   }
 
