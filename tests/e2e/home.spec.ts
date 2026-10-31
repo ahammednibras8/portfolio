@@ -42,8 +42,9 @@ test("the whole portfolio reads as one continuous page", async ({ page }) => {
   ).toEqual([
     "Selected work",
     "Cascade",
-    "How this site runs.",
+    "What I work with",
     "About",
+    "How this site runs.",
     "Contact",
   ]);
 
@@ -59,7 +60,9 @@ test("the whole portfolio reads as one continuous page", async ({ page }) => {
   await expect(page.locator('a[href^="/architecture"]')).toHaveCount(0);
   await expect(page.locator('a[href="/contact/"]')).toHaveCount(0);
   await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(page.getByText("TypeScript · PostgreSQL · Redis")).toBeVisible();
+  await expect(
+    page.locator("#cascade").getByText("TypeScript · PostgreSQL · Redis"),
+  ).toBeVisible();
   await expect(page.locator("footer")).toContainText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
@@ -83,9 +86,14 @@ test("the page runs from work through about to contact without clicks", async ({
     };
 
     return {
-      order: ["#work", "#cascade", "#architecture", "#about", "#contact"].map(
-        top,
-      ),
+      order: [
+        "#work",
+        "#cascade",
+        "#toolbox",
+        "#about",
+        "#architecture",
+        "#contact",
+      ].map(top),
       viewportHeight: window.innerHeight,
       documentHeight: document.documentElement.scrollHeight,
     };
@@ -350,7 +358,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   await expect.poll(() => underlineClip(title)).toBe(underlineHidden);
 });
 
-test("printing gives a clean two-page document", async ({
+test("printing gives a clean three-page document", async ({
   browserName,
   page,
 }) => {
@@ -386,7 +394,17 @@ test("printing gives a clean two-page document", async ({
   const pdf = await page.pdf({ format: "A4", preferCSSPageSize: true });
   const pages = pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? [];
 
-  expect(pages).toHaveLength(2);
+  // Six projects and a toolbox need three pages, and no heading may be left
+  // at the foot of one page with its words on the next.
+  expect(pages).toHaveLength(3);
+
+  const breaks = await page.evaluate(() => {
+    const heading = document.querySelector("#architecture");
+
+    return heading ? getComputedStyle(heading).breakInside : "missing";
+  });
+
+  expect(breaks).toBe("avoid");
 });
 
 test("the hero shows an optimized portrait in a cartoon frame", async ({
@@ -716,16 +734,22 @@ test("the 320px index keeps navigation and route choices usable", async ({
       clientWidth: document.documentElement.clientWidth,
       scrollWidth: document.documentElement.scrollWidth,
       navigation: bounds(".primary-navigation a"),
-      routes: bounds(".route-link"),
+      projects: bounds("#work .route-link"),
+      routes: bounds("#contact .route-link"),
     };
   });
 
   expect(layout.scrollWidth).toBe(layout.clientWidth);
   expect(layout.navigation).toHaveLength(4);
   expect(new Set(layout.navigation.map(({ top }) => top)).size).toBe(1);
+  expect(layout.projects).toHaveLength(6);
   expect(layout.routes).toHaveLength(4);
 
-  for (const item of [...layout.navigation, ...layout.routes]) {
+  for (const item of [
+    ...layout.navigation,
+    ...layout.projects,
+    ...layout.routes,
+  ]) {
     expect(item.left).toBeGreaterThanOrEqual(0);
     expect(item.right).toBeLessThanOrEqual(layout.clientWidth);
   }
@@ -1253,6 +1277,22 @@ test("the verify and approval checks finish after the pointer leaves", async ({
       `.architecture-node-${node} .architecture-node-link`,
     );
     const check = link.locator("svg.lucide > path").last();
+
+    // Stretch the gesture and its hold together, so a starved machine can still
+    // leave mid-gesture. The two must stay equal for the check to finish.
+    await link.evaluate((anchor) => {
+      const icon = anchor.querySelector<SVGElement>("svg.lucide");
+
+      icon?.style.setProperty("transition-delay", "3300ms");
+
+      for (const part of icon?.children ?? []) {
+        (part as SVGElement).style.setProperty(
+          "--icon-part-duration",
+          "3300ms",
+        );
+      }
+    });
+
     const playing = () =>
       check.evaluate((part) =>
         part
@@ -1270,7 +1310,7 @@ test("the verify and approval checks finish after the pointer leaves", async ({
 
     // Firefox cannot hold the style query, so its check ends with the hover.
     expect(await playing(), node).toBe(browserName !== "firefox");
-    await expect(check).toHaveCSS("animation-name", "none");
+    await expect(check).toHaveCSS("animation-name", "none", { timeout: 6000 });
 
     await link.hover();
     await expect.poll(playing, node).toBe(true);
@@ -1363,7 +1403,7 @@ test("the index preserves the typography, color, spacing, and depth contracts", 
     const root = getComputedStyle(document.documentElement);
     const body = getComputedStyle(document.body);
     const introduction = document.querySelector<HTMLElement>(".introduction");
-    const route = document.querySelector<HTMLElement>(".route-link");
+    const route = document.querySelector<HTMLElement>("#contact .route-link");
     const label = document.querySelector<HTMLElement>(".route-label");
 
     if (!introduction || !route || !label) {
@@ -1460,6 +1500,75 @@ test("route links preserve pointer, keyboard, reduced-motion, and forced-color s
   );
 });
 
+test("the work section shows every project with a working link", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const cards = page
+    .getByRole("navigation", { name: "Projects" })
+    .getByRole("link");
+
+  await expect(cards).toHaveCount(6);
+
+  const projects = await cards.evaluateAll((links) =>
+    links.map((link) => ({
+      href: link.getAttribute("href"),
+      name: link.querySelector("h3")?.textContent?.trim(),
+      summary: link.querySelector("p")?.textContent?.trim() ?? "",
+      stack: link.querySelector(".project-stack")?.textContent?.trim() ?? "",
+    })),
+  );
+
+  expect(projects.map(({ name }) => name)).toEqual([
+    "Cascade",
+    "Rivet",
+    "Secure MCP Database Bridge",
+    "llama.cpp inference server",
+    "Organic KV",
+    "Apple Music Discord Bridge",
+  ]);
+
+  // Cascade opens its case study on this page. The rest open their repository.
+  expect(projects[0]?.href).toBe("#cascade");
+
+  for (const { href, stack, summary } of projects.slice(1)) {
+    expect(href).toMatch(/^https:\/\/github\.com\/ahammednibras8\/[\w.-]+$/);
+    expect(summary.length).toBeGreaterThan(40);
+    expect(stack).not.toBe("");
+  }
+
+  expect(new Set(projects.map(({ href }) => href)).size).toBe(6);
+
+  // Boasts are the project's own words, and the site does not repeat them.
+  const text = projects.map(({ summary }) => summary).join(" ");
+
+  expect(text).not.toMatch(/high-performance|ultra-lightweight|blazing/i);
+});
+
+test("the toolbox is plain text rows, not logos or meters", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const rows = page.locator("#toolbox dl > div");
+
+  await expect(rows).toHaveCount(5);
+  expect(await rows.locator("dt").allTextContents()).toEqual([
+    "Languages",
+    "AI",
+    "Backend",
+    "Cloud and infrastructure",
+    "Testing",
+  ]);
+  await expect(page.locator("#toolbox img, #toolbox svg.lucide")).toHaveCount(
+    1,
+  );
+  await expect(
+    page.locator("#toolbox [role='progressbar'], #toolbox meter"),
+  ).toHaveCount(0);
+});
+
 test("Cascade keeps the complete case study and public evidence", async ({
   page,
 }) => {
@@ -1478,7 +1587,7 @@ test("Cascade keeps the complete case study and public evidence", async ({
     "href",
     "https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx",
   );
-  await expect(page.locator(".signature-band")).toHaveCount(4);
+  await expect(page.locator(".signature-band")).toHaveCount(5);
 });
 
 test("Cascade gives its case study and lifecycle room on desktop", async ({

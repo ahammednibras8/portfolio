@@ -1,0 +1,135 @@
+/*
+ * The project grid reuses the contact cards, so it only changes how many fit
+ * across. The toolbox is plain rows of text: no logos and no skill meters.
+ */
+
+/* Words sit under the title and the link stays at the foot of every card. */
+.project-list .route-placard {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: var(--space-interface);
+}
+
+.project-list .route-action {
+  margin-block-start: auto;
+}
+
+@media (width >= 72rem) {
+  .project-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.toolbox {
+  display: grid;
+  margin: 0;
+}
+
+.toolbox > div {
+  display: grid;
+  gap: var(--space-interface);
+  padding-block: var(--space-component);
+  border-block-start: var(--border-width-default) solid var(--color-rule-strong);
+}
+
+.toolbox > div:last-child {
+  border-block-end: var(--border-width-default) solid var(--color-rule-strong);
+}
+
+.toolbox dt {
+  color: var(--color-action);
+  font-family: var(--font-technical);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.toolbox dd {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+@media (width >= 48rem) {
+  .page > .toolbox-part > :is(.routes-introduction, .toolbox) {
+    grid-column: 1 / -1;
+  }
+
+  .toolbox > div {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-editorial);
+  }
+}
+
+@media (width >= 72rem) {
+  .page > .toolbox-part > :is(.routes-introduction, .toolbox) {
+    grid-column: 2 / span 10;
+  }
+}
+
+/* Print keeps a plain document: a short list of projects, then the tools. */
+@media print {
+  .project-list {
+    display: block;
+  }
+
+  .project-list li {
+    margin-block-start: var(--space-interface);
+    break-inside: avoid;
+  }
+
+  .project-list .route-link {
+    display: block;
+    min-block-size: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .project-list .route-link h3 {
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .project-list .route-link p {
+    font-size: 0.9375rem;
+  }
+
+  .project-list .route-action {
+    display: none;
+  }
+
+  /* Show where a project lives, since paper cannot be clicked. */
+  .project-list a[href^="https"]::after {
+    display: block;
+    content: attr(href);
+    color: var(--color-ink-secondary);
+    font-size: 0.8125rem;
+  }
+
+  .toolbox > div {
+    display: flex;
+    gap: var(--space-component);
+    padding-block: 0.125rem;
+    border: 0;
+    break-inside: avoid;
+  }
+
+  .toolbox dt {
+    flex: 0 0 9rem;
+  }
+
+  .toolbox dd {
+    font-size: 0.9375rem;
+  }
+
+  /* A heading must not be left on one page with its words on the next. */
+  #architecture {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+}

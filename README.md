@@ -12,6 +12,7 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - A typed document layout owns shared metadata, fonts, navigation, and the footer.
 - Important content and navigation work without JavaScript.
 - There is no application server, database, or client framework.
+- The project cards and toolbox are data in `src/data/`, taken from each project's own README. Check every line there before treating it as a claim.
 - Small TypeScript scripts add motion and navigation shortcuts to the finished HTML. Nothing depends on them, and `src/scripts/` holds all of them.
 - A service worker in the browser saves one offline page and shows it when a page cannot load. It never stores live pages, so deploys and rollbacks reach every visitor.
 - Images are optimized during the build.
