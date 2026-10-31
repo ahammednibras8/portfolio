@@ -88,3 +88,106 @@ test("project depth follows a mouse and releases for press, focus, and reduced m
   await card.dispatchEvent("pointerdown", { pointerType: "touch", buttons: 1 });
   await expect(card).not.toHaveClass(/is-pressed/);
 });
+
+test("icon gestures use attached hinges, separated layers, and one clockwise turn", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    document.querySelectorAll(".zoom-ready").forEach((piece) => {
+      piece.classList.remove("zoom-ready");
+    });
+  });
+
+  const sample = async (selector: string, progress: number) => {
+    const part = page.locator(selector).first();
+
+    // Each sample starts a fresh one-shot, even for another part of the same SVG.
+    await page.mouse.move(0, 0);
+    await expect(part.locator("..")).not.toHaveClass(/is-playing/);
+    await part.locator("..").hover();
+    return part.evaluate((element, fraction) => {
+      const animation = element.getAnimations()[0];
+
+      if (!animation?.effect) throw new Error("Expected an icon gesture.");
+
+      animation.pause();
+      const { delay, duration } = animation.effect.getTiming();
+
+      animation.currentTime = Number(delay ?? 0) + Number(duration) * fraction;
+      const style = getComputedStyle(element);
+      const result = {
+        origin: style.transformOrigin,
+        scale: style.scale.split(" ").map(Number),
+        translate: style.translate.split(" ").map(parseFloat),
+      };
+
+      animation.finish();
+      return result;
+    }, progress);
+  };
+
+  const flap = await sample("#contact .lucide-mail > path", 0.44);
+  expect(flap.origin).toBe("12px 7px");
+  expect(flap.scale[1]).toBeCloseTo(-0.3);
+  await expect(page.locator(".lucide-mail > rect")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+
+  const handle = await sample(".lucide-briefcase > path", 0.34);
+  expect(handle.origin).toBe("12px 20px");
+  expect(handle.scale[1]).toBeCloseTo(1.07);
+
+  const top = await sample(".lucide-layers > path:first-child", 0.32);
+  const bottom = await sample(".lucide-layers > path:last-child", 0.32);
+  expect(top.translate[1]).toBeCloseTo(-2);
+  expect(bottom.translate[1]).toBeCloseTo(1.5);
+  await expect(
+    page.locator(".lucide-layers > path:nth-child(2)").first(),
+  ).toHaveCSS("animation-name", "none");
+
+  const arrow = page.locator(".lucide-rotate-cw");
+  await arrow.hover();
+  const turns = await arrow.evaluate((element) =>
+    [...element.children].map((part) => {
+      const animation = part.getAnimations()[0];
+
+      if (!animation?.effect) throw new Error("Expected both arrow parts.");
+
+      animation.pause();
+      animation.currentTime =
+        Number(animation.effect.getTiming().duration) * 0.72;
+      const turn = parseFloat(getComputedStyle(part).rotate);
+
+      animation.finish();
+      return turn;
+    }),
+  );
+  expect(turns).toEqual([330, 330]);
+});
+
+test("tactile icon surfaces stay static with reduced motion and simplify in forced colors", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const badge = page.locator(".project-list .sticker").first();
+  await expect(badge).toHaveCSS("background-color", "rgb(143, 216, 220)");
+  await expect(badge).toHaveCSS("border-top-width", "2px");
+  expect(
+    await badge.evaluate((element) => getComputedStyle(element).boxShadow),
+  ).toContain("inset");
+  await expect(badge.locator("svg")).toHaveCSS("color", "rgb(1, 58, 99)");
+  await expect(badge.locator("path").first()).toHaveCSS("fill-opacity", "0.38");
+  await expect(badge.locator("path").last()).toHaveCSS("fill", "none");
+  await badge.hover();
+  await expect(badge.locator("svg")).not.toHaveClass(/is-playing/);
+
+  await page.emulateMedia({ forcedColors: "active" });
+  await expect(badge).toHaveCSS("box-shadow", "none");
+  await expect(badge.locator("path").first()).toHaveCSS("fill", "none");
+});

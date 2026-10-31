@@ -1,13 +1,60 @@
-/* Keep Lucide geometry unchanged. Move the detail that explains each icon. */
+/* Keep Lucide geometry unchanged. Give its ink a surface and its parts a job. */
+@media screen and (forced-colors: none) {
+  .page .sticker {
+    --icon-tone: var(--color-surface-raised);
 
-/* On while a check icon is triggered, then held until its check has redrawn. */
-@property --icon-gesture {
-  syntax: "<integer>";
-  inherits: false;
-  initial-value: 0;
+    background: var(--color-aqua);
+    box-shadow:
+      var(--shadow-pop),
+      inset 0 0.125rem 0 var(--color-surface-raised),
+      inset 0 -0.1875rem 0 rgb(1 58 99 / 16%);
+    color: var(--color-action);
+  }
+
+  .page .gallery-wall-compact .sticker {
+    border: 2px solid var(--color-action);
+    border-radius: 0.625rem;
+    box-shadow:
+      0.125rem 0.125rem 0 var(--color-action),
+      inset 0 0.125rem 0 var(--color-surface-raised),
+      inset 0 -0.125rem 0 rgb(1 58 99 / 16%);
+  }
+
+  .page .sticker svg {
+    stroke-width: 1.8px;
+  }
+
+  /* Only closed surfaces take tone; open strokes stay crisp and unfilled. */
+  .page
+    :where(
+      .lucide-layers > path:first-child,
+      .lucide-server > rect,
+      .lucide-shield-check > path:first-child,
+      .lucide-circle-check > circle,
+      .lucide-cpu > rect:first-of-type,
+      .lucide-database > ellipse,
+      .lucide-package > path:first-child,
+      .lucide-message-circle-more > path:first-child,
+      .lucide-user-round > circle,
+      .lucide-git-branch > circle
+    ) {
+    fill: var(--icon-tone, var(--color-aqua));
+    fill-opacity: 0.38;
+  }
+
+  /* The envelope and case paint after their detail, so keep their tone light. */
+  .page :where(.lucide-mail > rect, .lucide-briefcase > rect) {
+    fill: var(--icon-tone, var(--color-aqua));
+    fill-opacity: 0.16;
+  }
+
+  .page :where(.lucide-cpu > rect:last-child, .lucide-layout-dashboard > rect) {
+    fill: currentcolor;
+    fill-opacity: 0.12;
+  }
 }
 
-@media screen and (prefers-reduced-motion: no-preference) {
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   :where(.page .lucide) {
     overflow: visible;
   }
@@ -17,11 +64,7 @@
     transform-origin: 12px 12px;
   }
 
-  /* Touch screens have no hover, so touch-motion.ts sets this class instead. */
-  :where(.page) .lucide.is-playing {
-    animation: icon-pop 800ms var(--motion-ease-in) 1;
-  }
-
+  /* One gesture finishes even after hover ends; touch uses the same parts. */
   .page .lucide.is-playing > * {
     animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
       var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
@@ -47,33 +90,15 @@
         var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
     }
 
-    /*
-   * Only the two check icons use this slower, gentler motion. Removing a running
-   * animation snaps the part to rest, and no transition can ease that jump, so
-   * a held style query keeps the keyframes applied until they finish. Firefox
-   * leaves a held query matched for good, which stops every later gesture, so
-   * it skips the query and ends the check with the hover.
-   */
-    .lucide-circle-check,
-    .lucide-shield-check {
-      transition: --icon-gesture 0s var(--motion-ease-in) 1100ms;
+    .page .gallery-wall-compact .sticker {
+      transition: box-shadow var(--motion-standard) var(--motion-ease-in);
     }
 
-    .architecture-node-link:is(:hover, :focus-visible)
-      :is(.lucide-circle-check, .lucide-shield-check) {
-      --icon-gesture: 1;
-
-      transition: none;
-    }
-
-    @supports not (-moz-appearance: none) {
-      @container style(--icon-gesture: 1) {
-        .lucide-circle-check > path,
-        .lucide-shield-check > path:where(:last-child) {
-          animation: icon-check-detail var(--icon-part-duration)
-            var(--motion-ease-in) 1;
-        }
-      }
+    .page .route-link:is(:hover, :focus-visible) .sticker {
+      box-shadow:
+        0.1875rem 0.1875rem 0 var(--color-action),
+        inset 0 0.125rem 0 var(--color-surface-raised),
+        inset 0 -0.125rem 0 rgb(1 58 99 / 16%);
     }
   }
 
@@ -97,7 +122,7 @@
   .lucide-circle-check > path {
     --icon-part-motion: icon-check-detail;
     --icon-part-duration: 1100ms;
-    --icon-stroke-length: 16;
+    --icon-stroke-length: 11.5;
 
     stroke-dasharray: var(--icon-stroke-length);
   }
@@ -120,9 +145,10 @@
 
   .lucide-cpu > rect:where(:last-child) {
     --icon-part-motion: icon-core;
+    --icon-part-duration: 760ms;
 
     fill: currentcolor;
-    fill-opacity: 0;
+    fill-opacity: 0.12;
   }
 
   .lucide-database > path:where(:last-child) {
@@ -135,11 +161,14 @@
 
   .lucide-git-branch > path {
     --icon-part-motion: icon-branch-path;
+    --icon-stroke-length: 26.2;
+
+    stroke-dasharray: var(--icon-stroke-length);
   }
 
   .lucide-git-branch > circle:where(:first-of-type) {
     --icon-part-motion: icon-branch-node;
-    --icon-part-delay: 120ms;
+    --icon-part-delay: 180ms;
 
     transform-origin: 18px 6px;
   }
@@ -151,12 +180,15 @@
   }
 
   .lucide-layers > path:where(:first-child) {
-    --icon-part-motion: icon-direction;
-    --icon-y: -1.5px;
+    --icon-part-motion: icon-layer;
+    --icon-part-duration: 820ms;
+    --icon-y: -2px;
   }
 
   .lucide-layers > path:where(:last-child) {
-    --icon-part-motion: icon-direction;
+    --icon-part-motion: icon-layer;
+    --icon-part-duration: 740ms;
+    --icon-part-delay: 80ms;
     --icon-y: 1.5px;
   }
 
@@ -165,7 +197,7 @@
     --icon-part-duration: 460ms;
 
     fill: currentcolor;
-    fill-opacity: 0;
+    fill-opacity: 0.12;
   }
 
   .lucide-layout-dashboard > rect:where(:nth-child(2)) {
@@ -198,7 +230,7 @@
   /* Fold the flap around its existing hinge, leaving the envelope fixed. */
   .lucide-mail > path {
     --icon-part-motion: icon-mail-flap;
-    --icon-part-duration: 720ms;
+    --icon-part-duration: 940ms;
 
     transform-origin: 12px 7px;
   }
@@ -233,7 +265,7 @@
 
   .lucide-rotate-cw > path {
     --icon-part-motion: icon-turn;
-    --icon-part-duration: 720ms;
+    --icon-part-duration: 800ms;
   }
 
   .lucide-server > line {
@@ -248,7 +280,7 @@
   .lucide-shield-check > path:where(:last-child) {
     --icon-part-motion: icon-check-detail;
     --icon-part-duration: 1000ms;
-    --icon-stroke-length: 12;
+    --icon-stroke-length: 8.5;
 
     stroke-dasharray: var(--icon-stroke-length);
   }
@@ -257,26 +289,22 @@
     --icon-part-motion: icon-nod;
   }
 
-  @keyframes icon-pop {
-    0%,
-    100% {
-      scale: 1;
-    }
-
-    50% {
-      scale: 1.2;
-    }
-  }
-
   @keyframes icon-direction {
     0%,
     100% {
       translate: 0 0;
     }
 
-    45%,
-    60% {
+    18% {
+      translate: calc(var(--icon-x, 0px) * -0.2) calc(var(--icon-y, 0px) * -0.2);
+    }
+
+    48% {
       translate: var(--icon-x, 0) var(--icon-y, 0);
+    }
+
+    78% {
+      translate: calc(var(--icon-x, 0px) * 0.15) calc(var(--icon-y, 0px) * 0.15);
     }
   }
 
@@ -286,9 +314,16 @@
       scale: 1 1;
     }
 
-    45%,
-    60% {
+    34% {
       scale: 1 1.07;
+    }
+
+    62% {
+      scale: 1 1.025;
+    }
+
+    86% {
+      scale: 1 1.004;
     }
   }
 
@@ -298,20 +333,28 @@
       stroke-dashoffset: 0;
     }
 
-    40% {
+    18%,
+    28% {
       stroke-dashoffset: var(--icon-stroke-length);
+    }
+
+    82% {
+      stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-core {
     0%,
     100% {
-      fill-opacity: 0;
+      fill-opacity: 0.12;
     }
 
-    35%,
-    65% {
-      fill-opacity: 0.24;
+    36% {
+      fill-opacity: 0.45;
+    }
+
+    72% {
+      fill-opacity: 0.18;
     }
   }
 
@@ -321,9 +364,12 @@
       translate: 0 0;
     }
 
-    45%,
-    60% {
-      translate: 0 -1.5px;
+    38% {
+      translate: 0 -1px;
+    }
+
+    72% {
+      translate: 0 -0.15px;
     }
   }
 
@@ -333,23 +379,33 @@
       translate: 0 0;
     }
 
-    30% {
-      translate: 1.5px 0;
+    26%,
+    38% {
+      translate: 1.75px 0;
     }
 
-    65% {
-      translate: -1px 0;
+    62%,
+    72% {
+      translate: -1.25px 0;
+    }
+
+    90% {
+      translate: -0.1px 0;
     }
   }
 
   @keyframes icon-branch-path {
     0%,
     100% {
-      stroke-opacity: 1;
+      stroke-dashoffset: 0;
     }
 
-    35% {
-      stroke-opacity: 0.45;
+    22% {
+      stroke-dashoffset: var(--icon-stroke-length);
+    }
+
+    82% {
+      stroke-dashoffset: 0;
     }
   }
 
@@ -359,8 +415,12 @@
       scale: 1;
     }
 
-    45% {
-      scale: 1.15;
+    38% {
+      scale: 1.1;
+    }
+
+    74% {
+      scale: 1.015;
     }
   }
 
@@ -370,19 +430,46 @@
       scale: 1 1;
     }
 
+    25% {
+      scale: 0.15 1;
+    }
+
     50% {
-      scale: 0.3 1;
+      scale: -1 1;
+    }
+
+    75% {
+      scale: -0.15 1;
+    }
+  }
+
+  @keyframes icon-layer {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+
+    32% {
+      translate: 0 var(--icon-y);
+    }
+
+    62% {
+      translate: 0 calc(var(--icon-y) * 0.4);
+    }
+
+    86% {
+      translate: 0 calc(var(--icon-y) * 0.04);
     }
   }
 
   @keyframes icon-panel {
     0%,
     100% {
-      fill-opacity: 0;
+      fill-opacity: 0.12;
     }
 
     50% {
-      fill-opacity: 0.2;
+      fill-opacity: 0.38;
     }
   }
 
@@ -392,8 +479,12 @@
       scale: 1 1;
     }
 
-    35% {
-      scale: 0.65 1;
+    24% {
+      scale: 0.72 1;
+    }
+
+    72% {
+      scale: 0.97 1;
     }
   }
 
@@ -403,9 +494,21 @@
       scale: 1 1;
     }
 
-    40%,
-    60% {
-      scale: 1 -0.4;
+    26% {
+      scale: 1 0.08;
+    }
+
+    44%,
+    56% {
+      scale: 1 -0.3;
+    }
+
+    78% {
+      scale: 1 0.75;
+    }
+
+    92% {
+      scale: 1 0.98;
     }
   }
 
@@ -416,9 +519,14 @@
       stroke-opacity: 1;
     }
 
-    45% {
-      translate: 0 -1px;
-      stroke-opacity: 0.5;
+    36% {
+      translate: 0 -1.6px;
+      stroke-opacity: 0.65;
+    }
+
+    74% {
+      translate: 0 -0.2px;
+      stroke-opacity: 0.95;
     }
   }
 
@@ -461,13 +569,20 @@
   }
 
   @keyframes icon-turn {
-    0%,
-    100% {
+    0% {
       rotate: 0deg;
     }
 
-    50% {
-      rotate: 35deg;
+    72% {
+      rotate: 330deg;
+    }
+
+    90% {
+      rotate: 356deg;
+    }
+
+    100% {
+      rotate: 360deg;
     }
   }
 

@@ -1,8 +1,8 @@
 /*
- * Touch screens cannot hover, so each icon plays as it scrolls into view and
- * the hero dots roll the same way. Tapping a hero heading rolls them again, taps
- * give a short buzz where phones allow it, and the portrait leans with the
- * phone. All of this is decoration: without it, the page simply stays still.
+ * Icon gestures finish after pointer and keyboard triggers. Touch screens also
+ * play each icon as it enters view and roll the hero dots. Tapping a hero heading
+ * rolls them again, taps give a short buzz where phones allow it, and the portrait
+ * leans with the phone. Without this decoration, the page simply stays still.
  */
 const startDelay = 400;
 const waveDuration = 8000;
@@ -16,6 +16,11 @@ type TiltEvent = typeof DeviceOrientationEvent & {
 };
 
 const playIcon = async (icon: Element) => {
+  if (
+    matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    matchMedia("(forced-colors: active)").matches
+  )
+    return;
   if (icon.classList.contains("is-playing")) return;
 
   icon.classList.add("is-playing");
@@ -24,6 +29,48 @@ const playIcon = async (icon: Element) => {
   );
   icon.classList.remove("is-playing");
 };
+
+/* A single delegated gesture keeps moving parts attached until they settle. */
+const gestureOwner = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return;
+
+  return (
+    target.closest(
+      ".route-link, .architecture-node-link, .hero-action, .hero-contact, .section-title, .run-path li, .architecture-recovery",
+    ) ?? target.closest(".sticker, svg.lucide")
+  );
+};
+
+const playGesture = (owner: Element) => {
+  const icons = owner.matches("svg.lucide")
+    ? [owner]
+    : owner.querySelectorAll("svg.lucide");
+
+  for (const icon of icons) {
+    if (!icon.classList.contains("lucide-hand")) void playIcon(icon);
+  }
+};
+
+document.addEventListener("pointerover", (event) => {
+  if (event.pointerType === "touch" || !matchMedia("(hover: hover)").matches)
+    return;
+
+  const owner = gestureOwner(event.target);
+
+  if (
+    owner &&
+    !(
+      event.relatedTarget instanceof Node && owner.contains(event.relatedTarget)
+    )
+  )
+    playGesture(owner);
+});
+
+document.addEventListener("focusin", ({ target }) => {
+  const owner = gestureOwner(target);
+
+  if (owner) playGesture(owner);
+});
 
 const rollWave = (section: Element) => {
   if (section.classList.contains("is-waving")) return;
