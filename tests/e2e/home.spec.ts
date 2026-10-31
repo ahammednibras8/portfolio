@@ -952,9 +952,18 @@ test.describe("on a touch screen", () => {
     const hero = page.locator(".exhibit-hero-portrait");
     const flap = page.locator("#contact .lucide-mail > path");
 
+    const dotSize = () =>
+      hero.evaluate((section) =>
+        Number.parseFloat(
+          getComputedStyle(section).getPropertyValue("--wave-size"),
+        ),
+      );
+
     // The script must really run under the production security policy.
     await expect(hero).toHaveClass(/is-waving/);
     expect(blocked).toEqual([]);
+    await expect.poll(dotSize).toBeGreaterThan(2.5);
+    await expect.poll(dotSize, { timeout: 11000 }).toBeCloseTo(1.44, 1);
     await expect(hero).not.toHaveClass(/is-waving/, { timeout: 11000 });
     await expect(flap).toHaveCSS("animation-name", "none");
 
