@@ -1211,7 +1211,7 @@ article > .project-evidence > h4 {
       11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
     background-size: 12rem 1rem;
     transition: --wave-reach var(--motion-sweep) var(--motion-ease-in);
-    animation: dot-wave 4s linear infinite paused;
+    animation: dot-wave 4s var(--motion-ease-in) infinite paused;
   }
 
   /* Only the words start the wave, not the empty space beside them. */

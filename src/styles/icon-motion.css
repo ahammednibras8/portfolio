@@ -56,7 +56,7 @@
    */
     .lucide-circle-check,
     .lucide-shield-check {
-      transition: --icon-gesture 0s 1100ms;
+      transition: --icon-gesture 0s var(--motion-ease-in) 1100ms;
     }
 
     .architecture-node-link:is(:hover, :focus-visible)
