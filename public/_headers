@@ -1,9 +1,12 @@
 /*
-  Content-Security-Policy: default-src 'none'; base-uri 'none'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'none'; style-src 'self'
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; manifest-src 'self'; script-src 'self'; style-src 'self'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), geolocation=(), microphone=(), payment=(), usb=()
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
 
 https://beta.ahammednibras.com/*
   X-Robots-Tag: noindex

@@ -22,7 +22,7 @@ Static HTML keeps the site fast, accessible without JavaScript, and easy to move
 ## Constraints
 
 - Important content and navigation must remain available without JavaScript.
-- Browser JavaScript is added only when HTML and CSS cannot provide the required behavior.
+- Browser JavaScript is added only when HTML and CSS cannot provide the required behavior, and it must be written in TypeScript.
 - A client framework, server code, or database requires a replacement decision record.
 
 ## Where it is used

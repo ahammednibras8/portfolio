@@ -1,6 +1,13 @@
 /* Keep Lucide geometry unchanged. Move the detail that explains each icon. */
 
-@media screen and (hover: hover) and (prefers-reduced-motion: no-preference) {
+/* On while a check icon is triggered, then held until its check has redrawn. */
+@property --icon-gesture {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
   :where(.page .lucide) {
     overflow: visible;
   }
@@ -10,23 +17,65 @@
     transform-origin: 12px 12px;
   }
 
-  .page
-    :where(
-      .route-link:is(:hover, :focus-visible),
-      .architecture-node-link:is(:hover, :focus-visible),
-      .hero-action:is(:hover, :focus-visible),
-      .hero-contact:is(:hover, :focus-visible),
-      .section-title:hover,
-      .sticker:hover,
-      .run-path li:hover,
-      .architecture-recovery:hover,
-      .architecture-recovery:focus-within
-    )
-    .lucide
-    > *,
-  .page .lucide:hover > * {
+  /* Touch screens have no hover, so touch-motion.ts sets this class instead. */
+  .page .lucide.is-playing > * {
     animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-      ease-in-out var(--icon-part-delay, 0ms) 1;
+      var(--icon-part-ease, ease-in-out) var(--icon-part-delay, 0ms) 1;
+  }
+
+  .lucide-circle-check,
+  .lucide-shield-check {
+    --icon-part-ease: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+
+  @media (hover: hover) {
+    .page
+      :where(
+        .route-link:is(:hover, :focus-visible),
+        .architecture-node-link:is(:hover, :focus-visible),
+        .hero-action:is(:hover, :focus-visible),
+        .hero-contact:is(:hover, :focus-visible),
+        .section-title:hover,
+        .sticker:hover,
+        .run-path li:hover,
+        .architecture-recovery:hover,
+        .architecture-recovery:focus-within
+      )
+      .lucide
+      > *,
+    .page .lucide:hover > * {
+      animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
+        var(--icon-part-ease, ease-in-out) var(--icon-part-delay, 0ms) 1;
+    }
+
+    /*
+   * Only the two check icons use this slower, gentler motion. Removing a running
+   * animation snaps the part to rest, and no transition can ease that jump, so
+   * a held style query keeps the keyframes applied until they finish. Firefox
+   * leaves a held query matched for good, which stops every later gesture, so
+   * it skips the query and ends the check with the hover.
+   */
+    .lucide-circle-check,
+    .lucide-shield-check {
+      transition: --icon-gesture 0s 1100ms;
+    }
+
+    .architecture-node-link:is(:hover, :focus-visible)
+      :is(.lucide-circle-check, .lucide-shield-check) {
+      --icon-gesture: 1;
+
+      transition: none;
+    }
+
+    @supports not (-moz-appearance: none) {
+      @container style(--icon-gesture: 1) {
+        .lucide-circle-check > path,
+        .lucide-shield-check > path:where(:last-child) {
+          animation: icon-check-detail var(--icon-part-duration)
+            var(--icon-part-ease) 1;
+        }
+      }
+    }
   }
 
   .lucide-arrow-down > path {
@@ -48,6 +97,7 @@
 
   .lucide-circle-check > path {
     --icon-part-motion: icon-check-detail;
+    --icon-part-duration: 1100ms;
     --icon-stroke-length: 16;
 
     stroke-dasharray: var(--icon-stroke-length);
@@ -198,7 +248,7 @@
 
   .lucide-shield-check > path:where(:last-child) {
     --icon-part-motion: icon-check-detail;
-    --icon-part-duration: 560ms;
+    --icon-part-duration: 1000ms;
     --icon-stroke-length: 12;
 
     stroke-dasharray: var(--icon-stroke-length);
@@ -238,12 +288,8 @@
       stroke-dashoffset: 0;
     }
 
-    20% {
+    40% {
       stroke-dashoffset: var(--icon-stroke-length);
-    }
-
-    70% {
-      stroke-dashoffset: 0;
     }
   }
 

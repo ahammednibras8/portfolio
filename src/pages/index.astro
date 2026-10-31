@@ -24,7 +24,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "@lucide/astro";
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 import portrait from "../assets/portrait-enhanced.png";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
 
@@ -129,7 +129,7 @@ const productionPath = [
   socialImage={socialImage}
 >
   <section
-    class="introduction signature-band exhibit-hero exhibit-hero-portrait"
+    class="introduction signature-band exhibit-hero exhibit-hero-portrait dot-wave"
     aria-labelledby="introduction-heading"
   >
     <h1 id="introduction-heading" class="title-sweep">
@@ -137,11 +137,13 @@ const productionPath = [
     </h1>
 
     <div class="hero-portrait">
-      <Image
+      <Picture
         src={portrait}
         alt="Ahammed Nibras smiling in front of a carved stone wall."
-        widths={[280, 560]}
-        sizes="(width >= 72rem) 285px, (width >= 48rem) 30vw, min(55vw, 14rem)"
+        formats={["avif", "webp"]}
+        fallbackFormat="webp"
+        widths={[280, 400, 600, 720]}
+        sizes="(width >= 72rem) 17.125rem, (width >= 48rem) 30vw, min(51vw, 14rem)"
         loading="eager"
         fetchpriority="high"
       />
@@ -191,7 +193,7 @@ const productionPath = [
 
   <section
     id="cascade"
-    class="introduction signature-band exhibit-hero"
+    class="introduction signature-band exhibit-hero dot-wave"
     aria-labelledby="cascade-heading"
   >
     <h2 id="cascade-heading">Cascade</h2>
