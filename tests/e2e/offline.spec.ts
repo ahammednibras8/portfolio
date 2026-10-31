@@ -40,6 +40,7 @@ test("a lost connection shows the saved page and recovers on its own", async ({
 
 test("the offline page lines up with the header", async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1440 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/offline/");
 
   const lefts = await page.evaluate(() =>
@@ -51,6 +52,17 @@ test("the offline page lines up with the header", async ({ page }) => {
   );
 
   expect(new Set(lefts).size).toBe(1);
+
+  const timings = await page
+    .locator(".offline-signal")
+    .evaluate((signal) => [
+      getComputedStyle(signal, "::before").animationTimingFunction,
+      getComputedStyle(signal, "::after").animationTimingFunction,
+      getComputedStyle(signal.querySelector("svg") as SVGElement)
+        .animationTimingFunction,
+    ]);
+
+  expect(timings).toEqual(["ease-in", "ease-in", "ease-in"]);
 });
 
 test("live pages are never answered from the offline cache", async () => {

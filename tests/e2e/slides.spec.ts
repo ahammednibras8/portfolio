@@ -428,6 +428,21 @@ test("depth effects run only where scroll-driven animation exists", async ({
       orb: "orb-drift",
       story: "none",
     });
+    await expect(page.locator("#about")).toHaveCSS(
+      "animation-timing-function",
+      "ease-in",
+    );
+    await expect(page.locator("#cascade")).toHaveCSS(
+      "animation-timing-function",
+      "ease-in, ease-in",
+    );
+    expect(
+      await page
+        .locator("#about")
+        .evaluate(
+          (part) => getComputedStyle(part, "::after").animationTimingFunction,
+        ),
+    ).toBe("ease-in");
   } else {
     expect((await names()).about).toBe("none");
   }

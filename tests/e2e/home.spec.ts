@@ -1443,6 +1443,9 @@ test("hovering a hero heading rolls a wave through its dots", async ({
         );
 
       return {
+        eased: style.animationTimingFunction
+          .split(",")
+          .every((timing) => timing.trim() === "ease-in"),
         layers: style.backgroundImage.split("radial-gradient").length - 1,
         reach: Number.parseFloat(style.getPropertyValue("--wave-reach")),
         state: rolling?.playState ?? style.animationPlayState,
@@ -1454,6 +1457,7 @@ test("hovering a hero heading rolls a wave through its dots", async ({
 
     await section.locator(".speech-bubble").hover();
     expect(await wave(section), heading).toEqual({
+      eased: true,
       layers: 12,
       reach: 0,
       state: "paused",
