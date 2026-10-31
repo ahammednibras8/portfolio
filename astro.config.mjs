@@ -1,6 +1,8 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 
 const envFile = new URL(".env", import.meta.url);
 
@@ -35,6 +37,24 @@ if (
   );
 }
 
+// A service worker only reinstalls when its bytes change, so tie it to the page.
+const stampServiceWorker = {
+  name: "stamp-service-worker",
+  hooks: {
+    "astro:build:done": async ({ dir }) => {
+      const page = await readFile(new URL("offline/index.html", dir));
+      const version = createHash("sha256")
+        .update(page)
+        .digest("hex")
+        .slice(0, 12);
+      const worker = new URL("sw.js", dir);
+      const source = await readFile(worker, "utf8");
+
+      await writeFile(worker, source.replace("__OFFLINE_VERSION__", version));
+    },
+  },
+};
+
 export default defineConfig({
   output: "static",
   site: siteUrl.href,
@@ -45,7 +65,10 @@ export default defineConfig({
       config: { avif: { quality: 65 } },
     },
   },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({ filter: (page) => !page.endsWith("/offline/") }),
+    stampServiceWorker,
+  ],
   vite: {
     build: {
       // The security policy blocks inline scripts, so every script must be a file.
