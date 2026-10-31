@@ -29,6 +29,20 @@ export default [
     },
   },
   {
+    files: ["public/sw.js"],
+    languageOptions: {
+      globals: {
+        caches: "readonly",
+        clients: "readonly",
+        fetch: "readonly",
+        location: "readonly",
+        Response: "readonly",
+        self: "readonly",
+        URL: "readonly",
+      },
+    },
+  },
+  {
     files: ["**/*.cjs"],
     languageOptions: {
       sourceType: "commonjs",

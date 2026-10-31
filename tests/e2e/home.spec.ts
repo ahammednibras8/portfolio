@@ -1196,7 +1196,7 @@ test("every screen size and large text fit without sideways scrolling", async ({
     [3840, 2160],
   ] as const;
 
-  for (const route of ["/", "/route-that-does-not-exist"]) {
+  for (const route of ["/", "/offline/", "/route-that-does-not-exist"]) {
     await page.goto(route);
 
     for (const [width, height] of screens) {

@@ -1,0 +1,42 @@
+---
+import { ArrowRight, WifiOff } from "@lucide/astro";
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+import "../styles/offline.css";
+
+const title = "You’re offline — Ahammed Nibras";
+const description =
+  "This device has no connection. The page reloads when it comes back.";
+---
+
+<DocumentLayout title={title} description={description}>
+  <section
+    class="offline band-navy dot-wave is-waving"
+    aria-labelledby="offline-heading"
+  >
+    <span class="offline-signal" aria-hidden="true">
+      <span class="sticker">
+        <WifiOff size={40} />
+      </span>
+    </span>
+
+    <h1 id="offline-heading">
+      You’re <span>offline.</span>
+    </h1>
+
+    <div class="route-placard speech-bubble">
+      <span class="route-label">No connection</span>
+      <p>
+        This page was saved on your device, so it still opens. It reloads on its
+        own when you are back online.
+      </p>
+      <div class="hero-actions">
+        <a class="hero-action" href="/">
+          Try again
+          <ArrowRight class="action-arrow" size={16} aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script src="../scripts/offline-page.ts"></script>
+</DocumentLayout>

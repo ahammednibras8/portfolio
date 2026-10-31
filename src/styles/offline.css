@@ -1,0 +1,103 @@
+/* Offline: one navy screen that keeps listening for a signal. */
+.page > .offline {
+  min-block-size: calc(100vh - 9rem);
+  min-block-size: calc(100svh - 9rem);
+  align-content: center;
+  justify-items: start;
+  gap: var(--space-editorial);
+}
+
+.page > .offline > * {
+  grid-column: 1 / -1;
+}
+
+.offline h1 {
+  font-size: clamp(3.25rem, 13vw, 8rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.offline h1 span {
+  text-decoration: underline var(--color-aqua) 0.09em;
+  text-underline-offset: 0.12em;
+}
+
+.offline-signal {
+  position: relative;
+  display: grid;
+  width: 6rem;
+  height: 6rem;
+  place-items: center;
+}
+
+.offline-signal .sticker {
+  align-self: center;
+  background: var(--color-aqua);
+  box-shadow: 0.25rem 0.25rem 0 var(--color-surface-raised);
+  color: var(--color-action);
+}
+
+.offline-signal svg {
+  width: 55%;
+  height: 55%;
+}
+
+@media (width >= 72rem) {
+  .page > .offline > * {
+    grid-column: 2 / span 10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page > .offline {
+    background-image: radial-gradient(
+      var(--color-rule-structural) 0.09rem,
+      transparent 0.1rem
+    );
+    background-size: 1rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes offline-ping {
+    0% {
+      opacity: 0.8;
+      scale: 0.6;
+    }
+
+    100% {
+      opacity: 0;
+      scale: 2;
+    }
+  }
+
+  @keyframes offline-search {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .offline-signal::before,
+  .offline-signal::after {
+    position: absolute;
+    inset: 0;
+    border: var(--border-width-ink) solid var(--color-aqua);
+    border-radius: 50%;
+    content: "";
+    opacity: 0;
+    animation: offline-ping 2.4s ease-out infinite;
+  }
+
+  .offline-signal::after {
+    animation-delay: 1.2s;
+  }
+
+  .offline-signal svg {
+    animation: offline-search 2.4s ease-in-out infinite;
+  }
+}

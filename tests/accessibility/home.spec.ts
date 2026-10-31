@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const routes = ["/"];
+const routes = ["/", "/offline/"];
 
 for (const route of routes) {
   test(`${route} has no detectable WCAG violations`, async ({ page }) => {

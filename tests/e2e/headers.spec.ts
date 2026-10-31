@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 const expectedHeaders = {
   "content-security-policy":
-    "default-src 'none'; base-uri 'none'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; manifest-src 'self'; script-src 'self'; style-src 'self'",
+    "default-src 'none'; base-uri 'none'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; manifest-src 'self'; script-src 'self'; style-src 'self'; worker-src 'self'",
   "permissions-policy":
     "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
   "referrer-policy": "strict-origin-when-cross-origin",
@@ -24,6 +24,13 @@ test("the build includes the Cloudflare Pages header rules", async () => {
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+/offline/*
+  X-Robots-Tag: noindex
+
+/sw.js
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; connect-src 'self'
 
 https://beta.ahammednibras.com/*
   X-Robots-Tag: noindex
