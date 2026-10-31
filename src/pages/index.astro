@@ -133,7 +133,8 @@ const productionPath = [
     aria-labelledby="introduction-heading"
   >
     <h1 id="introduction-heading" class="title-sweep">
-      Hi, I’m Nibras.
+      <span class="hero-greeting">Hi, I’m</span>
+      <span class="hero-name">Nibras.</span>
     </h1>
 
     <div class="hero-portrait">
@@ -142,8 +143,8 @@ const productionPath = [
         alt="Ahammed Nibras smiling in front of a carved stone wall."
         formats={["avif", "webp"]}
         fallbackFormat="webp"
-        widths={[280, 400, 600, 720]}
-        sizes="(width >= 72rem) 17.125rem, (width >= 48rem) 30vw, min(51vw, 14rem)"
+        widths={[280, 400, 520, 720, 800]}
+        sizes="(width >= 72rem) 23.375rem, (width >= 48rem) 30vw, min(64vw, 17rem)"
         loading="eager"
         fetchpriority="high"
       />

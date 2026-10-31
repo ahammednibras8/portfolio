@@ -877,6 +877,23 @@ article ul {
     }
   }
 
+  @keyframes name-pop {
+    0%,
+    100% {
+      rotate: -2deg;
+      scale: 1;
+    }
+
+    50% {
+      rotate: 1deg;
+      scale: 1.05;
+    }
+  }
+
+  .hero-name {
+    animation: name-pop 700ms ease-in-out 900ms;
+  }
+
   @keyframes hand-wave {
     0%,
     100% {
@@ -944,6 +961,18 @@ article ul {
 
   .title-sweep:hover {
     background-position-x: 0%;
+  }
+
+  .hero-name {
+    transition:
+      rotate var(--motion-route) var(--motion-ease-out),
+      scale var(--motion-route) var(--motion-ease-out);
+  }
+
+  h1:hover .hero-name {
+    transition-timing-function: var(--motion-ease-bounce);
+    rotate: 0deg;
+    scale: 1.04;
   }
 
   .hero-portrait {
@@ -1110,9 +1139,8 @@ article > .project-evidence > h4 {
 
 .hero-portrait {
   position: relative;
-  justify-self: start;
-  width: min(55%, 14rem);
-  order: -1;
+  justify-self: center;
+  width: min(70%, 17rem);
   rotate: 2deg;
 }
 
@@ -1319,6 +1347,28 @@ article > .project-evidence > h4 {
 .exhibit-hero :is(h1, h2) {
   font-size: var(--font-size-display);
   line-height: 0.95;
+}
+
+/* The greeting leads in quietly so the name can land on a comic title plate. */
+.hero-greeting {
+  display: block;
+  font-size: 0.5em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.hero-name {
+  display: inline-block;
+  margin-block-start: 0.12em;
+  padding: 0.06em 0.2em 0.12em;
+  background: var(--color-action);
+  border: var(--border-ink);
+  border-radius: var(--radius-sketch);
+  box-shadow: var(--shadow-pop-large);
+  color: var(--color-surface-raised);
+  font-size: max(1.45em, min(18vw, 5rem));
+  line-height: 1;
+  rotate: -2deg;
 }
 
 .exhibit-hero p {
@@ -1631,7 +1681,8 @@ article > .project-evidence > h4 {
 
   .page > .exhibit-hero-portrait > .route-placard {
     grid-column: 1 / span 4;
-    justify-self: end;
+    justify-self: start;
+    margin-inline-end: var(--space-editorial);
   }
 
   .page > .exhibit-hero-portrait > .hero-portrait {
@@ -1715,15 +1766,15 @@ article > .project-evidence > h4 {
   }
 
   .page > .exhibit-hero-portrait > h1 {
-    grid-column: 2 / span 7;
+    grid-column: 2 / span 6;
   }
 
   .page > .exhibit-hero-portrait > .route-placard {
-    grid-column: 2 / span 7;
+    grid-column: 2 / span 6;
   }
 
   .page > .exhibit-hero-portrait > .hero-portrait {
-    grid-column: 9 / span 3;
+    grid-column: 8 / span 4;
   }
 
   .page > section:not(.introduction) > :where(h2, .routes-introduction) {
@@ -2027,6 +2078,23 @@ article > .project-evidence > h4 {
 
   .exhibit-hero :is(h1, h2) {
     line-height: 1.1;
+  }
+
+  .hero-greeting {
+    display: inline;
+    font-size: inherit;
+  }
+
+  .hero-name {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    color: inherit;
+    font-size: inherit;
+    rotate: none;
   }
 
   .page > .exhibit-hero h2 {
