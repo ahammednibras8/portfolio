@@ -1324,7 +1324,8 @@ article > .project-evidence > h4 {
 }
 
 .page .hero-action,
-.page .hero-action:visited {
+.page .hero-action:visited,
+.page .hero-action:active {
   color: var(--color-surface-raised);
 }
 

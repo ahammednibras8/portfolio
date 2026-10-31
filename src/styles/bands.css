@@ -137,6 +137,15 @@
     color: var(--color-surface-raised);
   }
 
+  /* The pale bar's hover and pressed colors are navy, which vanish on navy. */
+  .primary-navigation a:is(:hover, :focus-visible) {
+    color: var(--color-aqua);
+  }
+
+  .primary-navigation a:active {
+    color: var(--color-surface-raised);
+  }
+
   .site-footer a:visited {
     color: var(--color-aqua);
   }

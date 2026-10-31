@@ -709,6 +709,101 @@ test("the shared navigation points to real sections and marks the page", async (
   }
 });
 
+test("links stay readable on dark surfaces while hovered, focused, and pressed", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  // Text color against the surface behind it, blending every translucent layer.
+  const contrast = (link: Locator) =>
+    link.evaluate((anchorElement) => {
+      const channel = (value: number) => {
+        const unit = value / 255;
+
+        return unit <= 0.03928 ? unit / 12.92 : ((unit + 0.055) / 1.055) ** 2.4;
+      };
+      const light = (rgb: number[]) =>
+        0.2126 * channel(rgb[0] ?? 0) +
+        0.7152 * channel(rgb[1] ?? 0) +
+        0.0722 * channel(rgb[2] ?? 0);
+      const parse = (css: string) => {
+        const numbers = css.match(/[\d.]+/g)?.map(Number) ?? [];
+
+        return { alpha: numbers[3] ?? 1, rgb: numbers.slice(0, 3) };
+      };
+      const layers: string[] = [];
+
+      for (
+        let node: Element | null = anchorElement;
+        node;
+        node = node.parentElement
+      ) {
+        layers.push(getComputedStyle(node).backgroundColor);
+      }
+
+      let behind = [255, 255, 255];
+
+      for (const layer of layers.reverse()) {
+        const { alpha, rgb } = parse(layer);
+
+        if (alpha === 0) continue;
+
+        behind = rgb.map(
+          (value, index) => value * alpha + (behind[index] ?? 0) * (1 - alpha),
+        );
+      }
+
+      const text = parse(getComputedStyle(anchorElement).color).rgb;
+      const [lighter = 0, darker = 0] = [light(text), light(behind)].sort(
+        (a, b) => b - a,
+      );
+
+      return (lighter + 0.05) / (darker + 0.05);
+    });
+
+  for (const route of ["/", "/offline/"]) {
+    await page.goto(route);
+    await page.evaluate(() => document.fonts.ready);
+
+    const links = [
+      ...(await page.locator(".primary-navigation a").all()),
+      ...(await page.locator(".hero-actions a, .page .hero-action").all()),
+      ...(await page.locator(".site-footer a").all()),
+    ];
+
+    for (const link of links) {
+      const name = (await link.textContent())?.trim() ?? "";
+
+      await link.scrollIntoViewIfNeeded();
+
+      const box = await link.boundingBox();
+
+      if (!box) continue;
+
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      expect(await contrast(link), `${route} ${name} hovered`).toBeGreaterThan(
+        4.5,
+      );
+
+      await page.mouse.down();
+      expect(await contrast(link), `${route} ${name} pressed`).toBeGreaterThan(
+        4.5,
+      );
+
+      // Let go away from the link, so no click follows.
+      await page.mouse.move(2, 790);
+      await page.mouse.up();
+
+      await page.keyboard.press("Tab");
+      await link.focus();
+      expect(await contrast(link), `${route} ${name} focused`).toBeGreaterThan(
+        4.5,
+      );
+    }
+  }
+});
+
 test("the 320px index keeps navigation and route choices usable", async ({
   browserName,
   page,
