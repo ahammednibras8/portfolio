@@ -11,15 +11,9 @@
   --alpha-grid: 8%;
   --alpha-structure: 12%;
   --alpha-emphasis: 20%;
-  --color-rule-quiet: oklch(
-    from var(--color-ink-primary) l c h / var(--alpha-grid)
-  );
-  --color-rule-structural: oklch(
-    from var(--color-ink-primary) l c h / var(--alpha-structure)
-  );
-  --color-rule-strong: oklch(
-    from var(--color-ink-primary) l c h / var(--alpha-emphasis)
-  );
+  --color-rule-quiet: rgb(23 25 26 / var(--alpha-grid));
+  --color-rule-structural: rgb(23 25 26 / var(--alpha-structure));
+  --color-rule-strong: rgb(23 25 26 / var(--alpha-emphasis));
   --border-width-default: 1px;
   --border-width-emphasis: 0.25rem;
   --border-width-ink: 0.1875rem;
@@ -34,9 +28,7 @@
   --color-action-visited: #6f4350;
   --color-action-active: #641426;
   --color-focus: #007a73;
-  --color-surface-recessed: oklch(
-    from var(--color-ink-primary) l c h / var(--alpha-atmosphere)
-  );
+  --color-surface-recessed: rgb(23 25 26 / var(--alpha-atmosphere));
 
   /* Typography: reading and technical text stacks. */
   --font-reading:
@@ -78,7 +70,6 @@
 }
 
 html {
-  min-width: 20rem;
   scroll-padding-block-start: calc(
     var(--touch-target) + var(--space-component)
   );
@@ -749,6 +740,12 @@ article ul {
   flex-wrap: wrap;
 }
 
+.site-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--touch-target);
+}
+
 .site-footer-location {
   color: var(--color-ink-secondary);
   font-size: 0.875rem;
@@ -1141,6 +1138,7 @@ article > .project-evidence > h4 {
   position: relative;
   justify-self: center;
   width: min(70%, 17rem);
+  width: min(70%, 17rem, 34svh);
   rotate: 2deg;
 }
 
@@ -1173,7 +1171,7 @@ article > .project-evidence > h4 {
 }
 
 .page > .exhibit-hero {
-  min-block-size: max(22rem, 48svh);
+  min-block-size: max(22rem, min(48svh, 38rem));
   grid-template-rows: auto auto 1fr;
   gap: var(--space-editorial);
   background-image: radial-gradient(
@@ -1308,7 +1306,7 @@ article > .project-evidence > h4 {
   border-radius: var(--radius-sketch);
   box-shadow: var(--shadow-pop-large);
   color: var(--color-surface-raised);
-  font-size: max(1.45em, min(18vw, 5rem));
+  font-size: min(max(1.45em, min(18vw, 5rem)), 20vw);
   line-height: 1;
   rotate: -2deg;
 }
@@ -1892,6 +1890,74 @@ article > .project-evidence > h4 {
   .recovery-list li + li {
     border-inline-start: var(--border-width-default) solid
       var(--color-rule-structural);
+  }
+}
+
+/* Large text can make a diagram label wider than a narrow screen. */
+@media (width < 48rem) {
+  .architecture-relation {
+    inset-inline-end: 0;
+    white-space: normal;
+  }
+}
+
+/* Phones on their side: the portrait moves beside the words to fit the height. */
+@media (width < 48rem) and (orientation: landscape) and (height < 30rem) {
+  .page > .exhibit-hero-portrait {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--space-editorial);
+  }
+
+  .page > .exhibit-hero-portrait > h1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .page > .exhibit-hero-portrait > .route-placard {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: none;
+  }
+
+  .page > .exhibit-hero-portrait > .hero-portrait {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 30svw;
+    margin-inline-end: 0.75rem;
+  }
+}
+
+/* Short screens keep the buttons close to the first view. */
+@media (height < 30rem) {
+  .page > .exhibit-hero {
+    min-block-size: 0;
+    padding-block: var(--space-component);
+  }
+
+  .page > .exhibit-hero-portrait {
+    gap: var(--space-interface);
+  }
+
+  .hero-name {
+    font-size: min(4rem, 12vw);
+  }
+
+  .hero-actions {
+    margin-block-start: 0;
+  }
+}
+
+/* Very large screens at normal zoom would otherwise leave a narrow column. */
+@media (width >= 160rem) {
+  html {
+    font-size: 125%;
+  }
+}
+
+@media (width >= 240rem) {
+  html {
+    font-size: 150%;
   }
 }
 

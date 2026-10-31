@@ -46,6 +46,12 @@ export default defineConfig({
     },
   },
   integrations: [sitemap()],
-  // The security policy blocks inline scripts, so every script must be a file.
-  vite: { build: { assetsInlineLimit: 0 } },
+  vite: {
+    build: {
+      // The security policy blocks inline scripts, so every script must be a file.
+      assetsInlineLimit: 0,
+      // Rewrites newer CSS syntax so older tablets still get the wide layouts.
+      cssTarget: ["chrome100", "firefox100", "safari15"],
+    },
+  },
 });

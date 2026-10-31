@@ -1086,6 +1086,60 @@ test.describe("on a touch screen", () => {
   });
 });
 
+test("every screen size and large text fit without sideways scrolling", async ({
+  page,
+}) => {
+  const fits = () =>
+    page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    );
+  const screens = [
+    [240, 320],
+    [280, 653],
+    [320, 568],
+    [568, 320],
+    [667, 375],
+    [844, 390],
+    [768, 1024],
+    [1280, 720],
+    [2560, 1440],
+    [3840, 2160],
+  ] as const;
+
+  for (const route of ["/", "/route-that-does-not-exist"]) {
+    await page.goto(route);
+
+    for (const [width, height] of screens) {
+      await page.setViewportSize({ height, width });
+      expect(await fits(), `${route} at ${width}x${height}`).toBe(true);
+    }
+
+    // People who set large text in their browser must not lose the layout.
+    await page.setViewportSize({ height: 844, width: 390 });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    expect(await fits(), `${route} with large text`).toBe(true);
+  }
+});
+
+test("a phone on its side keeps the portrait beside the buttons", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 375, width: 667 });
+  await page.goto("/");
+
+  const action = await page.locator(".hero-action").boundingBox();
+  const portrait = await page.locator(".hero-portrait img").boundingBox();
+
+  if (!action || !portrait) throw new Error("Expected the hero to render.");
+
+  expect(action.y + action.height).toBeLessThanOrEqual(375);
+  expect(portrait.x).toBeGreaterThan(action.x + action.width);
+});
+
 test("the verify and approval checks finish after the pointer leaves", async ({
   browserName,
   page,
