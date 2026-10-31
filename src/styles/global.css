@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
 
-  --color-canvas: #f3f1ed;
+  --color-canvas: #dff3f4;
   --color-surface-raised: #fff;
   --color-ink-primary: #17191a;
   --color-ink-secondary: #51565a;
@@ -24,9 +24,10 @@
   --radius-sketch-alt: 15px 225px 15px 255px / 255px 15px 225px 15px;
   --shadow-pop: 0.25rem 0.25rem 0 var(--color-ink-primary);
   --shadow-pop-large: 0.625rem 0.625rem 0 var(--color-ink-primary);
-  --color-action: #a11f35;
-  --color-action-visited: #6f4350;
-  --color-action-active: #641426;
+  --color-action: #013a63;
+  --color-action-visited: #3d5f7a;
+  --color-action-active: #012a4a;
+  --color-aqua: #8fd8dc;
   --color-focus: #007a73;
   --color-surface-recessed: rgb(23 25 26 / var(--alpha-atmosphere));
 
@@ -1304,7 +1305,7 @@ article > .project-evidence > h4 {
   background: var(--color-action);
   border: var(--border-ink);
   border-radius: var(--radius-sketch);
-  box-shadow: var(--shadow-pop-large);
+  box-shadow: 0.625rem 0.625rem 0 var(--color-aqua);
   color: var(--color-surface-raised);
   font-size: min(max(1.45em, min(18vw, 5rem)), 20vw);
   line-height: 1;
