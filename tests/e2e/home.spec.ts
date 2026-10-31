@@ -113,7 +113,7 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   );
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
     "content",
-    "#f3f1ed",
+    "#dff3f4",
   );
 
   const canonicalLink = page.locator('link[rel="canonical"]');
@@ -1290,18 +1290,18 @@ test("the index preserves the typography, color, spacing, and depth contracts", 
       component: "1rem",
       editorial: "1.5rem",
       section: "3rem",
-      action: "#a11f35",
+      action: "#013a63",
       focus: "#007a73",
     },
     bodyUsesReadingFont: true,
     bodySize: "16px",
-    bodyBackground: "rgb(243, 241, 237)",
+    bodyBackground: "rgb(223, 243, 244)",
     introductionBackground: "rgb(255, 255, 255)",
     introductionBorder: "4px",
     routePadding: "24px",
     routeShadow: "rgb(23, 25, 26) 4px 4px 0px 0px",
     labelUsesTechnicalFont: true,
-    labelColor: "rgb(161, 31, 53)",
+    labelColor: "rgb(1, 58, 99)",
   });
 });
 

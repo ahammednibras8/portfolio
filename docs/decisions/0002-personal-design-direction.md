@@ -40,6 +40,8 @@ The color system has a personal starting point. [Arsenal's off-white and dark re
 
 The released site uses a raised white band between two dark-red rules to mark identity, proof, and contact. Its favicon uses an outlined uppercase N from IBM Plex Sans Bold. Both treatments established continuity without inventing a separate logo system.
 
+Nibras later replaced the dark red and off-white with navy `#013A63` and soft aqua, which supersedes the color references in this record. Navy takes every action role, the page canvas is a pale aqua `#DFF3F4`, and a stronger aqua `#8FD8DC` gives the name plate its shadow. The ink for text and outlines is unchanged, and every text pairing was checked against WCAG AA.
+
 A 2024 study of short-story writing found that access to generative AI ideas improved how individual stories were evaluated while making AI-assisted stories more similar to one another. The study does not establish the same effect in web design. It does support using AI to critique an authored direction instead of asking it to invent the personality. See [“Generative AI enhances individual creativity but reduces the collective diversity of novel content”](https://doi.org/10.1126/sciadv.adn5290).
 
 ## What must remain
