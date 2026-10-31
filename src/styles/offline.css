@@ -90,7 +90,7 @@
     border-radius: 50%;
     content: "";
     opacity: 0;
-    animation: offline-ping 2.4s var(--motion-ease-in) infinite;
+    animation: offline-ping 2.4s var(--motion-ease-settle) infinite;
   }
 
   .offline-signal::after {
@@ -98,6 +98,6 @@
   }
 
   .offline-signal svg {
-    animation: offline-search 2.4s var(--motion-ease-in) infinite;
+    animation: offline-search 2.4s var(--motion-ease-fluid) infinite;
   }
 }

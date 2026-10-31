@@ -62,7 +62,11 @@ test("the offline page lines up with the header", async ({ page }) => {
         .animationTimingFunction,
     ]);
 
-  expect(timings).toEqual(["ease-in", "ease-in", "ease-in"]);
+  expect(timings).toEqual([
+    "cubic-bezier(0.22, 1, 0.36, 1)",
+    "cubic-bezier(0.22, 1, 0.36, 1)",
+    "cubic-bezier(0.45, 0, 0.2, 1)",
+  ]);
 });
 
 test("live pages are never answered from the offline cache", async () => {

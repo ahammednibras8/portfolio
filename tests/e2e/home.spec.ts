@@ -10,6 +10,8 @@ const primaryLinks = ["/", "/#work", "/#about", "/#contact"];
 
 const underlineHidden = "inset(0px 100% 0px 0px)";
 const underlineDrawn = "inset(0px)";
+const settleEase = "cubic-bezier(0.22, 1, 0.36, 1)";
+const gestureEase = "cubic-bezier(0.45, 0, 0.2, 1)";
 const underlineClip = (element: Locator) =>
   element.evaluate((node) => getComputedStyle(node, "::after").clipPath);
 
@@ -273,10 +275,10 @@ test("pop-outs settle, then answer hover", async ({ page }) => {
     .toEqual({ animation: "none", scale: "none" });
 
   await bubble.hover();
-  await expect.poll(async () => (await read(bubble)).scale).toBe("1.05");
+  await expect.poll(async () => (await read(bubble)).scale).toBe("1.025");
 
   await label.hover();
-  await expect.poll(async () => (await read(label)).scale).toBe("1.05");
+  await expect.poll(async () => (await read(label)).scale).toBe("1.025");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.mouse.move(0, 0);
@@ -342,7 +344,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   expect(atRest.property).toBe("translate, rotate, box-shadow");
   expect(atRest.duration).toBe("0.36s, 0.36s, 0.18s");
-  expect(atRest.timing).toBe("ease-in, ease-in, ease-in");
+  expect(atRest.timing).toBe(Array(3).fill(settleEase).join(", "));
 
   const title = plate.getByRole("heading", { name: "Email" });
 
@@ -350,7 +352,9 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   await plate.hover();
   await expect.poll(() => underlineClip(title)).toBe(underlineDrawn);
-  expect((await plateTiming()).timing).toBe("ease-in, ease-in, ease-in");
+  expect((await plateTiming()).timing).toBe(
+    Array(3).fill(settleEase).join(", "),
+  );
 
   await page.mouse.move(0, 0);
   await expect.poll(() => underlineClip(title)).toBe(underlineHidden);
@@ -996,7 +1000,7 @@ test("icon details animate once while the SVG and its outline stay still", async
       type,
     ).toBe(true);
     expect(
-      moving.every((part) => part.timing === "ease-in"),
+      moving.every((part) => part.timing === gestureEase),
       type,
     ).toBe(true);
   }
@@ -1417,7 +1421,7 @@ test("icon gestures finish after the pointer leaves and can play again", async (
   const flap = mail.locator(".lucide-mail > path");
 
   await mail.hover();
-  await expect(flap).toHaveCSS("animation-timing-function", "ease-in");
+  await expect(flap).toHaveCSS("animation-timing-function", gestureEase);
   await page.mouse.move(0, 0);
   await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
   await expect(flap).toHaveCSS("animation-name", "none");
@@ -1459,9 +1463,9 @@ test("hovering a hero heading rolls a wave through its dots", async ({
         );
 
       return {
-        eased: style.animationTimingFunction
+        steady: style.animationTimingFunction
           .split(",")
-          .every((timing) => timing.trim() === "ease-in"),
+          .every((timing) => timing.trim() === "linear"),
         layers: style.backgroundImage.split("radial-gradient").length - 1,
         reach: Number.parseFloat(style.getPropertyValue("--wave-reach")),
         state: rolling?.playState ?? style.animationPlayState,
@@ -1473,7 +1477,7 @@ test("hovering a hero heading rolls a wave through its dots", async ({
 
     await section.locator(".speech-bubble").hover();
     expect(await wave(section), heading).toEqual({
-      eased: true,
+      steady: true,
       layers: 12,
       reach: 0,
       state: "paused",

@@ -104,12 +104,12 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
     });
 
   await expect(piece).toHaveClass(/zoom-ready/);
-  await expect(piece).toHaveCSS("scale", "0.92");
+  await expect(piece).toHaveCSS("scale", "0.96");
 
   // Waiting pieces stay readable, because motion never hides content.
   expect(await read()).toEqual({
     opacity: "1",
-    scale: "0.92",
+    scale: "0.96",
     translate: "none",
     visibility: "visible",
   });
@@ -118,7 +118,10 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
     part.scrollIntoView({ behavior: "instant" });
   });
   await expect(piece).toHaveClass(/is-zooming/);
-  await expect(piece).toHaveCSS("animation-timing-function", "ease-in");
+  await expect(piece).toHaveCSS(
+    "animation-timing-function",
+    "cubic-bezier(0.22, 1, 0.36, 1)",
+  );
 
   const frames = await piece.evaluate((element) => {
     const animation = element
@@ -430,11 +433,11 @@ test("depth effects run only where scroll-driven animation exists", async ({
     });
     await expect(page.locator("#about")).toHaveCSS(
       "animation-timing-function",
-      "ease-in",
+      "linear",
     );
     await expect(page.locator("#cascade")).toHaveCSS(
       "animation-timing-function",
-      "ease-in, ease-in",
+      "linear, linear",
     );
     expect(
       await page
@@ -442,7 +445,7 @@ test("depth effects run only where scroll-driven animation exists", async ({
         .evaluate(
           (part) => getComputedStyle(part, "::after").animationTimingFunction,
         ),
-    ).toBe("ease-in");
+    ).toBe("linear");
   } else {
     expect((await names()).about).toBe("none");
   }
