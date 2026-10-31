@@ -26,6 +26,8 @@ import {
 } from "@lucide/astro";
 import { Picture } from "astro:assets";
 import portrait from "../assets/portrait-enhanced.png";
+import { projects } from "../data/projects";
+import { toolbox } from "../data/toolbox";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
 
 const title = "Ahammed Nibras — Software engineer";
@@ -46,9 +48,10 @@ const parts = [
   { href: "#cascade", label: "Cascade" },
   { href: "#story", label: "Case study" },
   { href: "#evidence", label: "Lifecycle" },
+  { href: "#toolbox", label: "Toolbox" },
+  { href: "#about", label: "About" },
   { href: "#architecture", label: "This site" },
   { href: "#deployment", label: "Deployment" },
-  { href: "#about", label: "About" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -193,7 +196,7 @@ const productionPath = [
 
   <section
     id="work"
-    class="part part-orb part-rise gallery-wall"
+    class="part part-orb part-rise gallery-wall gallery-wall-compact"
     aria-labelledby="work-heading"
   >
     <header class="routes-introduction">
@@ -207,6 +210,43 @@ const productionPath = [
         runs a real task.
       </p>
     </header>
+
+    <nav aria-label="Projects">
+      <ul class="route-list project-list">
+        {projects.map(({ Icon, ...project }) => (
+          <li>
+            <a class="route-link" href={project.href}>
+              <h3>{project.name}</h3>
+              <span class="sticker" aria-hidden="true">
+                <Icon size={24} />
+              </span>
+              <div class="route-placard">
+                <p>{project.summary}</p>
+                <span class="project-stack">{project.stack}</span>
+                <span class="route-action">
+                  {project.href.startsWith("#")
+                    ? "Read the case study"
+                    : "View on GitHub"}
+                  {project.href.startsWith("#") ? (
+                    <ArrowDown
+                      class="action-arrow"
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <ArrowRight
+                      class="action-arrow"
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  )}
+                </span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   </section>
 
   <section
@@ -352,6 +392,46 @@ const productionPath = [
         </p>
       </section>
     </article>
+  </section>
+
+  <section
+    id="toolbox"
+    class="part part-orb part-rise signature-band toolbox-part"
+    aria-labelledby="toolbox-heading"
+  >
+    <header class="routes-introduction">
+      <h2 id="toolbox-heading" class="section-title">
+        <Code size={24} aria-hidden="true" />
+        What I work with
+      </h2>
+      <p>Tools I use across client and personal projects.</p>
+    </header>
+
+    <dl class="toolbox">
+      {toolbox.map(({ items, label }) => (
+        <div>
+          <dt>{label}</dt>
+          <dd>{items}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section
+    id="about"
+    class="part part-orb part-rise band-aqua"
+    aria-labelledby="about-heading"
+  >
+    <h2 id="about-heading" class="section-title">
+      <UserRound size={24} aria-hidden="true" />
+      About
+    </h2>
+
+    <p class="speech-bubble">
+      My work often starts with an action on a screen. I follow it through the
+      API, database, queue, and worker, then back to the result or failure the
+      user sees.
+    </p>
   </section>
 
   <section
@@ -526,23 +606,6 @@ const productionPath = [
   </section>
 
   <section
-    id="about"
-    class="part part-orb part-rise band-aqua"
-    aria-labelledby="about-heading"
-  >
-    <h2 id="about-heading" class="section-title">
-      <UserRound size={24} aria-hidden="true" />
-      About
-    </h2>
-
-    <p class="speech-bubble">
-      My work often starts with an action on a screen. I follow it through the
-      API, database, queue, and worker, then back to the result or failure the
-      user sees.
-    </p>
-  </section>
-
-  <section
     id="contact"
     class="part part-orb part-rise gallery-wall gallery-wall-compact band-navy"
     aria-labelledby="contact-heading"
@@ -643,7 +706,7 @@ const productionPath = [
       aria-keyshortcuts="ArrowLeft"
     ></button>
     <p class="part-hud-status">
-      <span class="part-hud-count">01 / 09</span>{" "}
+      <span class="part-hud-count">01 / 10</span>{" "}
       <span class="part-hud-name">Intro</span>
     </p>
     <button

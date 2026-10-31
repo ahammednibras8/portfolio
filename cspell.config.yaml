@@ -23,7 +23,11 @@ words:
   - fontsource
   - htmlvalidate
   - inspectable
+  # The next three are repository names, spelled as they are on GitHub.
+  - infrence
   - keyshortcuts
+  - kvstore
+  - applemusicdiscord
   - lhci
   - lighthouseci
   - lighthouserc

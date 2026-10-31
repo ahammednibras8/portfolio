@@ -41,7 +41,7 @@ test("the side rail lists every part and jumps to it", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  await expect(rail(page).getByRole("link")).toHaveCount(9);
+  await expect(rail(page).getByRole("link")).toHaveCount(10);
 
   const targets = await rail(page)
     .getByRole("link")
@@ -73,7 +73,14 @@ test("every short part fills the screen as its own slide", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  for (const id of ["intro", "work", "cascade", "architecture", "about"]) {
+  for (const id of [
+    "intro",
+    "work",
+    "cascade",
+    "toolbox",
+    "architecture",
+    "about",
+  ]) {
     const height = await page
       .locator(`#${id}`)
       .evaluate((part) => part.getBoundingClientRect().height);
@@ -223,13 +230,13 @@ test("the HUD waits out the first view, then names the part", async ({
   await page.goto("/");
 
   await expect(hud(page)).toBeHidden();
-  await expect(page.locator(".part-hud-count")).toHaveText("01 / 09");
+  await expect(page.locator(".part-hud-count")).toHaveText("01 / 10");
 
   await jumpTo(page, "cascade");
   await expect(hud(page)).toBeVisible();
-  await expect(page.locator(".part-hud-count")).toHaveText("03 / 09");
+  await expect(page.locator(".part-hud-count")).toHaveText("03 / 10");
   await expect(page.locator(".part-hud-name")).toHaveText("Cascade");
-  await expect(page.locator(".part-hud-status")).toHaveText("03 / 09 Cascade");
+  await expect(page.locator(".part-hud-status")).toHaveText("03 / 10 Cascade");
 });
 
 test("the HUD steps through every part and never gets stuck", async ({
@@ -247,9 +254,10 @@ test("the HUD steps through every part and never gets stuck", async ({
     "cascade",
     "story",
     "evidence",
+    "toolbox",
+    "about",
     "architecture",
     "deployment",
-    "about",
     "contact",
   ];
 
@@ -275,7 +283,7 @@ test("the HUD steps through every part and never gets stuck", async ({
   await expect(hud(page)).toBeVisible();
   await page.keyboard.press("ArrowLeft");
   await expect.poll(() => partTop(page, "contact")).toBeGreaterThan(80);
-  await expect.poll(() => partTop(page, "about")).toBeLessThan(80);
+  await landedOn(page, "deployment");
 
   // Going back inside a long part returns to its own start first.
   await jumpTo(page, "story");
@@ -401,11 +409,13 @@ test("the depth orbs stay faint and inside their parts", async ({ page }) => {
     await page.goto("/");
 
     const clipped = await page.evaluate(() =>
-      ["work", "cascade", "architecture", "about", "contact"].map((id) => {
-        const part = document.getElementById(id) as HTMLElement;
+      ["work", "cascade", "toolbox", "architecture", "about", "contact"].map(
+        (id) => {
+          const part = document.getElementById(id) as HTMLElement;
 
-        return getComputedStyle(part).overflow;
-      }),
+          return getComputedStyle(part).overflow;
+        },
+      ),
     );
 
     expect(new Set(clipped), `at ${width}`).toEqual(new Set(["clip"]));
@@ -425,7 +435,7 @@ test("keyboard focus stays on a HUD button when its step runs out", async ({
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await jumpTo(page, "about");
+  await jumpTo(page, "deployment");
 
   const next = hud(page).getByRole("button", { name: "Next part" });
 
@@ -576,5 +586,5 @@ test("a rail jump ends a step in progress, so the next step starts there", async
 
   // A stale step toward Cascade would send this back to Work instead.
   await hud(page).getByRole("button", { name: "Previous part" }).click();
-  await landedOn(page, "about");
+  await landedOn(page, "deployment");
 });
