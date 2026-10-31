@@ -211,7 +211,6 @@
 
   /* Exhibit titles stack over their note, with a sticker big enough to answer. */
   .page > .exhibit-hero:not(.exhibit-hero-portrait) {
-    min-block-size: 0;
     row-gap: var(--space-section);
   }
 
@@ -244,7 +243,7 @@
   }
 
   .band-aqua .speech-bubble {
-    font-size: 1.25rem;
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
     line-height: 1.5;
   }
 
