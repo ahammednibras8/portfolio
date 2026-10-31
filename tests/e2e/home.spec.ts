@@ -962,8 +962,16 @@ test.describe("on a touch screen", () => {
     // The script must really run under the production security policy.
     await expect(hero).toHaveClass(/is-waving/);
     expect(blocked).toEqual([]);
+    const headingHalo = () =>
+      page
+        .locator("#introduction-heading")
+        .evaluate((heading) => getComputedStyle(heading, "::before").opacity);
+
+    // Bold dots must never run behind the letters.
     await expect.poll(dotSize).toBeGreaterThan(2.5);
+    expect(await headingHalo()).toBe("1");
     await expect.poll(dotSize, { timeout: 11000 }).toBeCloseTo(1.44, 1);
+    await expect.poll(headingHalo).toBe("0");
     await expect(hero).not.toHaveClass(/is-waving/, { timeout: 11000 });
     await expect(flap).toHaveCSS("animation-name", "none");
 
