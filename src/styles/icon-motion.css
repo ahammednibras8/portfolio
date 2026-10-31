@@ -236,8 +236,8 @@
     transform-origin: 9px 15px;
   }
 
-  .lucide-rotate-ccw > path {
-    --icon-part-motion: icon-undo;
+  .lucide-rotate-cw > path {
+    --icon-part-motion: icon-turn;
     --icon-part-duration: 720ms;
   }
 
@@ -465,14 +465,14 @@
     }
   }
 
-  @keyframes icon-undo {
+  @keyframes icon-turn {
     0%,
     100% {
       rotate: 0deg;
     }
 
     50% {
-      rotate: -35deg;
+      rotate: 35deg;
     }
   }
 
