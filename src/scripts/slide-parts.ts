@@ -4,16 +4,18 @@
  * when a scroll stops just short of it. Pieces only start a little off their
  * place, so without this script the page simply stays still.
  */
+import { partLinks, watchCurrentPart } from "./parts";
+
 const pieceSelector = [
   ".part:not(:first-child) > :not(article, nav)",
   "article > *",
   ".route-list > li",
 ].join(", ");
 const arrivalLine = "0px 0px -12% 0px";
-const middleLine = "-50% 0px -50% 0px";
 const sideZone = 0.45;
 const dockZone = 0.12;
 const scrollSettled = 140;
+const askWindow = 800;
 
 const sideOf = (piece: Element, index: number) => {
   const { left, width } = piece.getBoundingClientRect();
@@ -62,30 +64,6 @@ const preparePieces = () => {
   }
 };
 
-const trackRail = () => {
-  const links = [...document.querySelectorAll(".part-rail a")];
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const { isIntersecting, target } of entries) {
-        if (!isIntersecting) continue;
-
-        for (const link of links) {
-          if (link.getAttribute("href") === `#${target.id}`) {
-            link.setAttribute("aria-current", "true");
-          } else {
-            link.removeAttribute("aria-current");
-          }
-        }
-      }
-    },
-    { rootMargin: middleLine },
-  );
-
-  for (const part of document.querySelectorAll(".part, #evidence")) {
-    observer.observe(part);
-  }
-};
-
 /*
  * Finishes a move only in the direction it was already going, so it can never
  * pull someone back. Rail links and in-page jumps are left alone, because only
@@ -94,19 +72,23 @@ const trackRail = () => {
 const dockOntoParts = () => {
   const parts = [...document.querySelectorAll(".part")];
   const header = document.querySelector(".site-header");
-  let lastY = scrollY;
-  let asked = false;
+  // Where the page last rested. It stops following the page once a wheel,
+  // touch, or key asks to move, so the move is measured from where it began.
+  let restedAt = scrollY;
+  let askedAt: number | undefined;
   let touching = false;
   let timer: ReturnType<typeof setTimeout>;
 
   const dock = () => {
-    const moved = scrollY - lastY;
+    if (askedAt === undefined || touching) return;
 
-    lastY = scrollY;
+    const moved = scrollY - restedAt;
 
-    if (!asked || touching || moved === 0) return;
+    // A timer from an earlier scroll can fire before the asked-for move starts.
+    if (moved === 0) return;
 
-    asked = false;
+    askedAt = undefined;
+    restedAt = scrollY;
 
     const line = header?.getBoundingClientRect().bottom ?? 0;
     const reach = innerHeight * dockZone;
@@ -125,10 +107,21 @@ const dockOntoParts = () => {
     timer = setTimeout(dock, scrollSettled);
   };
   const noteAsked = () => {
-    asked = true;
+    askedAt = performance.now();
+  };
+  const onScroll = () => {
+    // A request that never moved the page must not claim a later jump.
+    if (askedAt !== undefined && performance.now() - askedAt > askWindow) {
+      askedAt = undefined;
+    }
+
+    if (askedAt === undefined) restedAt = scrollY;
+    else askedAt = performance.now();
+
+    waitForStillness();
   };
 
-  addEventListener("scroll", waitForStillness, { passive: true });
+  addEventListener("scroll", onScroll, { passive: true });
   addEventListener("wheel", noteAsked, { passive: true });
   addEventListener("keydown", noteAsked);
   addEventListener("touchmove", noteAsked, { passive: true });
@@ -147,6 +140,17 @@ const dockOntoParts = () => {
     },
     { passive: true },
   );
+};
+
+const trackRail = () => {
+  const links = partLinks();
+
+  watchCurrentPart((index) => {
+    links.forEach((link, position) => {
+      if (position === index) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+  });
 };
 
 trackRail();

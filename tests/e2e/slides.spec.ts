@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
-const rail = (page: import("@playwright/test").Page) =>
+const rail = (page: Page) =>
   page.getByRole("navigation", { name: "Page parts" });
 
 test("the side rail lists every part and jumps to it", async ({ page }) => {
@@ -174,4 +174,222 @@ test("print leaves the rail out", async ({ page }) => {
   await page.emulateMedia({ media: "print" });
 
   await expect(page.locator(".part-rail")).toBeHidden();
+});
+
+const hud = (page: Page) => page.getByRole("group", { name: "Part controls" });
+
+const jumpTo = (page: Page, id: string) =>
+  page.evaluate((target) => {
+    document.documentElement.style.scrollBehavior = "auto";
+    document.getElementById(target)?.scrollIntoView();
+  }, id);
+
+const partTop = (page: Page, id: string) =>
+  page
+    .locator(`#${id}`)
+    .evaluate((part) => Math.round(part.getBoundingClientRect().top));
+
+test("the HUD waits out the first view, then names the part", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+
+  await expect(hud(page)).toBeHidden();
+  await expect(page.locator(".part-hud-count")).toHaveText("01 / 09");
+
+  await jumpTo(page, "cascade");
+  await expect(hud(page)).toBeVisible();
+  await expect(page.locator(".part-hud-count")).toHaveText("03 / 09");
+  await expect(page.locator(".part-hud-name")).toHaveText("Cascade");
+  await expect(page.locator(".part-hud-status")).toHaveText("03 / 09 Cascade");
+});
+
+test("the HUD steps through every part and never gets stuck", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await jumpTo(page, "work");
+  await expect(hud(page)).toBeVisible();
+
+  const next = hud(page).getByRole("button", { name: "Next part" });
+  const previous = hud(page).getByRole("button", { name: "Previous part" });
+  const order = [
+    "cascade",
+    "story",
+    "evidence",
+    "architecture",
+    "deployment",
+    "about",
+    "contact",
+  ];
+
+  for (const id of order) {
+    await next.click();
+    await expect
+      .poll(() => partTop(page, id), { message: id })
+      .toBeLessThan(80);
+    expect(await partTop(page, id), id).toBeGreaterThan(30);
+  }
+
+  // There is nothing after the last part, so Next has nowhere to go.
+  await expect(next).toBeDisabled();
+  await expect(previous).toBeEnabled();
+
+  // The footer takes the HUD's place once it rises into view.
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+  await expect(hud(page)).toBeHidden();
+
+  await jumpTo(page, "contact");
+  await expect(hud(page)).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect.poll(() => partTop(page, "contact")).toBeGreaterThan(80);
+  await expect.poll(() => partTop(page, "about")).toBeLessThan(80);
+
+  // Going back inside a long part returns to its own start first.
+  await jumpTo(page, "story");
+  await page.evaluate(() => {
+    window.scrollBy(0, 500);
+  });
+  await expect(hud(page)).toBeVisible();
+  await previous.click();
+  await expect.poll(() => partTop(page, "story")).toBeLessThan(80);
+  expect(await partTop(page, "story")).toBeGreaterThan(30);
+  await previous.click();
+  await expect.poll(() => partTop(page, "cascade")).toBeLessThan(80);
+});
+
+test("arrow keys step parts and leave other keys alone", async ({ page }) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await jumpTo(page, "work");
+
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => partTop(page, "cascade")).toBeLessThan(80);
+
+  // A modified arrow belongs to the browser, so it must not step.
+  await page.keyboard.press("Alt+ArrowRight");
+  await page.waitForTimeout(300);
+  expect(await partTop(page, "cascade")).toBeLessThan(80);
+  expect(await partTop(page, "story")).toBeGreaterThan(300);
+
+  await expect(
+    hud(page).getByRole("button", { name: "Next part" }),
+  ).toHaveAttribute("aria-keyshortcuts", "ArrowRight");
+});
+
+test("progress runs along the header and the browser bar matches it", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const progress = () =>
+    page
+      .locator(".site-header")
+      .evaluate((header) =>
+        Number.parseFloat(header.style.getPropertyValue("--page-progress")),
+      );
+
+  expect(await progress()).toBe(0);
+
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+  await expect.poll(progress).toBeGreaterThan(0.99);
+
+  const bar = await page
+    .locator(".site-header")
+    .evaluate((header) => getComputedStyle(header, "::after").transform);
+
+  expect(bar).toBe("matrix(1, 0, 0, 1, 0, 0)");
+});
+
+test("without JavaScript the HUD never appears", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  await page.goto("/");
+  await expect(page.locator(".part-hud")).toBeHidden();
+  await context.close();
+});
+
+test("depth effects run only where scroll-driven animation exists", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+
+  const supported = await page.evaluate(() =>
+    CSS.supports("animation-timeline: view()"),
+  );
+  const names = () =>
+    page.evaluate(() => ({
+      about: getComputedStyle(document.getElementById("about") as Element)
+        .animationName,
+      cascade: getComputedStyle(document.getElementById("cascade") as Element)
+        .animationName,
+      intro: getComputedStyle(document.getElementById("intro") as Element)
+        .animationName,
+      orb: getComputedStyle(
+        document.getElementById("about") as Element,
+        "::after",
+      ).animationName,
+      story: getComputedStyle(document.getElementById("story") as Element)
+        .animationName,
+    }));
+
+  if (supported) {
+    expect(await names()).toEqual({
+      about: "part-rise",
+      // Cascade keeps rolling its dots while it rises.
+      cascade: "dot-wave, part-rise",
+      intro: "dot-wave",
+      orb: "orb-drift",
+      story: "none",
+    });
+  } else {
+    expect((await names()).about).toBe("none");
+  }
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await names()).toMatchObject({
+    about: "none",
+    cascade: "none",
+    orb: "none",
+  });
+});
+
+test("the depth orbs stay faint and inside their parts", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  for (const width of [390, 1440, 2560]) {
+    await page.setViewportSize({ height: 900, width });
+    await page.goto("/");
+
+    const clipped = await page.evaluate(() =>
+      ["work", "cascade", "architecture", "about", "contact"].map((id) => {
+        const part = document.getElementById(id) as HTMLElement;
+
+        return getComputedStyle(part).overflow;
+      }),
+    );
+
+    expect(new Set(clipped), `at ${width}`).toEqual(new Set(["clip"]));
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+  }
 });

@@ -23,6 +23,7 @@ words:
   - fontsource
   - htmlvalidate
   - inspectable
+  - keyshortcuts
   - lhci
   - lighthouseci
   - lighthouserc

@@ -118,9 +118,10 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
     "content",
     "Ahammed Nibras",
   );
+  // The browser bar matches the navy header that stays on screen.
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
     "content",
-    "#dff3f4",
+    "#013a63",
   );
 
   const canonicalLink = page.locator('link[rel="canonical"]');
@@ -1147,6 +1148,9 @@ test("page content shares one left and right edge at every width", async ({
 });
 
 test("color bands run edge to edge on any width", async ({ page }) => {
+  // Parts below the fold start slightly scaled, so measure them at rest.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
   for (const width of [390, 1440, 2560]) {
     await page.setViewportSize({ height: 900, width });
     await page.goto("/");
@@ -1296,11 +1300,19 @@ test("hovering a hero heading rolls a wave through its dots", async ({
   const wave = (section: Locator) =>
     section.evaluate((element) => {
       const style = getComputedStyle(element);
+      // Some parts also rise on scroll, so read the dot wave by its own name.
+      const rolling = element
+        .getAnimations()
+        .find(
+          (animation) =>
+            animation instanceof CSSAnimation &&
+            animation.animationName === "dot-wave",
+        );
 
       return {
         layers: style.backgroundImage.split("radial-gradient").length - 1,
         reach: Number.parseFloat(style.getPropertyValue("--wave-reach")),
-        state: style.animationPlayState,
+        state: rolling?.playState ?? style.animationPlayState,
       };
     });
 
