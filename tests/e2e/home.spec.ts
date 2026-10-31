@@ -983,6 +983,7 @@ test("icon details animate once while the SVG and its outline stay still", async
       details: [...element.children].map((part) => ({
         animation: getComputedStyle(part).animationName,
         iterations: getComputedStyle(part).animationIterationCount,
+        timing: getComputedStyle(part).animationTimingFunction,
       })),
     }));
 
@@ -992,6 +993,10 @@ test("icon details animate once while the SVG and its outline stay still", async
     expect(moving.length, type).toBeGreaterThan(0);
     expect(
       moving.every((part) => part.iterations === "1"),
+      type,
+    ).toBe(true);
+    expect(
+      moving.every((part) => part.timing === "ease-in"),
       type,
     ).toBe(true);
   }
@@ -1096,6 +1101,8 @@ test.describe("on a touch screen", () => {
 
     await flap.scrollIntoViewIfNeeded();
     await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
+    await expect(flap.locator("..")).toHaveCSS("animation-name", "none");
+    await expect(flap.locator("..")).toHaveCSS("scale", "none");
     await expect(flap).toHaveCSS("animation-name", "none");
 
     await page.locator("#introduction-heading").tap();
@@ -1357,8 +1364,7 @@ test("a phone on its side keeps the portrait beside the buttons", async ({
   expect(portrait.x).toBeGreaterThan(action.x + action.width);
 });
 
-test("the verify and approval checks finish after the pointer leaves", async ({
-  browserName,
+test("icon gestures finish after the pointer leaves and can play again", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -1371,12 +1377,9 @@ test("the verify and approval checks finish after the pointer leaves", async ({
     );
     const check = link.locator("svg.lucide > path").last();
 
-    // Stretch the gesture and its hold together, so a starved machine can still
-    // leave mid-gesture. The two must stay equal for the check to finish.
+    // Stretch the gesture so even a slow machine can leave mid-draw.
     await link.evaluate((anchor) => {
       const icon = anchor.querySelector<SVGElement>("svg.lucide");
-
-      icon?.style.setProperty("transition-delay", "3300ms");
 
       for (const part of icon?.children ?? []) {
         (part as SVGElement).style.setProperty(
@@ -1401,8 +1404,7 @@ test("the verify and approval checks finish after the pointer leaves", async ({
     await expect.poll(playing, node).toBe(true);
     await page.mouse.move(0, 0);
 
-    // Firefox cannot hold the style query, so its check ends with the hover.
-    expect(await playing(), node).toBe(browserName !== "firefox");
+    expect(await playing(), node).toBe(true);
     await expect(check).toHaveCSS("animation-name", "none", { timeout: 6000 });
 
     await link.hover();
@@ -1410,16 +1412,30 @@ test("the verify and approval checks finish after the pointer leaves", async ({
     await page.mouse.move(0, 0);
   }
 
-  // Every other icon shares ease-in timing and ends with the hover.
+  // Other objects also complete their action instead of snapping shut on exit.
   const mail = page.locator('#contact a[href^="mailto:"]');
   const flap = mail.locator(".lucide-mail > path");
 
   await mail.hover();
   await expect(flap).toHaveCSS("animation-timing-function", "ease-in");
   await page.mouse.move(0, 0);
-  expect(
-    await flap.evaluate((part) => getComputedStyle(part).animationName),
-  ).toBe("none");
+  await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
+  await expect(flap).toHaveCSS("animation-name", "none");
+  await expect(mail.locator(".lucide-mail")).not.toHaveClass(/is-playing/);
+
+  // Recovery's focused link and its sibling icon share the surrounding group.
+  const recovery = page.locator(".architecture-recovery");
+  const recoveryIcon = recovery.locator(".lucide-rotate-cw");
+  await recovery.getByRole("link").focus();
+  await expect(recoveryIcon).toHaveClass(/is-playing/);
+  await recovery.getByRole("link").evaluate((link) => {
+    (link as HTMLElement).blur();
+  });
+  await expect(recoveryIcon.locator("path").first()).toHaveCSS(
+    "animation-name",
+    "icon-turn",
+  );
+  await expect(recoveryIcon).not.toHaveClass(/is-playing/);
 });
 
 test("hovering a hero heading rolls a wave through its dots", async ({
