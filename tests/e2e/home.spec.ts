@@ -955,7 +955,7 @@ test.describe("on a touch screen", () => {
     // The script must really run under the production security policy.
     await expect(hero).toHaveClass(/is-waving/);
     expect(blocked).toEqual([]);
-    await expect(hero).not.toHaveClass(/is-waving/, { timeout: 7000 });
+    await expect(hero).not.toHaveClass(/is-waving/, { timeout: 11000 });
     await expect(flap).toHaveCSS("animation-name", "none");
 
     await flap.scrollIntoViewIfNeeded();
@@ -964,6 +964,29 @@ test.describe("on a touch screen", () => {
 
     await page.locator("#introduction-heading").tap();
     await expect(hero).toHaveClass(/is-waving/);
+  });
+
+  test("a phone that claims it can hover still starts on the first touch", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      const realMatchMedia = window.matchMedia.bind(window);
+
+      window.matchMedia = (query) =>
+        query === "(hover: hover)"
+          ? ({ matches: true } as MediaQueryList)
+          : realMatchMedia(query);
+    });
+    await page.goto("/");
+    await settleScrolling(page);
+
+    await expect(page.locator("html")).not.toHaveClass(/is-touch/);
+    await page.touchscreen.tap(20, 300);
+    await expect(page.locator("html")).toHaveClass(/is-touch/);
+    await expect(page.locator(".exhibit-hero-portrait")).toHaveClass(
+      /is-waving/,
+    );
   });
 
   const tiltPhone = (page: Page) =>

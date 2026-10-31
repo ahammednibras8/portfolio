@@ -1,10 +1,11 @@
 /*
- * Touch screens cannot hover, so each icon plays once as it scrolls into view
- * and the hero dots roll the same way. Tapping a hero heading rolls them again,
- * taps give a short buzz where phones allow it, and the portrait leans with the
+ * Touch screens cannot hover, so each icon plays as it scrolls into view and
+ * the hero dots roll the same way. Tapping a hero heading rolls them again, taps
+ * give a short buzz where phones allow it, and the portrait leans with the
  * phone. All of this is decoration: without it, the page simply stays still.
  */
-const waveDuration = 4000;
+const startDelay = 400;
+const waveDuration = 8000;
 const buzzDuration = 10;
 const tiltReach = 6;
 const fullTiltAngle = 30;
@@ -15,6 +16,8 @@ type TiltEvent = typeof DeviceOrientationEvent & {
 };
 
 const playIcon = async (icon: Element) => {
+  if (icon.classList.contains("is-playing")) return;
+
   icon.classList.add("is-playing");
   await Promise.allSettled(
     icon.getAnimations({ subtree: true }).map(({ finished }) => finished),
@@ -31,7 +34,7 @@ const rollWave = (section: Element) => {
   }, waveDuration);
 };
 
-const onceInView = (
+const whenInView = (
   selector: string,
   threshold: number,
   play: (element: Element) => unknown,
@@ -41,8 +44,8 @@ const onceInView = (
       for (const { isIntersecting, target } of entries) {
         if (!isIntersecting) continue;
 
-        observer.unobserve(target);
-        play(target);
+        // A short wait lets the eye arrive before the motion starts.
+        setTimeout(() => play(target), startDelay);
       }
     },
     { threshold },
@@ -102,12 +105,11 @@ const enableTilt = (portrait: HTMLElement) => {
   );
 };
 
-const canHover = matchMedia("(hover: hover)").matches;
-const reducesMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const start = () => {
+  document.documentElement.classList.add("is-touch");
 
-if (!canHover && !reducesMotion) {
-  onceInView("main svg.lucide", 0.6, playIcon);
-  onceInView(".dot-wave", 0.3, rollWave);
+  whenInView("main svg.lucide", 0.6, playIcon);
+  whenInView(".dot-wave", 0.3, rollWave);
 
   document.addEventListener("click", ({ target }) => {
     if (!(target instanceof Element)) return;
@@ -121,4 +123,13 @@ if (!canHover && !reducesMotion) {
   const portrait = document.querySelector<HTMLElement>(".hero-portrait");
 
   if (portrait) enableTilt(portrait);
+};
+
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  // Some phones claim they can hover, so a real touch also proves a touchscreen.
+  if (matchMedia("(hover: hover)").matches) {
+    addEventListener("touchstart", start, { once: true, passive: true });
+  } else {
+    start();
+  }
 }

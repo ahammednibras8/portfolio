@@ -899,7 +899,7 @@ article ul {
   }
 
   .sticker-wave svg.is-playing {
-    animation: hand-wave 900ms ease-in-out 1;
+    animation: hand-wave 1500ms ease-in-out 2;
   }
 }
 
@@ -1132,13 +1132,13 @@ article > .project-evidence > h4 {
 }
 
 /* touch-motion.ts sets these from how the phone is held. */
-@media screen and (hover: none) and (prefers-reduced-motion: no-preference) {
-  .hero-portrait {
+@media screen and (prefers-reduced-motion: no-preference) {
+  .is-touch .hero-portrait {
     translate: var(--tilt-x, 0) var(--tilt-y, 0);
     transition: translate var(--motion-short) ease-out;
   }
 
-  .hero-portrait .sticker {
+  .is-touch .hero-portrait .sticker {
     translate: calc(var(--tilt-x, 0px) * -0.75) calc(var(--tilt-y, 0px) * -0.75);
     transition: translate var(--motion-short) ease-out;
   }
@@ -1168,6 +1168,12 @@ article > .project-evidence > h4 {
   initial-value: 0;
 }
 
+@property --wave-ink {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
 @media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   @keyframes dot-wave {
     0% {
@@ -1187,9 +1193,10 @@ article > .project-evidence > h4 {
    * repaints the whole section on every frame, so keep the count low.
    */
   .page > .dot-wave {
+    --wave-ink: var(--color-rule-structural);
     --wave-dot: radial-gradient(
       circle at 0.5rem 0.5rem,
-      var(--color-rule-structural) 0.09rem,
+      var(--wave-ink) 0.09rem,
       transparent 0.1rem
     );
 
@@ -1211,12 +1218,19 @@ article > .project-evidence > h4 {
       10rem calc(var(--wave-reach) * sin(var(--wave-phase) - 300deg)),
       11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
     background-size: 12rem 1rem;
-    transition: --wave-reach var(--motion-sweep) ease-in-out;
+    transition:
+      --wave-reach var(--motion-sweep) ease-in-out,
+      --wave-ink var(--motion-sweep) ease-in-out;
     animation: dot-wave 4s linear infinite paused;
   }
 
+  /*
+   * Phones get red dots because the pale ones barely show on a small screen.
+   * Past half the 1rem spacing, a dot would read as part of the next row.
+   */
   .page > .dot-wave.is-waving {
-    --wave-reach: 0.4rem;
+    --wave-ink: var(--color-action);
+    --wave-reach: 0.45rem;
 
     animation-play-state: running;
   }

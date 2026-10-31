@@ -18,6 +18,10 @@
   }
 
   /* Touch screens have no hover, so touch-motion.ts sets this class instead. */
+  :where(.page) .lucide.is-playing {
+    animation: icon-pop 800ms ease-in-out 1;
+  }
+
   .page .lucide.is-playing > * {
     animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
       var(--icon-part-ease, ease-in-out) var(--icon-part-delay, 0ms) 1;
@@ -256,6 +260,17 @@
 
   .lucide-user-round > circle {
     --icon-part-motion: icon-nod;
+  }
+
+  @keyframes icon-pop {
+    0%,
+    100% {
+      scale: 1;
+    }
+
+    50% {
+      scale: 1.2;
+    }
   }
 
   @keyframes icon-direction {
