@@ -875,23 +875,6 @@ article ul {
     }
   }
 
-  @keyframes name-pop {
-    0%,
-    100% {
-      rotate: -2deg;
-      scale: 1;
-    }
-
-    50% {
-      rotate: 1deg;
-      scale: 1.05;
-    }
-  }
-
-  .hero-name {
-    animation: name-pop 700ms ease-in-out 900ms;
-  }
-
   @keyframes hand-wave {
     0%,
     100% {
@@ -959,18 +942,6 @@ article ul {
 
   .title-sweep:hover {
     background-position-x: 0%;
-  }
-
-  .hero-name {
-    transition:
-      rotate var(--motion-route) var(--motion-ease-out),
-      scale var(--motion-route) var(--motion-ease-out);
-  }
-
-  h1:hover .hero-name {
-    transition-timing-function: var(--motion-ease-bounce);
-    rotate: 0deg;
-    scale: 1.04;
   }
 
   .hero-portrait {
@@ -1290,26 +1261,27 @@ article > .project-evidence > h4 {
   line-height: 0.95;
 }
 
-/* The greeting leads in quietly so the name can land on a comic title plate. */
+/* The name is the biggest thing on the page, and nothing distorts it. */
 .hero-greeting {
   display: block;
-  font-size: 0.5em;
+  font-size: 0.7em;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .hero-name {
   display: inline-block;
-  margin-block-start: 0.12em;
-  padding: 0.06em 0.2em 0.12em;
-  background: var(--color-action);
-  border: var(--border-ink);
-  border-radius: var(--radius-sketch);
-  box-shadow: 0.625rem 0.625rem 0 var(--color-aqua);
-  color: var(--color-surface-raised);
+  margin-block-start: 0.04em;
+  padding-inline: 0.04em;
+  background: linear-gradient(
+    transparent 66%,
+    var(--color-aqua) 66%,
+    var(--color-aqua) 90%,
+    transparent 90%
+  );
+  color: var(--color-action);
   font-size: min(max(1.45em, min(18vw, 5rem)), 20vw);
   line-height: 1;
-  rotate: -2deg;
 }
 
 .exhibit-hero p {
@@ -2099,11 +2071,8 @@ article > .project-evidence > h4 {
     margin: 0;
     padding: 0;
     background: none;
-    border: 0;
-    box-shadow: none;
     color: inherit;
     font-size: inherit;
-    rotate: none;
   }
 
   .page > .exhibit-hero h2 {
