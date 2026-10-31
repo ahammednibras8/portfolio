@@ -260,7 +260,9 @@ test("pop-outs settle, then answer hover", async ({ page }) => {
       return { animation: style.animationName, scale: style.scale };
     });
 
-  expect(await read(bubble)).toEqual({ animation: "none", scale: "none" });
+  await expect
+    .poll(() => read(bubble))
+    .toEqual({ animation: "none", scale: "none" });
 
   await page.locator("#about").evaluate((section) => {
     section.scrollIntoView({ block: "center" });

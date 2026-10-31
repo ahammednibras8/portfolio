@@ -1,0 +1,276 @@
+/* Printed folio details: ink, registration marks, and physical card feedback. */
+.folio-mark {
+  display: none;
+}
+
+@media screen and (forced-colors: none) {
+  .part {
+    position: relative;
+  }
+
+  .page :is(.part, .project-evidence) > .folio-mark {
+    grid-area: auto;
+    position: absolute;
+    inset-block-start: 0.875rem;
+    inset-inline-end: var(--band-edge);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--color-action);
+    font-family: var(--font-technical);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .folio-mark::before {
+    width: 1.75rem;
+    height: 0.125rem;
+    background: currentcolor;
+    content: "";
+    transform-origin: right;
+  }
+
+  .page :is(.band-navy, .project-evidence) > .folio-mark {
+    color: var(--color-aqua);
+  }
+
+  .page .project-evidence > .folio-mark {
+    inset-inline-end: var(--space-component);
+  }
+
+  @media (width >= 72rem) {
+    .page > .part > .folio-mark {
+      inset-inline-end: calc(
+        var(--band-edge) + (100% - 2 * var(--band-edge) + var(--grid-gap)) / 12
+      );
+    }
+  }
+
+  .hero-name {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .hero-portrait {
+    isolation: isolate;
+  }
+
+  /* Crop marks belong to the photograph, inside its existing safe gutter. */
+  .hero-portrait::before {
+    position: absolute;
+    inset: -0.625rem;
+    background:
+      linear-gradient(var(--color-action) 0 0) left top / 1.25rem 0.125rem,
+      linear-gradient(var(--color-action) 0 0) left top / 0.125rem 1.25rem,
+      linear-gradient(var(--color-action) 0 0) right top / 1.25rem 0.125rem,
+      linear-gradient(var(--color-action) 0 0) right top / 0.125rem 1.25rem,
+      linear-gradient(var(--color-action) 0 0) left bottom / 1.25rem 0.125rem,
+      linear-gradient(var(--color-action) 0 0) left bottom / 0.125rem 1.25rem,
+      linear-gradient(var(--color-action) 0 0) right bottom / 1.25rem 0.125rem,
+      linear-gradient(var(--color-action) 0 0) right bottom / 0.125rem 1.25rem;
+    background-repeat: no-repeat;
+    content: "";
+    pointer-events: none;
+  }
+
+  .hero-portrait::after {
+    position: absolute;
+    z-index: -1;
+    inset: -0.25rem;
+    border: 0.125rem solid var(--color-aqua);
+    border-radius: var(--radius-sketch-alt);
+    content: "";
+    pointer-events: none;
+    rotate: -4deg;
+  }
+
+  .route-link {
+    position: relative;
+  }
+
+  /* One short ink rule grows across a card when its destination is engaged. */
+  .route-link::before {
+    position: absolute;
+    inset-block-start: 0.75rem;
+    inset-inline: var(--space-editorial);
+    height: 0.1875rem;
+    background: var(--color-action);
+    border-radius: 999px;
+    content: "";
+    pointer-events: none;
+    scale: 0.12 1;
+    transform-origin: left;
+  }
+
+  .route-link:is(:hover, :focus-visible)::before {
+    scale: 1 1;
+  }
+
+  .run-path-step,
+  .toolbox dt {
+    position: relative;
+  }
+
+  .toolbox dt {
+    width: fit-content;
+  }
+
+  .run-path-step::after,
+  .toolbox dt::after,
+  .architecture-node-link::before {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-end: -0.25rem;
+    width: 1.75rem;
+    height: 0.125rem;
+    background: var(--color-action);
+    content: "";
+    pointer-events: none;
+    transform-origin: left;
+  }
+
+  .architecture-node-link {
+    position: relative;
+  }
+
+  .architecture-node-link::before {
+    inset-block-end: 0.5rem;
+    inset-inline-start: var(--space-component);
+    width: calc(100% - 2 * var(--space-component));
+    background: var(--color-aqua);
+  }
+
+  .run-path li:nth-child(2),
+  .toolbox > div:nth-child(2),
+  .architecture-node:nth-child(2) {
+    --ink-step: 1;
+  }
+
+  .run-path li:nth-child(3),
+  .toolbox > div:nth-child(3),
+  .architecture-node:nth-child(3) {
+    --ink-step: 2;
+  }
+
+  .run-path li:nth-child(4),
+  .toolbox > div:nth-child(4) {
+    --ink-step: 3;
+  }
+
+  .run-path li:nth-child(5),
+  .toolbox > div:nth-child(5) {
+    --ink-step: 4;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes ink-highlight {
+      0% {
+        background-size: 0% 100%;
+      }
+
+      100% {
+        background-size: 100% 100%;
+      }
+    }
+
+    @keyframes frame-register {
+      0% {
+        scale: 0.94;
+      }
+
+      100% {
+        scale: 1;
+      }
+    }
+
+    @keyframes ink-reveal {
+      0% {
+        scale: 0.15 1;
+      }
+
+      100% {
+        scale: 1 1;
+      }
+    }
+
+    @keyframes card-ink {
+      0%,
+      100% {
+        scale: 0.12 1;
+      }
+
+      60% {
+        scale: 1 1;
+      }
+    }
+
+    .hero-name {
+      animation: ink-highlight 900ms var(--motion-ease-out) 350ms backwards;
+    }
+
+    .hero-portrait::before {
+      animation: frame-register 800ms var(--motion-ease-out) 150ms backwards;
+      transition: scale var(--motion-route) var(--motion-ease-out);
+    }
+
+    .route-link::before {
+      transition: scale var(--motion-route) var(--motion-ease-out);
+    }
+
+    .is-zooming.folio-mark::before,
+    .is-zooming .run-path-step::after,
+    .toolbox.is-zooming dt::after,
+    .is-zooming .architecture-node-link::before {
+      animation: ink-reveal 400ms var(--motion-ease-out)
+        calc(var(--ink-step, 0) * 70ms) backwards;
+    }
+
+    .is-zooming > .route-link::before {
+      animation: card-ink 700ms var(--motion-ease-out) 1;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .hero-portrait:hover::before {
+        scale: 1.035;
+      }
+
+      /* Pointer depth has its own transform; lift, press, and zoom stay separate. */
+      .page .project-list .route-link {
+        transition:
+          translate var(--motion-route) var(--motion-ease-out),
+          rotate var(--motion-route) var(--motion-ease-out),
+          box-shadow var(--motion-standard) var(--motion-ease-out),
+          transform var(--motion-standard) var(--motion-ease-out),
+          scale var(--motion-short) var(--motion-ease-out);
+      }
+
+      .page .project-list .route-link.is-tilting {
+        transform: perspective(900px) rotateX(var(--card-tilt-x, 0deg))
+          rotateY(var(--card-tilt-y, 0deg));
+      }
+
+      .page .project-list .route-link:is(:hover, :focus-visible) {
+        box-shadow: 0.5rem 0.5rem 0 var(--color-action);
+      }
+    }
+
+    /* Touch browsers can retain :active after release; pointer events own the press. */
+    .page .project-list .route-link:active {
+      box-shadow: var(--shadow-pop);
+      scale: none;
+      transform: none;
+      translate: 0 0;
+    }
+
+    .page .project-list .route-link.is-pressed,
+    .page .hero-actions .hero-action:active {
+      box-shadow: 0.125rem 0.125rem 0 var(--color-action);
+      scale: 0.985;
+      translate: 0.125rem 0.125rem;
+    }
+  }
+}
