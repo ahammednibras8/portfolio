@@ -19,17 +19,12 @@
 
   /* Touch screens have no hover, so touch-motion.ts sets this class instead. */
   :where(.page) .lucide.is-playing {
-    animation: icon-pop 800ms ease-in-out 1;
+    animation: icon-pop 800ms var(--motion-ease-in) 1;
   }
 
   .page .lucide.is-playing > * {
     animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-      var(--icon-part-ease, ease-in-out) var(--icon-part-delay, 0ms) 1;
-  }
-
-  .lucide-circle-check,
-  .lucide-shield-check {
-    --icon-part-ease: cubic-bezier(0.37, 0, 0.63, 1);
+      var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
   }
 
   @media (hover: hover) {
@@ -49,7 +44,7 @@
       > *,
     .page .lucide:hover > * {
       animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-        var(--icon-part-ease, ease-in-out) var(--icon-part-delay, 0ms) 1;
+        var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
     }
 
     /*
@@ -76,7 +71,7 @@
         .lucide-circle-check > path,
         .lucide-shield-check > path:where(:last-child) {
           animation: icon-check-detail var(--icon-part-duration)
-            var(--icon-part-ease) 1;
+            var(--motion-ease-in) 1;
         }
       }
     }

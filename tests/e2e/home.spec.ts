@@ -342,7 +342,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   expect(atRest.property).toBe("translate, rotate, box-shadow");
   expect(atRest.duration).toBe("0.36s, 0.36s, 0.18s");
-  expect(atRest.timing).toContain("cubic-bezier(0.2, 0, 0, 1)");
+  expect(atRest.timing).toBe("ease-in, ease-in, ease-in");
 
   const title = plate.getByRole("heading", { name: "Email" });
 
@@ -350,9 +350,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   await plate.hover();
   await expect.poll(() => underlineClip(title)).toBe(underlineDrawn);
-  expect((await plateTiming()).timing).toContain(
-    "cubic-bezier(0.34, 1.56, 0.64, 1)",
-  );
+  expect((await plateTiming()).timing).toBe("ease-in, ease-in, ease-in");
 
   await page.mouse.move(0, 0);
   await expect.poll(() => underlineClip(title)).toBe(underlineHidden);
@@ -1412,12 +1410,12 @@ test("the verify and approval checks finish after the pointer leaves", async ({
     await page.mouse.move(0, 0);
   }
 
-  // Every other icon keeps the standard ease and ends with the hover.
+  // Every other icon shares ease-in timing and ends with the hover.
   const mail = page.locator('#contact a[href^="mailto:"]');
   const flap = mail.locator(".lucide-mail > path");
 
   await mail.hover();
-  await expect(flap).toHaveCSS("animation-timing-function", "ease-in-out");
+  await expect(flap).toHaveCSS("animation-timing-function", "ease-in");
   await page.mouse.move(0, 0);
   expect(
     await flap.evaluate((part) => getComputedStyle(part).animationName),

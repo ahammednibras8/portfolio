@@ -164,7 +164,7 @@
 
     .zoom-ready.is-zooming {
       scale: 1;
-      animation: zoom-in 800ms var(--motion-ease-out)
+      animation: zoom-in 800ms var(--motion-ease-in)
         calc(var(--zoom-order, 0) * 90ms) backwards;
     }
   }
