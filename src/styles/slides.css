@@ -9,10 +9,6 @@
 }
 
 @media screen {
-  :root {
-    --slide-distance: clamp(3rem, 12vw, 9rem);
-  }
-
   .part-rail {
     position: fixed;
     z-index: 4;
@@ -150,33 +146,26 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    @keyframes slide-in {
+    @keyframes zoom-in {
       0% {
-        translate: var(--slide-from) 0;
+        scale: 0.92;
       }
 
       100% {
-        translate: 0 0;
+        scale: 1;
       }
     }
 
-    /* Pieces wait just off their place, never hidden, then slide in. */
-    .slide-from-start {
-      --slide-from: calc(-1 * var(--slide-distance));
-
-      translate: var(--slide-from) 0;
+    /* Pieces stay visible and centered while growing into their final size. */
+    .zoom-ready {
+      scale: 0.92;
+      transform-origin: center;
     }
 
-    .slide-from-end {
-      --slide-from: var(--slide-distance);
-
-      translate: var(--slide-from) 0;
-    }
-
-    :is(.slide-from-start, .slide-from-end).is-sliding {
-      translate: 0 0;
-      animation: slide-in 800ms var(--motion-ease-out)
-        calc(var(--slide-order, 0) * 90ms) backwards;
+    .zoom-ready.is-zooming {
+      scale: 1;
+      animation: zoom-in 800ms var(--motion-ease-out)
+        calc(var(--zoom-order, 0) * 90ms) backwards;
     }
   }
 }

@@ -18,11 +18,9 @@ const settleScrolling = (page: Page) =>
   page.evaluate(() => {
     document.documentElement.style.scrollBehavior = "auto";
 
-    // Hover tests point at resting places, so nothing may still slide in.
-    for (const piece of document.querySelectorAll(
-      ".slide-from-start, .slide-from-end",
-    )) {
-      piece.classList.remove("slide-from-start", "slide-from-end");
+    // Hover tests point at resting places, so nothing may still zoom in.
+    for (const piece of document.querySelectorAll(".zoom-ready")) {
+      piece.classList.remove("zoom-ready");
     }
   });
 
@@ -247,7 +245,7 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("pop-outs slide in, settle, then answer hover", async ({ page }) => {
+test("pop-outs settle, then answer hover", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
