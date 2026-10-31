@@ -1272,6 +1272,7 @@ article > .project-evidence > h4 {
 .hero-name {
   display: inline-block;
   margin-block-start: 0.04em;
+  margin-inline-start: -0.08em;
   padding-inline: 0.04em;
   background: linear-gradient(
     transparent 66%,
