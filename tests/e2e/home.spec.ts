@@ -17,6 +17,13 @@ const underlineClip = (element: Locator) =>
 const settleScrolling = (page: Page) =>
   page.evaluate(() => {
     document.documentElement.style.scrollBehavior = "auto";
+
+    // Hover tests point at resting places, so nothing may still slide in.
+    for (const piece of document.querySelectorAll(
+      ".slide-from-start, .slide-from-end",
+    )) {
+      piece.classList.remove("slide-from-start", "slide-from-end");
+    }
   });
 
 test("the whole portfolio reads as one continuous page", async ({ page }) => {
@@ -231,9 +238,7 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("pop-outs answer hover and stay still while scrolling", async ({
-  page,
-}) => {
+test("pop-outs slide in, settle, then answer hover", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -254,7 +259,9 @@ test("pop-outs answer hover and stay still while scrolling", async ({
     section.scrollIntoView({ block: "center" });
   });
   await page.mouse.move(0, 0);
-  expect(await read(bubble)).toEqual({ animation: "none", scale: "none" });
+  await expect
+    .poll(() => read(bubble))
+    .toEqual({ animation: "none", scale: "none" });
 
   await bubble.hover();
   await expect.poll(async () => (await read(bubble)).scale).toBe("1.05");
@@ -303,7 +310,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   await page.mouse.move(0, 0);
   await sticker.hover();
   await expect.poll(() => stickerStyle("rotate")).toBe("-6deg");
-  expect(await stickerStyle("animationName")).toBe("none");
+  await expect.poll(() => stickerStyle("animationName")).toBe("none");
 
   await page.mouse.move(0, 0);
   await expect.poll(() => stickerStyle("rotate")).toBe("-6deg");
@@ -688,6 +695,7 @@ test("the 320px index keeps navigation and route choices usable", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
   const layout = await page.evaluate(() => {

@@ -40,6 +40,18 @@ const socialImage = {
   height: 630,
 } as const;
 
+const parts = [
+  { href: "#intro", label: "Intro" },
+  { href: "#work", label: "Work" },
+  { href: "#cascade", label: "Cascade" },
+  { href: "#story", label: "Case study" },
+  { href: "#evidence", label: "Lifecycle" },
+  { href: "#architecture", label: "This site" },
+  { href: "#deployment", label: "Deployment" },
+  { href: "#about", label: "About" },
+  { href: "#contact", label: "Contact" },
+];
+
 const buildPath = [
   {
     key: "source",
@@ -129,7 +141,8 @@ const productionPath = [
   socialImage={socialImage}
 >
   <section
-    class="introduction signature-band exhibit-hero exhibit-hero-portrait dot-wave"
+    id="intro"
+    class="part introduction signature-band exhibit-hero exhibit-hero-portrait dot-wave"
     aria-labelledby="introduction-heading"
   >
     <h1 id="introduction-heading" class="title-sweep">
@@ -178,7 +191,7 @@ const productionPath = [
     </address>
   </section>
 
-  <section id="work" class="gallery-wall" aria-labelledby="work-heading">
+  <section id="work" class="part gallery-wall" aria-labelledby="work-heading">
     <header class="routes-introduction">
       <h2 id="work-heading" class="section-title">
         <Rocket size={24} aria-hidden="true" />
@@ -194,7 +207,7 @@ const productionPath = [
 
   <section
     id="cascade"
-    class="introduction signature-band exhibit-hero dot-wave band-navy"
+    class="part introduction signature-band exhibit-hero dot-wave band-navy"
     aria-labelledby="cascade-heading"
   >
     <h2 id="cascade-heading">Cascade</h2>
@@ -212,7 +225,7 @@ const productionPath = [
     </div>
   </section>
 
-  <section class="case-study" aria-label="Cascade case study">
+  <section id="story" class="part case-study" aria-label="Cascade case study">
     <article>
       <header>
         <h3>Background work that survives failure</h3>
@@ -339,7 +352,7 @@ const productionPath = [
 
   <section
     id="architecture"
-    class="introduction signature-band exhibit-hero"
+    class="part introduction signature-band exhibit-hero"
     aria-labelledby="architecture-heading"
   >
     <h2 id="architecture-heading">How this site runs.</h2>
@@ -359,7 +372,11 @@ const productionPath = [
     </div>
   </section>
 
-  <section class="architecture-system" aria-labelledby="deployment-heading">
+  <section
+    id="deployment"
+    class="part architecture-system"
+    aria-labelledby="deployment-heading"
+  >
     <h3 id="deployment-heading">One artifact, two controlled paths</h3>
 
     <figure
@@ -504,7 +521,7 @@ const productionPath = [
     </figure>
   </section>
 
-  <section id="about" class="band-aqua" aria-labelledby="about-heading">
+  <section id="about" class="part band-aqua" aria-labelledby="about-heading">
     <h2 id="about-heading" class="section-title">
       <UserRound size={24} aria-hidden="true" />
       About
@@ -519,7 +536,7 @@ const productionPath = [
 
   <section
     id="contact"
-    class="gallery-wall gallery-wall-compact band-navy"
+    class="part gallery-wall gallery-wall-compact band-navy"
     aria-labelledby="contact-heading"
   >
     <header class="routes-introduction">
@@ -596,4 +613,18 @@ const productionPath = [
       </ul>
     </nav>
   </section>
+
+  <nav class="part-rail" aria-label="Page parts">
+    <ol>
+      {parts.map(({ href, label }) => (
+        <li>
+          <a href={href}>
+            <span>{label}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <script src="../scripts/slide-parts.ts"></script>
 </DocumentLayout>
