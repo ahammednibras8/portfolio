@@ -245,8 +245,8 @@
   @media (prefers-reduced-motion: no-preference) {
     .part-hud {
       transition:
-        opacity var(--motion-route) var(--motion-ease-out),
-        translate var(--motion-route) var(--motion-ease-out),
+        opacity var(--motion-route) var(--motion-ease-in),
+        translate var(--motion-route) var(--motion-ease-in),
         visibility 0s var(--motion-route);
     }
 

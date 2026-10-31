@@ -209,28 +209,28 @@
     }
 
     .hero-name {
-      animation: ink-highlight 900ms var(--motion-ease-out) 350ms backwards;
+      animation: ink-highlight 900ms var(--motion-ease-in) 350ms backwards;
     }
 
     .hero-portrait::before {
-      animation: frame-register 800ms var(--motion-ease-out) 150ms backwards;
-      transition: scale var(--motion-route) var(--motion-ease-out);
+      animation: frame-register 800ms var(--motion-ease-in) 150ms backwards;
+      transition: scale var(--motion-route) var(--motion-ease-in);
     }
 
     .route-link::before {
-      transition: scale var(--motion-route) var(--motion-ease-out);
+      transition: scale var(--motion-route) var(--motion-ease-in);
     }
 
     .is-zooming.folio-mark::before,
     .is-zooming .run-path-step::after,
     .toolbox.is-zooming dt::after,
     .is-zooming .architecture-node-link::before {
-      animation: ink-reveal 400ms var(--motion-ease-out)
+      animation: ink-reveal 400ms var(--motion-ease-in)
         calc(var(--ink-step, 0) * 70ms) backwards;
     }
 
     .is-zooming > .route-link::before {
-      animation: card-ink 700ms var(--motion-ease-out) 1;
+      animation: card-ink 700ms var(--motion-ease-in) 1;
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -241,11 +241,11 @@
       /* Pointer depth has its own transform; lift, press, and zoom stay separate. */
       .page .project-list .route-link {
         transition:
-          translate var(--motion-route) var(--motion-ease-out),
-          rotate var(--motion-route) var(--motion-ease-out),
-          box-shadow var(--motion-standard) var(--motion-ease-out),
-          transform var(--motion-standard) var(--motion-ease-out),
-          scale var(--motion-short) var(--motion-ease-out);
+          translate var(--motion-route) var(--motion-ease-in),
+          rotate var(--motion-route) var(--motion-ease-in),
+          box-shadow var(--motion-standard) var(--motion-ease-in),
+          transform var(--motion-standard) var(--motion-ease-in),
+          scale var(--motion-short) var(--motion-ease-in);
       }
 
       .page .project-list .route-link.is-tilting {

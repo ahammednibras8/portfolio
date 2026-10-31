@@ -118,6 +118,7 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
     part.scrollIntoView({ behavior: "instant" });
   });
   await expect(piece).toHaveClass(/is-zooming/);
+  await expect(piece).toHaveCSS("animation-timing-function", "ease-in");
 
   const frames = await piece.evaluate((element) => {
     const animation = element
