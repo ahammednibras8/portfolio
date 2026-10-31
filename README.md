@@ -12,6 +12,8 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - A typed document layout owns shared metadata, fonts, navigation, and the footer.
 - Important content and navigation work without JavaScript.
 - There is no application server, database, or client framework.
+- Small TypeScript scripts add motion and navigation shortcuts to the finished HTML. Nothing depends on them, and `src/scripts/` holds all of them.
+- A service worker in the browser saves one offline page and shows it when a page cannot load. It never stores live pages, so deploys and rollbacks reach every visitor.
 - Images are optimized during the build.
 - GitHub Actions builds and tests the site after a change reaches `main`.
 - The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.

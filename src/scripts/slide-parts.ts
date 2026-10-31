@@ -11,7 +11,9 @@ const pieceSelector = [
   "article > *",
   ".route-list > li",
 ].join(", ");
-const arrivalLine = "0px 0px -12% 0px";
+// Any piece showing at all starts sliding. A margin left a sliver of offset
+// pieces at the screen's foot after a jump, which stayed until the next scroll.
+const arrivalLine = "0px";
 const sideZone = 0.45;
 const dockZone = 0.12;
 const scrollSettled = 140;

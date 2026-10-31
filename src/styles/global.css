@@ -141,6 +141,11 @@ a {
   transform: none;
 }
 
+/* It lands on the navy header, where the teal ring is too faint. */
+.skip-link:focus-visible {
+  outline-color: var(--color-surface-raised);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .skip-link {
     transition: transform var(--motion-deliberate) var(--motion-ease-out);
