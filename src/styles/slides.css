@@ -148,7 +148,7 @@
   @media (prefers-reduced-motion: no-preference) {
     @keyframes zoom-in {
       0% {
-        scale: 0.92;
+        scale: 0.96;
       }
 
       100% {
@@ -158,14 +158,14 @@
 
     /* Pieces stay visible and centered while growing into their final size. */
     .zoom-ready {
-      scale: 0.92;
+      scale: 0.96;
       transform-origin: center;
     }
 
     .zoom-ready.is-zooming {
       scale: 1;
-      animation: zoom-in 800ms var(--motion-ease-in)
-        calc(var(--zoom-order, 0) * 90ms) backwards;
+      animation: zoom-in 800ms var(--motion-ease-settle)
+        calc(var(--zoom-order, 0) * 70ms) backwards;
     }
   }
 }

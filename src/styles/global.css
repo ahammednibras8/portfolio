@@ -56,7 +56,8 @@
   --motion-deliberate: 220ms;
   --motion-route: 360ms;
   --motion-sweep: 1100ms;
-  --motion-ease-in: ease-in;
+  --motion-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-fluid: cubic-bezier(0.45, 0, 0.2, 1);
 
   font-family: var(--font-reading);
   font-synthesis: none;
@@ -147,7 +148,7 @@ a {
 
 @media (prefers-reduced-motion: no-preference) {
   .skip-link {
-    transition: transform var(--motion-deliberate) var(--motion-ease-in);
+    transition: transform var(--motion-deliberate) var(--motion-ease-settle);
   }
 }
 
@@ -901,7 +902,7 @@ article ul {
   }
 
   .sticker-wave svg.is-playing {
-    animation: hand-wave 1500ms var(--motion-ease-in) 2;
+    animation: hand-wave 1200ms var(--motion-ease-fluid) 1;
   }
 }
 
@@ -925,7 +926,7 @@ article ul {
       background-clip: text;
       background-size: 300% 100%;
       color: transparent;
-      animation: title-sweep var(--motion-sweep) var(--motion-ease-in) 300ms
+      animation: title-sweep var(--motion-sweep) var(--motion-ease-fluid) 300ms
         backwards;
     }
 
@@ -938,11 +939,12 @@ article ul {
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   /*
-   * Declare transitions at rest so the shared ease-in applies on both arrival
-   * and return, with a gentle start and no overshoot.
+   * Respond promptly, then settle gently. Declare transitions at rest so the
+   * same controlled response applies when the pointer leaves.
    */
   .title-sweep {
-    transition: background-position-x var(--motion-sweep) var(--motion-ease-in);
+    transition: background-position-x var(--motion-sweep)
+      var(--motion-ease-fluid);
   }
 
   .title-sweep:hover {
@@ -951,8 +953,8 @@ article ul {
 
   .hero-portrait {
     transition:
-      rotate var(--motion-route) var(--motion-ease-in),
-      scale var(--motion-route) var(--motion-ease-in);
+      rotate var(--motion-route) var(--motion-ease-settle),
+      scale var(--motion-route) var(--motion-ease-settle);
   }
 
   .hero-portrait:hover {
@@ -961,30 +963,30 @@ article ul {
   }
 
   .hero-portrait:hover .sticker-wave svg {
-    animation: hand-wave 900ms var(--motion-ease-in) 1;
+    animation: hand-wave 900ms var(--motion-ease-fluid) 1;
   }
 
   .hero-portrait img {
-    transition: box-shadow var(--motion-standard) var(--motion-ease-in);
+    transition: box-shadow var(--motion-standard) var(--motion-ease-settle);
   }
 
   .speech-bubble,
   article > section > h4 {
     transition:
-      scale var(--motion-route) var(--motion-ease-in),
-      box-shadow var(--motion-standard) var(--motion-ease-in);
+      scale var(--motion-route) var(--motion-ease-settle),
+      box-shadow var(--motion-standard) var(--motion-ease-settle);
   }
 
   .speech-bubble:hover,
   article > section > h4:hover {
-    scale: 1.05;
+    scale: 1.025;
   }
 
   .page .route-link {
     transition:
-      translate var(--motion-route) var(--motion-ease-in),
-      rotate var(--motion-route) var(--motion-ease-in),
-      box-shadow var(--motion-standard) var(--motion-ease-in);
+      translate var(--motion-route) var(--motion-ease-settle),
+      rotate var(--motion-route) var(--motion-ease-settle),
+      box-shadow var(--motion-standard) var(--motion-ease-settle);
   }
 
   .route-list li .route-link:is(:hover, :focus-visible) {
@@ -999,30 +1001,30 @@ article ul {
   .route-placard::before,
   .route-link h3,
   .recovery-link strong {
-    transition: transform var(--motion-route) var(--motion-ease-in);
+    transition: transform var(--motion-route) var(--motion-ease-settle);
   }
 
   .page a,
   .site-footer a {
     transition:
-      color var(--motion-standard) var(--motion-ease-in),
-      background-size var(--motion-route) var(--motion-ease-in);
+      color var(--motion-standard) var(--motion-ease-settle),
+      background-size var(--motion-route) var(--motion-ease-settle);
   }
 
   .primary-navigation a {
     transition:
-      color var(--motion-standard) var(--motion-ease-in),
-      background-size var(--motion-route) var(--motion-ease-in);
+      color var(--motion-standard) var(--motion-ease-settle),
+      background-size var(--motion-route) var(--motion-ease-settle);
   }
 
   .page .hero-actions .hero-action,
   .page .hero-actions .hero-contact,
   .page .architecture-node-link {
     transition:
-      background-color var(--motion-standard) var(--motion-ease-in),
-      border-color var(--motion-standard) var(--motion-ease-in),
-      box-shadow var(--motion-standard) var(--motion-ease-in),
-      translate var(--motion-route) var(--motion-ease-in);
+      background-color var(--motion-standard) var(--motion-ease-settle),
+      border-color var(--motion-standard) var(--motion-ease-settle),
+      box-shadow var(--motion-standard) var(--motion-ease-settle),
+      translate var(--motion-route) var(--motion-ease-settle);
   }
 
   .page .hero-actions .hero-action:hover,
@@ -1134,12 +1136,12 @@ article > .project-evidence > h4 {
 @media screen and (prefers-reduced-motion: no-preference) {
   .is-touch .hero-portrait {
     translate: var(--tilt-x, 0) var(--tilt-y, 0);
-    transition: translate var(--motion-short) var(--motion-ease-in);
+    transition: translate var(--motion-short) var(--motion-ease-settle);
   }
 
   .is-touch .hero-portrait .sticker {
     translate: calc(var(--tilt-x, 0px) * -0.75) calc(var(--tilt-y, 0px) * -0.75);
-    transition: translate var(--motion-short) var(--motion-ease-in);
+    transition: translate var(--motion-short) var(--motion-ease-settle);
   }
 }
 
@@ -1210,8 +1212,8 @@ article > .project-evidence > h4 {
       10rem calc(var(--wave-reach) * sin(var(--wave-phase) - 300deg)),
       11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
     background-size: 12rem 1rem;
-    transition: --wave-reach var(--motion-sweep) var(--motion-ease-in);
-    animation: dot-wave 4s var(--motion-ease-in) infinite paused;
+    transition: --wave-reach var(--motion-sweep) var(--motion-ease-settle);
+    animation: dot-wave 6s linear infinite paused;
   }
 
   /* Only the words start the wave, not the empty space beside them. */
@@ -1221,14 +1223,14 @@ article > .project-evidence > h4 {
 
   /* Past half the 1rem spacing, a dot would read as part of the next row. */
   .page > .dot-wave.is-waving {
-    --wave-reach: 0.45rem;
+    --wave-reach: 0.32rem;
 
     animation-play-state: running;
   }
 
   @media (hover: hover) {
     .page > .dot-wave:has(> :is(h1, h2):hover) {
-      --wave-reach: 0.4rem;
+      --wave-reach: 0.28rem;
 
       animation-play-state: running;
     }
@@ -1448,7 +1450,7 @@ article > .project-evidence > h4 {
     .recovery-link strong::after,
     .site-footer a::after,
     .page a:not([class])::after {
-      transition: clip-path var(--motion-route) var(--motion-ease-in);
+      transition: clip-path var(--motion-route) var(--motion-ease-settle);
     }
 
     .route-link:is(:hover, :focus-visible) h3::after,

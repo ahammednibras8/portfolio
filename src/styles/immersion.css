@@ -110,14 +110,14 @@
       }
 
       .part-orb::after {
-        animation: orb-drift var(--motion-ease-in) both;
+        animation: orb-drift linear both;
         animation-range: cover;
         animation-timeline: --part;
       }
 
       .part-rise {
         transform-origin: 50% 0;
-        animation: part-rise var(--motion-ease-in) both;
+        animation: part-rise linear both;
         animation-range: entry 0% entry 100%;
         animation-timeline: --part;
       }
@@ -125,8 +125,8 @@
       /* The Cascade band already rolls its dots, so it runs both together. */
       .page > .dot-wave.part-rise {
         animation:
-          dot-wave 4s var(--motion-ease-in) infinite paused,
-          part-rise var(--motion-ease-in) both;
+          dot-wave 6s linear infinite paused,
+          part-rise linear both;
         animation-range:
           normal,
           entry 0% entry 100%;
@@ -245,8 +245,8 @@
   @media (prefers-reduced-motion: no-preference) {
     .part-hud {
       transition:
-        opacity var(--motion-route) var(--motion-ease-in),
-        translate var(--motion-route) var(--motion-ease-in),
+        opacity var(--motion-route) var(--motion-ease-settle),
+        translate var(--motion-route) var(--motion-ease-settle),
         visibility 0s var(--motion-route);
     }
 

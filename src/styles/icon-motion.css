@@ -67,7 +67,7 @@
   /* One gesture finishes even after hover ends; touch uses the same parts. */
   .page .lucide.is-playing > * {
     animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-      var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
+      var(--motion-ease-fluid) var(--icon-part-delay, 0ms) 1;
   }
 
   @media (hover: hover) {
@@ -87,11 +87,11 @@
       > *,
     .page .lucide:hover > * {
       animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-        var(--motion-ease-in) var(--icon-part-delay, 0ms) 1;
+        var(--motion-ease-fluid) var(--icon-part-delay, 0ms) 1;
     }
 
     .page .gallery-wall-compact .sticker {
-      transition: box-shadow var(--motion-standard) var(--motion-ease-in);
+      transition: box-shadow var(--motion-standard) var(--motion-ease-settle);
     }
 
     .page .route-link:is(:hover, :focus-visible) .sticker {
