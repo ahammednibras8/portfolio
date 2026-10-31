@@ -1086,6 +1086,58 @@ test.describe("on a touch screen", () => {
   });
 });
 
+test("page content shares one left and right edge at every width", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  for (const width of [390, 820, 1440, 2560]) {
+    await page.setViewportSize({ height: 900, width });
+    await page.goto("/");
+
+    const edges = await page.evaluate(() => {
+      const box = (selector: string) => {
+        const element = document.querySelector(selector);
+
+        if (!element) throw new Error(`Expected ${selector}.`);
+
+        return element.getBoundingClientRect();
+      };
+      const leftEdge = [
+        ".primary-navigation ul",
+        "#introduction-heading",
+        ".hero-greeting",
+        "#work .routes-introduction",
+        "#cascade-heading",
+        "article > header",
+        "article > p",
+        "#evidence",
+        "#architecture-heading",
+        ".architecture-diagram",
+        "#about-heading",
+        ".route-list",
+        ".site-footer-location",
+      ];
+      const rightEdge = [
+        ".primary-navigation ul",
+        "#work .routes-introduction",
+        "#evidence",
+        ".architecture-diagram",
+        "#about .speech-bubble",
+        ".route-list",
+      ];
+
+      return {
+        lefts: leftEdge.map((selector) => Math.round(box(selector).left)),
+        rights: rightEdge.map((selector) => Math.round(box(selector).right)),
+      };
+    });
+
+    expect(new Set(edges.lefts).size, `left edges at ${width}`).toBe(1);
+    expect(new Set(edges.rights).size, `right edges at ${width}`).toBe(1);
+  }
+});
+
 test("color bands run edge to edge on any width", async ({ page }) => {
   for (const width of [390, 1440, 2560]) {
     await page.setViewportSize({ height: 900, width });

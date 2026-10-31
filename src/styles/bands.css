@@ -234,6 +234,10 @@
     background-image: none;
   }
 
+  .architecture-distribution {
+    text-align: start;
+  }
+
   /* About: one big speech bubble on a band of its own. */
   .page > .band-aqua {
     background: var(--color-aqua);
