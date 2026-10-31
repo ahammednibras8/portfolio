@@ -394,6 +394,16 @@ test("the hero shows an optimized portrait in a cartoon frame", async ({
     name: "Ahammed Nibras smiling in front of a carved stone wall.",
   });
 
+  // Build output strips line breaks, which would run the two lines together.
+  await expect(page.locator("#introduction-heading")).toHaveText(
+    "Hi, I’m Nibras.",
+    { useInnerText: false },
+  );
+  expect(
+    await page
+      .locator("#introduction-heading")
+      .evaluate((heading) => heading.textContent),
+  ).toBe("Hi, I’m Nibras.");
   await expect(portrait).toBeVisible();
   await expect(portrait).toHaveAttribute("src", /^\/_astro\/.*\.webp$/);
   await expect(portrait).toHaveCSS("border-top-width", "3px");
