@@ -89,9 +89,7 @@ test("every short part fills the screen as its own slide", async ({ page }) => {
   }
 });
 
-test("pieces wait in view, slide in from the side, and settle", async ({
-  page,
-}) => {
+test("pieces zoom in around their center and settle", async ({ page }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -99,30 +97,74 @@ test("pieces wait in view, slide in from the side, and settle", async ({
   const piece = page.locator("#about .speech-bubble");
   const read = () =>
     piece.evaluate((element) => {
-      const { opacity, translate, visibility } = getComputedStyle(element);
+      const { opacity, scale, translate, visibility } =
+        getComputedStyle(element);
 
-      return { opacity, translate, visibility };
+      return { opacity, scale, translate, visibility };
     });
 
-  await expect(piece).toHaveClass(/slide-from-/);
+  await expect(piece).toHaveClass(/zoom-ready/);
+  await expect(piece).toHaveCSS("scale", "0.92");
 
   // Waiting pieces stay readable, because motion never hides content.
-  expect(await read()).toMatchObject({ opacity: "1", visibility: "visible" });
-  expect((await read()).translate).not.toBe("none");
+  expect(await read()).toEqual({
+    opacity: "1",
+    scale: "0.92",
+    translate: "none",
+    visibility: "visible",
+  });
 
   await page.locator("#about").evaluate((part) => {
     part.scrollIntoView({ behavior: "instant" });
   });
-  await expect(piece).not.toHaveClass(/slide-from-/);
-  expect((await read()).translate).toBe("none");
+  await expect(piece).toHaveClass(/is-zooming/);
+
+  const frames = await piece.evaluate((element) => {
+    const animation = element
+      .getAnimations()
+      .find((motion) => (motion as CSSAnimation).animationName === "zoom-in");
+
+    if (!animation)
+      throw new Error("Expected the entrance zoom to be running.");
+
+    animation.pause();
+    const duration = Number(animation.effect?.getTiming().duration);
+    const samples = [0, duration / 2].map((time) => {
+      animation.currentTime = time;
+      const { left, width } = element.getBoundingClientRect();
+      const { scale, translate } = getComputedStyle(element);
+
+      return {
+        center: left + width / 2,
+        scale: Number(scale),
+        translate,
+        width,
+      };
+    });
+
+    animation.finish();
+    return samples;
+  });
+
+  const [start, middle] = frames;
+
+  if (!start || !middle) throw new Error("Expected both zoom samples.");
+
+  expect(middle.width).toBeGreaterThan(start.width);
+  expect(middle.center).toBeCloseTo(start.center, 1);
+  expect(middle.scale).toBeGreaterThan(start.scale);
+  expect(middle.scale).toBeLessThan(1);
+  expect(frames.every(({ translate }) => translate === "none")).toBe(true);
+
+  await expect(piece).not.toHaveClass(/zoom-ready/);
+  await expect(piece).toHaveCSS("scale", "none");
 });
 
 test("the first view never jumps", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
 
-  await expect(page.locator("#intro .slide-from-start")).toHaveCount(0);
-  await expect(page.locator("#intro .slide-from-end")).toHaveCount(0);
+  await expect(page.locator("#intro .zoom-ready")).toHaveCount(0);
 });
 
 test("a slow mouse wheel moves the page on every notch", async ({
@@ -190,25 +232,21 @@ test("reduced motion keeps every piece still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  await expect(page.locator(".slide-from-start, .slide-from-end")).toHaveCount(
-    0,
-  );
+  await expect(page.locator(".zoom-ready")).toHaveCount(0);
   await expect(rail(page).getByRole("link", { name: "Intro" })).toHaveAttribute(
     "aria-current",
     "true",
   );
 });
 
-test("without JavaScript nothing is offset and the rail still links", async ({
+test("without JavaScript nothing is scaled and the rail still links", async ({
   browser,
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
 
   await page.goto("/");
-  await expect(page.locator(".slide-from-start, .slide-from-end")).toHaveCount(
-    0,
-  );
+  await expect(page.locator(".zoom-ready")).toHaveCount(0);
 
   await rail(page).getByRole("link", { name: "Contact" }).click();
   await expect(page).toHaveURL(/#contact$/);
@@ -495,7 +533,7 @@ test("a held arrow key takes one step, not every part", async ({ page }) => {
 });
 
 for (const width of [390, 1280]) {
-  test(`a jump straight to a part leaves nothing half slid at ${width}px`, async ({
+  test(`a jump straight to a part finishes every zoom at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ height: 844, width });
@@ -503,7 +541,7 @@ for (const width of [390, 1280]) {
 
     const waiting = () =>
       page.evaluate(() =>
-        [...document.querySelectorAll(".slide-from-start, .slide-from-end")]
+        [...document.querySelectorAll(".zoom-ready")]
           .filter((piece) => {
             const { bottom, top } = piece.getBoundingClientRect();
 

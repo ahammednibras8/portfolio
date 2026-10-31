@@ -1,8 +1,7 @@
 /*
- * Slides each piece of the page into place as it arrives, from whichever side
- * it sits on, marks the current part in the side rail, and docks onto a part
- * when a scroll stops just short of it. Pieces only start a little off their
- * place, so without this script the page simply stays still.
+ * Zooms each piece of the page into place as it arrives, marks the current part
+ * in the side rail, and docks onto a part when a scroll stops just short of it.
+ * Pieces stay centered and visible, and without this script they stay still.
  */
 import { partLinks, watchCurrentPart } from "./parts";
 
@@ -11,32 +10,20 @@ const pieceSelector = [
   "article > *",
   ".route-list > li",
 ].join(", ");
-// Any piece showing at all starts sliding. A margin left a sliver of offset
-// pieces at the screen's foot after a jump, which stayed until the next scroll.
+// Any piece showing at all starts zooming, including after an anchor jump.
 const arrivalLine = "0px";
-const sideZone = 0.45;
 const dockZone = 0.12;
 const scrollSettled = 140;
 const askWindow = 800;
 
-const sideOf = (piece: Element, index: number) => {
-  const { left, width } = piece.getBoundingClientRect();
-  const center = (left + width / 2) / document.documentElement.clientWidth;
-
-  if (center < sideZone) return "slide-from-start";
-  if (center > 1 - sideZone) return "slide-from-end";
-
-  return index % 2 ? "slide-from-end" : "slide-from-start";
-};
-
-const slideIn = async (piece: HTMLElement, order: number, side: string) => {
-  piece.style.setProperty("--slide-order", String(order));
-  piece.classList.add("is-sliding");
+const zoomIn = async (piece: HTMLElement, order: number) => {
+  piece.style.setProperty("--zoom-order", String(order));
+  piece.classList.add("is-zooming");
   await Promise.allSettled(
     piece.getAnimations().map(({ finished }) => finished),
   );
-  piece.classList.remove(side, "is-sliding");
-  piece.style.removeProperty("--slide-order");
+  piece.classList.remove("zoom-ready", "is-zooming");
+  piece.style.removeProperty("--zoom-order");
 };
 
 const preparePieces = () => {
@@ -44,8 +31,6 @@ const preparePieces = () => {
   const pieces = [
     ...document.querySelectorAll<HTMLElement>(pieceSelector),
   ].filter((piece) => piece.getBoundingClientRect().top > innerHeight);
-  const sides = new Map(pieces.map((piece, i) => [piece, sideOf(piece, i)]));
-
   const observer = new IntersectionObserver(
     (entries) => {
       const arriving = entries.filter(({ isIntersecting }) => isIntersecting);
@@ -54,14 +39,14 @@ const preparePieces = () => {
         const piece = target as HTMLElement;
 
         observer.unobserve(piece);
-        void slideIn(piece, order, sides.get(piece) ?? "");
+        void zoomIn(piece, order);
       });
     },
     { rootMargin: arrivalLine },
   );
 
-  for (const [piece, side] of sides) {
-    piece.classList.add(side);
+  for (const piece of pieces) {
+    piece.classList.add("zoom-ready");
     observer.observe(piece);
   }
 };
