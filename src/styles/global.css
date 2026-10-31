@@ -1240,6 +1240,35 @@ article > .project-evidence > h4 {
     background-size: 12rem 1rem;
     transition: --wave-reach var(--motion-sweep) ease-in-out;
     animation: dot-wave 4s linear infinite paused;
+    isolation: isolate;
+  }
+
+  /* Only the words start the wave, not the empty space beside them. */
+  .page > .dot-wave > :is(h1, h2) {
+    position: relative;
+    justify-self: start;
+  }
+
+  /*
+   * Bold dots behind the letters make headings hard to read, so a soft halo
+   * clears them. The headline paints its letters through a clipped background,
+   * so the halo sits one layer under it, and the isolated section keeps it
+   * above the dots.
+   */
+  .page > .dot-wave > :is(h1, h2)::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: var(--color-surface-raised);
+    box-shadow: 0 0 1rem 0.75rem var(--color-surface-raised);
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--motion-route) ease-in-out;
+  }
+
+  .page > .dot-wave.is-waving > :is(h1, h2)::before {
+    opacity: 1;
   }
 
   /*
@@ -1261,11 +1290,6 @@ article > .project-evidence > h4 {
       --wave-reach: 0.4rem;
 
       animation-play-state: running;
-    }
-
-    /* Only the words start the wave, not the empty space beside them. */
-    .page > .dot-wave > h2 {
-      justify-self: start;
     }
   }
 }
