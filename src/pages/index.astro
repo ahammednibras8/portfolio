@@ -29,6 +29,7 @@ import portrait from "../assets/portrait-enhanced.png";
 import { projects } from "../data/projects";
 import { toolbox } from "../data/toolbox";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
+import "../styles/motion-details.css";
 
 const title = "Ahammed Nibras — Software engineer";
 const description =
@@ -54,6 +55,9 @@ const parts = [
   { href: "#deployment", label: "Deployment" },
   { href: "#contact", label: "Contact" },
 ];
+
+const folio = (id: string) =>
+  `${String(parts.findIndex(({ href }) => href === `#${id}`) + 1).padStart(2, "0")} / ${parts.length}`;
 
 const buildPath = [
   {
@@ -148,6 +152,9 @@ const productionPath = [
     class="part introduction signature-band exhibit-hero exhibit-hero-portrait dot-wave"
     aria-labelledby="introduction-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("intro")}
+    </span>
     <h1 id="introduction-heading" class="title-sweep">
       <span class="hero-greeting">Hi, I’m</span>{" "}
       <span class="hero-name">Nibras.</span>
@@ -199,6 +206,9 @@ const productionPath = [
     class="part part-orb part-rise gallery-wall gallery-wall-compact"
     aria-labelledby="work-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("work")}
+    </span>
     <header class="routes-introduction">
       <h2 id="work-heading" class="section-title">
         <Rocket size={24} aria-hidden="true" />
@@ -254,6 +264,9 @@ const productionPath = [
     class="part part-orb part-rise introduction signature-band exhibit-hero dot-wave band-navy"
     aria-labelledby="cascade-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("cascade")}
+    </span>
     <h2 id="cascade-heading">Cascade</h2>
     <span class="sticker" aria-hidden="true">
       <Layers size={40} />
@@ -270,6 +283,9 @@ const productionPath = [
   </section>
 
   <section id="story" class="part case-study" aria-label="Cascade case study">
+    <span class="folio-mark" aria-hidden="true">
+      {folio("story")}
+    </span>
     <article>
       <header>
         <h3>Background work that survives failure</h3>
@@ -320,6 +336,9 @@ const productionPath = [
         class="project-evidence signature-band"
         aria-labelledby="cascade-evidence"
       >
+        <span class="folio-mark" aria-hidden="true">
+          {folio("evidence")}
+        </span>
         <h4 id="cascade-evidence">Run lifecycle</h4>
 
         <figure class="run-path">
@@ -399,6 +418,9 @@ const productionPath = [
     class="part part-orb part-rise signature-band toolbox-part"
     aria-labelledby="toolbox-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("toolbox")}
+    </span>
     <header class="routes-introduction">
       <h2 id="toolbox-heading" class="section-title">
         <Code size={24} aria-hidden="true" />
@@ -422,6 +444,9 @@ const productionPath = [
     class="part part-orb part-rise band-aqua"
     aria-labelledby="about-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("about")}
+    </span>
     <h2 id="about-heading" class="section-title">
       <UserRound size={24} aria-hidden="true" />
       About
@@ -439,6 +464,9 @@ const productionPath = [
     class="part part-orb part-rise introduction signature-band exhibit-hero"
     aria-labelledby="architecture-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("architecture")}
+    </span>
     <h2 id="architecture-heading">How this site runs.</h2>
     <span class="sticker" aria-hidden="true">
       <Server size={40} />
@@ -461,6 +489,9 @@ const productionPath = [
     class="part architecture-system"
     aria-labelledby="deployment-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("deployment")}
+    </span>
     <h3 id="deployment-heading">One artifact, two controlled paths</h3>
 
     <figure
@@ -610,6 +641,9 @@ const productionPath = [
     class="part part-orb part-rise gallery-wall gallery-wall-compact band-navy"
     aria-labelledby="contact-heading"
   >
+    <span class="folio-mark" aria-hidden="true">
+      {folio("contact")}
+    </span>
     <header class="routes-introduction">
       <h2 id="contact-heading" class="section-title">
         <MessageCircleMore size={24} aria-hidden="true" />
@@ -720,4 +754,5 @@ const productionPath = [
 
   <script src="../scripts/slide-parts.ts"></script>
   <script src="../scripts/part-hud.ts"></script>
+  <script src="../scripts/card-depth.ts"></script>
 </DocumentLayout>

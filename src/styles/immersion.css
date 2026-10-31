@@ -97,11 +97,11 @@
 
       @keyframes orb-drift {
         0% {
-          transform: translateY(-14vh);
+          transform: translateY(-14vh) rotate(-12deg) scale(0.9);
         }
 
         100% {
-          transform: translateY(14vh);
+          transform: translateY(14vh) rotate(12deg) scale(1.1);
         }
       }
 
