@@ -389,9 +389,7 @@ test("without JavaScript the HUD never appears", async ({ browser }) => {
   await context.close();
 });
 
-test("sections and halftone orbs stay still during content entrances", async ({
-  page,
-}) => {
+test("sections stay still during content entrances", async ({ page }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -404,10 +402,6 @@ test("sections and halftone orbs stay still during content entrances", async ({
         .animationName,
       intro: getComputedStyle(document.getElementById("intro") as Element)
         .animationName,
-      orb: getComputedStyle(
-        document.getElementById("about") as Element,
-        "::after",
-      ).animationName,
       story: getComputedStyle(document.getElementById("story") as Element)
         .animationName,
     }));
@@ -416,7 +410,6 @@ test("sections and halftone orbs stay still during content entrances", async ({
     about: "none",
     cascade: "none",
     intro: "none",
-    orb: "none",
     story: "none",
   };
   expect(await names()).toEqual(still);
@@ -430,28 +423,30 @@ test("sections and halftone orbs stay still during content entrances", async ({
   expect(await names()).toMatchObject({
     about: "none",
     cascade: "none",
-    orb: "none",
   });
 });
 
-test("the depth orbs stay faint and inside their parts", async ({ page }) => {
+test("section backgrounds have no dotted-circle overlays at any width", async ({
+  page,
+}, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 
   for (const width of [390, 1440, 2560]) {
     await page.setViewportSize({ height: 900, width });
     await page.goto("/");
 
-    const clipped = await page.evaluate(() =>
+    await expect(page.locator(".part-orb")).toHaveCount(0);
+    const decoration = await page.evaluate(() =>
       ["work", "cascade", "toolbox", "architecture", "about", "contact"].map(
         (id) => {
           const part = document.getElementById(id) as HTMLElement;
 
-          return getComputedStyle(part).overflow;
+          return getComputedStyle(part, "::after").content;
         },
       ),
     );
 
-    expect(new Set(clipped), `at ${width}`).toEqual(new Set(["clip"]));
+    expect(new Set(decoration), `at ${width}`).toEqual(new Set(["none"]));
     expect(
       await page.evaluate(
         () =>
@@ -459,6 +454,12 @@ test("the depth orbs stay faint and inside their parts", async ({ page }) => {
           document.documentElement.clientWidth,
       ),
     ).toBe(true);
+    if (width === 390 || width === 1440) {
+      await jumpTo(page, "about");
+      await page.screenshot({
+        path: testInfo.outputPath(`plain-bands-${width}.png`),
+      });
+    }
   }
 });
 
