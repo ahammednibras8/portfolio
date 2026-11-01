@@ -1,7 +1,6 @@
 /*
- * Static halftone depth and useful progress for the page parts. Backgrounds
- * stay still while the content arrives, so the two never compete. Do not make
- * parts sticky: a covered part would still take keyboard focus.
+ * Useful progress for the page parts, without layered background decoration.
+ * Do not make parts sticky: a covered part would still take keyboard focus.
  */
 
 /* Print keeps its plain document, so the HUD only exists on screen. */
@@ -10,76 +9,6 @@
 }
 
 @media screen {
-  .part-orb {
-    --orb-ink: rgb(1 58 99 / 12%);
-
-    position: relative;
-    isolation: isolate;
-    overflow: clip;
-  }
-
-  @supports not (overflow: clip) {
-    .part-orb {
-      overflow: hidden;
-    }
-  }
-
-  .part-orb.band-navy {
-    --orb-ink: rgb(143 216 220 / 20%);
-  }
-
-  .part-orb.band-aqua {
-    --orb-ink: rgb(1 58 99 / 16%);
-  }
-
-  .part-orb::after {
-    position: absolute;
-    z-index: -1;
-    width: min(70vw, 34rem);
-    aspect-ratio: 1;
-    background: radial-gradient(var(--orb-ink) 0.13rem, transparent 0.14rem) 0
-      0 / 0.85rem 0.85rem;
-    border-radius: 50%;
-    content: "";
-    pointer-events: none;
-  }
-
-  #work::after {
-    inset-block-end: -10rem;
-    inset-inline-end: -8rem;
-  }
-
-  #cascade::after {
-    inset-block-end: -12rem;
-    inset-inline-end: -6rem;
-  }
-
-  #architecture::after {
-    inset-block-end: -12rem;
-    inset-inline-end: -6rem;
-  }
-
-  #toolbox::after {
-    inset-block-end: -12rem;
-    inset-inline-end: -8rem;
-  }
-
-  #about::after {
-    inset-block-end: -14rem;
-    inset-inline-start: -10rem;
-  }
-
-  #contact::after {
-    inset-block-start: -12rem;
-    inset-inline-end: -10rem;
-  }
-
-  @media (forced-colors: active) {
-    .part-orb::after {
-      display: none;
-    }
-  }
-
   /* Progress runs along the foot of the header. */
   .site-header {
     --page-progress: 0;
