@@ -125,6 +125,8 @@ Nibras then asked for animation specifically in the run lifecycle. Its five step
 
 Nibras said the dotted circles looked like a mismatched overlay and made the page messy. Remove the six large circular halftone layers and their section-specific clipping and stacking styles. Keep the navy, aqua, and white bands, the uniform hero dot texture, the existing cards, and the requested lifecycle motion. Do not replace the circles with another floating decoration. This supersedes the earlier orb treatment; reconsider background layers only if they support the content without reading as a separate overlay.
 
+Nibras clarified with a screenshot that the bottom-left section counter was the unwanted overlay. Remove that pill, its previous and next buttons, keyboard stepping, current-section observer, and reserved bottom scroll padding. Keep header navigation, the thin header progress line, static folio numbers, centered entrances, and lifecycle motion. This supersedes the earlier requirement to preserve the bottom section controls; do not replace them with another floating widget.
+
 Every SVG comes unchanged from Lucide. Stickers are decorative, stay hidden from assistive technology, and never replace visible text. Do not hand-draw SVG paths or approximate a brand mark: GitHub and LinkedIn use generic Lucide icons until an official asset is added.
 
 Art on the site comes from typography, space, and composition. Do not add AI-generated artwork to fill a plate. Reconsider the gallery wall when the homepage needs more routes than the plates can hold, or when human review shows the plates hide what Nibras does.
