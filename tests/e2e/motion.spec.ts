@@ -1,20 +1,23 @@
 import { expect, test } from "@playwright/test";
+import { parts } from "../../src/data/parts";
 
 test("folio marks follow the real page order and stay decorative", async ({
   page,
 }) => {
   await page.goto("/");
 
-  const folios = await page.locator(".part-rail a").evaluateAll((links) =>
-    links.map((link) => {
-      const target = document.querySelector(link.getAttribute("href") ?? "");
-      const mark = target?.querySelector(":scope > .folio-mark");
+  const folios = await page.evaluate(
+    (order) =>
+      order.map(({ href }) => {
+        const target = document.querySelector(href);
+        const mark = target?.querySelector(":scope > .folio-mark");
 
-      return {
-        hidden: mark?.getAttribute("aria-hidden"),
-        text: mark?.textContent?.trim(),
-      };
-    }),
+        return {
+          hidden: mark?.getAttribute("aria-hidden"),
+          text: mark?.textContent?.trim(),
+        };
+      }),
+    parts,
   );
 
   expect(folios).toHaveLength(10);

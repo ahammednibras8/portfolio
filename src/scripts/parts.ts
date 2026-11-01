@@ -1,14 +1,12 @@
-// The parts of the homepage, in reading order, shared by the rail and the HUD.
+import { parts } from "../data/parts";
+
+// The parts of the homepage, in reading order, used by the HUD.
 // A line 30% down the screen, so short parts count once they sit at the top.
 const readingLine = "-30% 0px -70% 0px";
 
-export const partLinks = () => [
-  ...document.querySelectorAll<HTMLAnchorElement>(".part-rail a"),
-];
-
 export const partTargets = () =>
-  partLinks()
-    .map(({ hash }) => document.getElementById(hash.slice(1)))
+  parts
+    .map(({ href }) => document.getElementById(href.slice(1)))
     .filter((part): part is HTMLElement => part !== null);
 
 /*

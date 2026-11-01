@@ -3,7 +3,8 @@
  * steps to the next or previous part by button or arrow key. It is a shortcut,
  * not the only way to move, so the page works the same without it.
  */
-import { partLinks, partTargets, watchCurrentPart } from "./parts";
+import { parts } from "../data/parts";
+import { partTargets, watchCurrentPart } from "./parts";
 
 const shownAfter = 120;
 const footerClearance = 72;
@@ -23,7 +24,9 @@ const back = hud?.querySelector<HTMLButtonElement>('[data-step="-1"]');
 const forward = hud?.querySelector<HTMLButtonElement>('[data-step="1"]');
 
 const targets = partTargets();
-const names = partLinks().map((link) => link.textContent?.trim() ?? "");
+const names = targets.map(
+  (target) => parts.find(({ href }) => href === `#${target.id}`)?.label ?? "",
+);
 const pad = (number: number) => String(number).padStart(2, "0");
 
 const headerLine = () => header?.getBoundingClientRect().bottom ?? 0;

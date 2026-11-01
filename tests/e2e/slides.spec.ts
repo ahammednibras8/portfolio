@@ -1,8 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
 
-const rail = (page: Page) =>
-  page.getByRole("navigation", { name: "Page parts" });
-
 const hud = (page: Page) => page.getByRole("group", { name: "Part controls" });
 
 // Late fonts reflow the page and move every part, so wait for them first.
@@ -36,30 +33,25 @@ const landedOn = (page: Page, id: string) =>
     )
     .toBe(true);
 
-test("the side rail lists every part and jumps to it", async ({ page }) => {
+test("the right-side dots are removed and header navigation still works", async ({
+  page,
+}) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  await expect(rail(page).getByRole("link")).toHaveCount(10);
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ height: 800, width });
+    await expect(page.locator(".part-rail")).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Page parts" }),
+    ).toHaveCount(0);
+  }
 
-  const targets = await rail(page)
-    .getByRole("link")
-    .evaluateAll((links) =>
-      links.map((link) => {
-        const id = link.getAttribute("href")?.slice(1) ?? "";
-
-        return document.getElementById(id) === null ? id : "";
-      }),
-    );
-
-  expect(targets.filter(Boolean)).toEqual([]);
-
-  const about = rail(page).getByRole("link", { name: "About" });
-
-  await about.click();
-  await expect(about).toHaveAttribute("aria-current", "true");
-  await expect(rail(page).locator("[aria-current]")).toHaveCount(1);
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "About", exact: true })
+    .click();
 
   const top = await page
     .locator("#about")
@@ -237,13 +229,10 @@ test("reduced motion keeps every piece still", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.locator(".zoom-ready")).toHaveCount(0);
-  await expect(rail(page).getByRole("link", { name: "Intro" })).toHaveAttribute(
-    "aria-current",
-    "true",
-  );
+  await expect(page.locator(".part-hud-count")).toHaveText("01 / 10");
 });
 
-test("without JavaScript nothing is scaled and the rail still links", async ({
+test("without JavaScript nothing is scaled and header links still work", async ({
   browser,
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
@@ -252,16 +241,20 @@ test("without JavaScript nothing is scaled and the rail still links", async ({
   await page.goto("/");
   await expect(page.locator(".zoom-ready")).toHaveCount(0);
 
-  await rail(page).getByRole("link", { name: "Contact" }).click();
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Contact", exact: true })
+    .click();
   await expect(page).toHaveURL(/#contact$/);
   await context.close();
 });
 
-test("print leaves the rail out", async ({ page }) => {
+test("print leaves section controls out", async ({ page }) => {
   await page.goto("/");
   await page.emulateMedia({ media: "print" });
 
-  await expect(page.locator(".part-rail")).toBeHidden();
+  await expect(hud(page)).toBeHidden();
+  await expect(page.locator(".part-rail")).toHaveCount(0);
 });
 
 test("the HUD waits out the first view, then names the part", async ({
@@ -557,31 +550,36 @@ for (const width of [390, 1280]) {
 
     await page.goto("/");
     await page
-      .getByRole("navigation", { name: "Page parts" })
-      .getByRole("link", { name: "About" })
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "About", exact: true })
       .click();
     await expect.poll(waiting, { timeout: 5000 }).toEqual([]);
   });
 }
 
-test("rail dots are full size targets on every screen", async ({ page }) => {
+test("remaining section controls are full-size touch targets on every screen", async ({
+  page,
+}) => {
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ height: 800, width });
     await page.goto("/");
+    await jumpTo(page, "work");
+    await expect(hud(page)).toBeVisible();
 
-    const sizes = await rail(page)
-      .getByRole("link")
-      .evaluateAll((links) =>
-        links.map((link) => {
-          const { height, width: wide } = link.getBoundingClientRect();
+    const sizes = await hud(page)
+      .getByRole("button")
+      .evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const { height, width: wide } = button.getBoundingClientRect();
 
           return { height, wide };
         }),
       );
 
+    expect(sizes).toHaveLength(2);
     for (const { height, wide } of sizes) {
-      expect(wide, `width at ${width}`).toBeGreaterThanOrEqual(24);
-      expect(height, `height at ${width}`).toBeGreaterThanOrEqual(24);
+      expect(wide, `width at ${width}`).toBeGreaterThanOrEqual(44);
+      expect(height, `height at ${width}`).toBeGreaterThanOrEqual(44);
     }
   }
 });
@@ -600,18 +598,18 @@ test("focus rings stay visible over the navy header and bands", async ({
   await expect(skip).toBeFocused();
   await expect(skip).toHaveCSS("outline-color", "rgb(255, 255, 255)");
 
-  // The rail floats over navy parts, so its ring has a white and a navy tone.
+  // The remaining section controls keep a white focus ring on their navy surface.
   await jumpTo(page, "cascade");
 
-  const dot = rail(page).getByRole("link", { name: "Cascade" });
+  const next = hud(page).getByRole("button", { name: "Next part" });
 
-  await dot.focus();
-  await expect(dot).toHaveCSS("outline-color", "rgb(255, 255, 255)");
-  await expect(dot).toHaveCSS("outline-width", "3px");
-  await expect(dot).toHaveCSS("box-shadow", "rgb(1, 58, 99) 0px 0px 0px 6px");
+  await next.focus();
+  await expect(next).toBeFocused();
+  await expect(next).toHaveCSS("outline-color", "rgb(255, 255, 255)");
+  await expect(next).toHaveCSS("outline-width", "3px");
 });
 
-test("a rail jump ends a step in progress, so the next step starts there", async ({
+test("a header jump ends a step in progress, so the next step starts there", async ({
   page,
 }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
@@ -621,7 +619,10 @@ test("a rail jump ends a step in progress, so the next step starts there", async
   await expect(hud(page)).toBeVisible();
 
   await hud(page).getByRole("button", { name: "Next part" }).click();
-  await rail(page).getByRole("link", { name: "Contact" }).click();
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Contact", exact: true })
+    .click();
   await landedOn(page, "contact");
 
   // A stale step toward Cascade would send this back to Work instead.
