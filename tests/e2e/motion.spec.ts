@@ -1,6 +1,221 @@
 import { expect, test } from "@playwright/test";
 import { parts } from "../../src/data/parts";
 
+test("the lifecycle traces its five steps once without moving the text", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await page.mouse.move(0, 0);
+  await expect(page.locator(".run-path .is-tracing")).toHaveCount(0);
+  await page.locator("#evidence").evaluate(async (section) => {
+    await document.fonts.ready;
+    document.documentElement.style.scrollBehavior = "auto";
+    section.scrollIntoView();
+  });
+
+  const steps = page.locator(".run-path li");
+  await expect(page.locator(".run-path li.is-tracing")).toHaveCount(5);
+  await steps.evaluateAll((elements) => {
+    for (const element of elements) {
+      for (const animation of element.getAnimations({ subtree: true }))
+        animation.pause();
+    }
+    for (const animation of document
+      .querySelector("#evidence")
+      ?.getAnimations() ?? [])
+      animation.finish();
+  });
+  await expect(page.locator("#evidence")).not.toHaveClass(/zoom-ready/);
+
+  const samples = await steps.evaluateAll((elements) =>
+    elements.map((element) => {
+      const animation = element
+        .getAnimations()
+        .find(
+          (motion) =>
+            (motion as CSSAnimation).animationName === "run-step-wash",
+        );
+      if (!animation?.effect)
+        throw new Error("Expected a lifecycle highlight.");
+      const { delay = 0, duration, iterations } = animation.effect.getTiming();
+      animation.currentTime = delay;
+      const resting = getComputedStyle(element).backgroundColor;
+      const before = element.getBoundingClientRect();
+      animation.currentTime = delay + Number(duration) / 2;
+      const style = getComputedStyle(element);
+      const after = element.getBoundingClientRect();
+      const connector = element
+        .getAnimations({ subtree: true })
+        .find(
+          (motion) =>
+            (motion as CSSAnimation).animationName === "run-line-draw",
+        );
+      if (connector?.effect)
+        connector.currentTime = connector.effect.getTiming().delay ?? 0;
+      return {
+        delay,
+        iterations,
+        resting,
+        highlight: style.backgroundColor,
+        opacity: style.opacity,
+        scale: style.scale,
+        translate: style.translate,
+        textOpacity: getComputedStyle(
+          element.querySelector("strong") as Element,
+        ).opacity,
+        stationary:
+          before.x === after.x &&
+          before.y === after.y &&
+          before.width === after.width &&
+          before.height === after.height,
+        connectorStart: connector
+          ? getComputedStyle(element, "::after").scale
+          : null,
+      };
+    }),
+  );
+
+  expect(samples.map(({ delay }) => Math.round(delay))).toEqual([
+    650, 910, 1170, 1430, 1690,
+  ]);
+  for (const [index, sample] of samples.entries()) {
+    expect(sample).toMatchObject({
+      iterations: 1,
+      resting: "rgb(255, 255, 255)",
+      highlight: "rgb(223, 243, 244)",
+      opacity: "1",
+      textOpacity: "1",
+      scale: "none",
+      translate: "none",
+      stationary: true,
+    });
+    if (index < 4) expect(sample.connectorStart).toBe("0 1");
+  }
+
+  await steps.evaluateAll((elements) => {
+    for (const element of elements) {
+      for (const animation of element.getAnimations({ subtree: true }))
+        animation.currentTime = 1350;
+    }
+  });
+  await page.screenshot({ path: testInfo.outputPath("lifecycle-desktop.png") });
+
+  await steps.evaluateAll((elements) => {
+    for (const element of elements) {
+      for (const animation of element.getAnimations({ subtree: true }))
+        animation.finish();
+    }
+  });
+  await expect(page.locator(".run-path li.is-tracing")).toHaveCount(0);
+  await expect(steps.first()).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 255)",
+  );
+  await page.locator("#intro").evaluate((section) => section.scrollIntoView());
+  await page
+    .locator("#evidence")
+    .evaluate((section) => section.scrollIntoView());
+  await page.waitForTimeout(400);
+  await expect(page.locator(".run-path li.is-tracing")).toHaveCount(0);
+});
+
+test("a phone lifecycle draws downward and waits for steps below the viewport", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 500 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/#evidence");
+  await page.mouse.move(0, 0);
+  const first = page.locator(".run-path li").first();
+  const last = page.locator(".run-path li").last();
+  await expect(first).toHaveClass(/is-tracing/);
+  const start = await first.evaluate((element) => {
+    const line = element
+      .getAnimations({ subtree: true })
+      .find(
+        (animation) =>
+          (animation as CSSAnimation).animationName === "run-line-draw",
+      );
+    if (!line?.effect) throw new Error("Expected a downward connector.");
+    line.pause();
+    line.currentTime = line.effect.getTiming().delay ?? 0;
+    const style = getComputedStyle(element, "::after");
+    return {
+      scale: style.scale,
+      width: parseFloat(style.width),
+      height: parseFloat(style.height),
+    };
+  });
+  expect(start.scale).toBe("1 0");
+  expect(start.height).toBeGreaterThan(start.width);
+  await expect(last).not.toHaveClass(/is-tracing/);
+  expect(
+    await last.evaluate(
+      (element) => element.getBoundingClientRect().top >= innerHeight,
+    ),
+  ).toBe(true);
+  await first.evaluate((element) => {
+    for (const animation of element.getAnimations({ subtree: true })) {
+      animation.pause();
+      if (animation.effect)
+        animation.currentTime = (animation.effect.getTiming().delay ?? 0) + 300;
+    }
+  });
+  await page.screenshot({ path: testInfo.outputPath("lifecycle-phone.png") });
+  await first.evaluate((element) => {
+    for (const animation of element.getAnimations({ subtree: true }))
+      animation.finish();
+  });
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toHaveClass(/is-tracing/);
+  await expect(last).not.toHaveClass(/is-tracing/, { timeout: 5000 });
+});
+
+test("lifecycle static fallbacks preserve all five steps", async ({
+  browser,
+  browserName,
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/#evidence");
+  const steps = page.locator(".run-path li");
+  await expect(steps).toHaveCount(5);
+  await expect(page.locator(".run-path li.is-tracing")).toHaveCount(0);
+  await steps
+    .first()
+    .evaluate((element) => element.classList.add("is-tracing"));
+  await expect(steps.first()).toHaveCSS("animation-name", "none");
+  await page.emulateMedia({ media: "print", reducedMotion: "no-preference" });
+  expect(
+    await steps
+      .first()
+      .evaluate((element) => getComputedStyle(element, "::after").content),
+  ).toBe("none");
+  if (browserName === "chromium") {
+    await page.emulateMedia({ media: "screen", forcedColors: "active" });
+    expect(
+      await steps
+        .first()
+        .evaluate((element) => getComputedStyle(element, "::after").content),
+    ).toBe("none");
+    await expect(steps.first()).toHaveCSS("animation-name", "none");
+  }
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const staticPage = await context.newPage();
+  await staticPage.goto("/#evidence");
+  await expect(staticPage.locator(".run-path li")).toHaveCount(5);
+  await expect(staticPage.locator(".run-path li").first()).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await expect(
+    staticPage.getByRole("link", { name: "Read the source documentation" }),
+  ).toBeVisible();
+  await context.close();
+});
+
 test("folio marks follow the real page order and stay decorative", async ({
   page,
 }) => {

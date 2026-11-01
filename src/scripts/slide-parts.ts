@@ -24,6 +24,21 @@ const zoomIn = async (piece: HTMLElement, order: number) => {
   piece.style.removeProperty("--zoom-order");
 };
 
+const traceStep = async (step: HTMLElement, order: number) => {
+  step.style.setProperty("--run-order", String(order));
+  step.classList.add("is-tracing");
+  await Promise.allSettled(
+    step
+      .getAnimations({ subtree: true })
+      .filter(
+        ({ effect }) => (effect as KeyframeEffect | null)?.target === step,
+      )
+      .map(({ finished }) => finished),
+  );
+  step.classList.remove("is-tracing");
+  step.style.removeProperty("--run-order");
+};
+
 const preparePieces = () => {
   // Anything already on screen stays put, so the first view never jumps.
   const pieces = [
@@ -31,21 +46,34 @@ const preparePieces = () => {
   ].filter((piece) => piece.getBoundingClientRect().top > innerHeight);
   const observer = new IntersectionObserver(
     (entries) => {
-      const arriving = entries.filter(({ isIntersecting }) => isIntersecting);
+      const arriving = entries.filter(
+        ({ isIntersecting, intersectionRatio, target }) =>
+          isIntersecting &&
+          (!target.matches(".run-path li") || intersectionRatio >= 0.3),
+      );
+      let zoomOrder = 0;
+      let runOrder = 0;
 
-      arriving.forEach(({ target }, order) => {
+      arriving.forEach(({ target }) => {
         const piece = target as HTMLElement;
 
         observer.unobserve(piece);
-        void zoomIn(piece, order);
+        if (piece.matches(".run-path li")) void traceStep(piece, runOrder++);
+        else void zoomIn(piece, zoomOrder++);
       });
     },
-    { rootMargin: arrivalLine },
+    { rootMargin: arrivalLine, threshold: [0, 0.3] },
   );
 
   for (const piece of pieces) {
     piece.classList.add("zoom-ready");
     observer.observe(piece);
+  }
+
+  // One observer also handles direct anchor visits and stacked phone steps.
+  // Each step waits until enough of it is visible, then plays only once.
+  for (const step of document.querySelectorAll(".run-path li")) {
+    observer.observe(step);
   }
 };
 
