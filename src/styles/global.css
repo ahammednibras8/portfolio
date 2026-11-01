@@ -55,7 +55,6 @@
   --motion-standard: 180ms;
   --motion-deliberate: 220ms;
   --motion-route: 360ms;
-  --motion-sweep: 1100ms;
   --motion-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-ease-fluid: cubic-bezier(0.45, 0, 0.2, 1);
 
@@ -870,16 +869,6 @@ article ul {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes title-sweep {
-    0% {
-      background-position-x: 100%;
-    }
-
-    100% {
-      background-position-x: 0%;
-    }
-  }
-
   @keyframes hand-wave {
     0%,
     100% {
@@ -906,51 +895,11 @@ article ul {
   }
 }
 
-/*
- * The band starts and ends beyond the text, so both ends look the same at rest.
- * Print, forced colors, and reduced motion keep ordinary text.
- */
-@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  @supports (background-clip: text) {
-    .title-sweep {
-      justify-self: start;
-      margin-block: -0.1em;
-      padding-block: 0.1em;
-      background-image: linear-gradient(
-        105deg,
-        var(--color-ink-primary) 40%,
-        var(--color-action) 50%,
-        var(--color-ink-primary) 60%
-      );
-      background-position-x: 100%;
-      background-clip: text;
-      background-size: 300% 100%;
-      color: transparent;
-      animation: title-sweep var(--motion-sweep) var(--motion-ease-fluid) 300ms
-        backwards;
-    }
-
-    .title-sweep::selection {
-      background: var(--color-action);
-      color: var(--color-surface-raised);
-    }
-  }
-}
-
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   /*
    * Respond promptly, then settle gently. Declare transitions at rest so the
    * same controlled response applies when the pointer leaves.
    */
-  .title-sweep {
-    transition: background-position-x var(--motion-sweep)
-      var(--motion-ease-fluid);
-  }
-
-  .title-sweep:hover {
-    background-position-x: 0%;
-  }
-
   .hero-portrait {
     transition:
       rotate var(--motion-route) var(--motion-ease-settle),
@@ -968,18 +917,6 @@ article ul {
 
   .hero-portrait img {
     transition: box-shadow var(--motion-standard) var(--motion-ease-settle);
-  }
-
-  .speech-bubble,
-  article > section > h4 {
-    transition:
-      scale var(--motion-route) var(--motion-ease-settle),
-      box-shadow var(--motion-standard) var(--motion-ease-settle);
-  }
-
-  .speech-bubble:hover,
-  article > section > h4:hover {
-    scale: 1.025;
   }
 
   .page .route-link {
@@ -1154,87 +1091,6 @@ article > .project-evidence > h4 {
     transparent 0.1rem
   );
   background-size: 1rem 1rem;
-}
-
-/* Rolls the dots from the phase and lifts them as far as the reach allows. */
-@property --wave-phase {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@property --wave-reach {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0;
-}
-
-@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  @keyframes dot-wave {
-    0% {
-      --wave-phase: 0deg;
-    }
-
-    100% {
-      --wave-phase: 360deg;
-    }
-  }
-
-  /*
-   * One sliding gradient can only move the whole grid, so each of the twelve
-   * columns in one wavelength is its own layer. They line up with the plain
-   * dots at rest. Pausing on exit keeps the phase, so the wave flattens where
-   * it is, and it paints nothing until a heading is hovered or touch-motion.ts starts it. Each extra layer
-   * repaints the whole section on every frame, so keep the count low.
-   */
-  .page > .dot-wave {
-    --wave-dot: radial-gradient(
-      circle at 0.5rem 0.5rem,
-      var(--color-rule-structural) 0.09rem,
-      transparent 0.1rem
-    );
-
-    background-image:
-      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot),
-      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot),
-      var(--wave-dot), var(--wave-dot), var(--wave-dot), var(--wave-dot);
-    background-position:
-      0 calc(var(--wave-reach) * sin(var(--wave-phase) - 0deg)),
-      1rem calc(var(--wave-reach) * sin(var(--wave-phase) - 30deg)),
-      2rem calc(var(--wave-reach) * sin(var(--wave-phase) - 60deg)),
-      3rem calc(var(--wave-reach) * sin(var(--wave-phase) - 90deg)),
-      4rem calc(var(--wave-reach) * sin(var(--wave-phase) - 120deg)),
-      5rem calc(var(--wave-reach) * sin(var(--wave-phase) - 150deg)),
-      6rem calc(var(--wave-reach) * sin(var(--wave-phase) - 180deg)),
-      7rem calc(var(--wave-reach) * sin(var(--wave-phase) - 210deg)),
-      8rem calc(var(--wave-reach) * sin(var(--wave-phase) - 240deg)),
-      9rem calc(var(--wave-reach) * sin(var(--wave-phase) - 270deg)),
-      10rem calc(var(--wave-reach) * sin(var(--wave-phase) - 300deg)),
-      11rem calc(var(--wave-reach) * sin(var(--wave-phase) - 330deg));
-    background-size: 12rem 1rem;
-    transition: --wave-reach var(--motion-sweep) var(--motion-ease-settle);
-    animation: dot-wave 6s linear infinite paused;
-  }
-
-  /* Only the words start the wave, not the empty space beside them. */
-  .page > .dot-wave > :is(h1, h2) {
-    justify-self: start;
-  }
-
-  /* Past half the 1rem spacing, a dot would read as part of the next row. */
-  .page > .dot-wave.is-waving {
-    --wave-reach: 0.32rem;
-
-    animation-play-state: running;
-  }
-
-  @media (hover: hover) {
-    .page > .dot-wave:has(> :is(h1, h2):hover) {
-      --wave-reach: 0.28rem;
-
-      animation-play-state: running;
-    }
-  }
 }
 
 .page > .exhibit-hero > .sticker {

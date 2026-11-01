@@ -144,28 +144,6 @@
     background: var(--color-aqua);
   }
 
-  .run-path li:nth-child(2),
-  .toolbox > div:nth-child(2),
-  .architecture-node:nth-child(2) {
-    --ink-step: 1;
-  }
-
-  .run-path li:nth-child(3),
-  .toolbox > div:nth-child(3),
-  .architecture-node:nth-child(3) {
-    --ink-step: 2;
-  }
-
-  .run-path li:nth-child(4),
-  .toolbox > div:nth-child(4) {
-    --ink-step: 3;
-  }
-
-  .run-path li:nth-child(5),
-  .toolbox > div:nth-child(5) {
-    --ink-step: 4;
-  }
-
   @media (prefers-reduced-motion: no-preference) {
     @keyframes ink-highlight {
       0% {
@@ -177,80 +155,22 @@
       }
     }
 
-    @keyframes frame-register {
-      0% {
-        scale: 0.94;
-      }
-
-      100% {
-        scale: 1;
-      }
-    }
-
-    @keyframes ink-reveal {
-      0% {
-        scale: 0.15 1;
-      }
-
-      100% {
-        scale: 1 1;
-      }
-    }
-
-    @keyframes card-ink {
-      0%,
-      100% {
-        scale: 0.12 1;
-      }
-
-      60% {
-        scale: 1 1;
-      }
-    }
-
     .hero-name {
       animation: ink-highlight 900ms var(--motion-ease-settle) 350ms backwards;
-    }
-
-    .hero-portrait::before {
-      animation: frame-register 800ms var(--motion-ease-settle) 150ms backwards;
-      transition: scale var(--motion-route) var(--motion-ease-settle);
     }
 
     .route-link::before {
       transition: scale var(--motion-route) var(--motion-ease-settle);
     }
 
-    .is-zooming.folio-mark::before,
-    .is-zooming .run-path-step::after,
-    .toolbox.is-zooming dt::after,
-    .is-zooming .architecture-node-link::before {
-      animation: ink-reveal 400ms var(--motion-ease-settle)
-        calc(var(--ink-step, 0) * 70ms) backwards;
-    }
-
-    .is-zooming > .route-link::before {
-      animation: card-ink 700ms var(--motion-ease-settle) 1;
-    }
-
     @media (hover: hover) and (pointer: fine) {
-      .hero-portrait:hover::before {
-        scale: 1.035;
-      }
-
-      /* Pointer depth has its own transform; lift, press, and zoom stay separate. */
+      /* Cards lift as one surface; pointer position never bends their text. */
       .page .project-list .route-link {
         transition:
           translate var(--motion-route) var(--motion-ease-settle),
           rotate var(--motion-route) var(--motion-ease-settle),
           box-shadow var(--motion-standard) var(--motion-ease-settle),
-          transform var(--motion-standard) var(--motion-ease-settle),
           scale var(--motion-short) var(--motion-ease-settle);
-      }
-
-      .page .project-list .route-link.is-tilting {
-        transform: perspective(900px) rotateX(var(--card-tilt-x, 0deg))
-          rotateY(var(--card-tilt-y, 0deg));
       }
 
       .page .project-list .route-link:is(:hover, :focus-visible) {

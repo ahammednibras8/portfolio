@@ -29,7 +29,7 @@ test("folio marks follow the real page order and stay decorative", async ({
   await expect(page.locator(".folio-mark:visible")).toHaveCount(0);
 });
 
-test("project depth follows a mouse and releases for press, focus, and reduced motion", async ({
+test("project cards stay level and release their press for focus and reduced motion", async ({
   page,
 }) => {
   await page.setViewportSize({ height: 900, width: 1440 });
@@ -43,18 +43,9 @@ test("project depth follows a mouse and releases for press, focus, and reduced m
   await card.scrollIntoViewIfNeeded();
   await expect(card.locator("..")).not.toHaveClass(/zoom-ready/);
   await card.hover({ position: { x: 30, y: 30 } });
-  await expect(card).toHaveClass(/is-tilting/);
-  await expect(card).not.toHaveCSS("transform", "none");
-
-  const angles = await card.evaluate((element) => {
-    const style = getComputedStyle(element);
-
-    return ["--card-tilt-x", "--card-tilt-y"].map((name) =>
-      Math.abs(parseFloat(style.getPropertyValue(name))),
-    );
-  });
-
-  expect(angles.every((angle) => angle > 0 && angle <= 2.5)).toBe(true);
+  await expect(card).toHaveCSS("transform", "none");
+  await card.hover({ position: { x: 120, y: 120 } });
+  await expect(card).toHaveCSS("transform", "none");
 
   // Keep a normal press/release without following this test's destination.
   await card.evaluate((link) => {
@@ -63,7 +54,6 @@ test("project depth follows a mouse and releases for press, focus, and reduced m
     });
   });
   await page.mouse.down();
-  await expect(card).not.toHaveClass(/is-tilting/);
   await expect(card).toHaveClass(/is-pressed/);
   await expect(card).toHaveCSS("scale", "0.985");
   await page.mouse.up();
@@ -74,15 +64,28 @@ test("project depth follows a mouse and releases for press, focus, and reduced m
 
   await page.keyboard.press("Tab");
   await card.focus();
-  await expect(card).not.toHaveClass(/is-tilting/);
   await expect(card).toHaveCSS("outline-style", "solid");
   await expect(card).toHaveCSS("translate", "-4px -4px");
 
   await page.mouse.move(0, 0);
   await card.hover({ position: { x: 60, y: 60 } });
-  await expect(card).toHaveClass(/is-tilting/);
+  await expect(card).toHaveCSS("transform", "none");
+  await card.dispatchEvent("pointerdown", {
+    pointerType: "touch",
+    button: 0,
+    buttons: 1,
+  });
+  await expect(card).toHaveClass(/is-pressed/);
+  await card.dispatchEvent("pointercancel");
+  await expect(card).not.toHaveClass(/is-pressed/);
+  await card.dispatchEvent("pointerdown", {
+    pointerType: "touch",
+    button: 0,
+    buttons: 1,
+  });
+  await expect(card).toHaveClass(/is-pressed/);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(card).not.toHaveClass(/is-tilting/);
+  await expect(card).not.toHaveClass(/is-pressed/);
   await expect(card).toHaveCSS("transform", "none");
   await expect(card).toHaveCSS("transition-duration", "0s");
   await card.dispatchEvent("pointerdown", { pointerType: "touch", buttons: 1 });
