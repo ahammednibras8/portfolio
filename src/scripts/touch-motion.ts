@@ -4,22 +4,25 @@
  * phones allow it, and the portrait leans with the phone. Without this decoration,
  * the page simply stays still.
  */
+export {};
+
 const startDelay = 400;
 const buzzDuration = 10;
 const tiltReach = 6;
 const fullTiltAngle = 30;
 const naturalHoldAngle = 45;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const forcedColors = matchMedia("(forced-colors: active)");
+const arrivalObservers = new Set<IntersectionObserver>();
+const arrivalTimers = new Set<ReturnType<typeof setTimeout>>();
+const motionAllowed = () => !reducedMotion.matches && !forcedColors.matches;
 
 type TiltEvent = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<PermissionState>;
 };
 
 const playIcon = async (icon: Element) => {
-  if (
-    matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    matchMedia("(forced-colors: active)").matches
-  )
-    return;
+  if (!motionAllowed()) return;
   if (icon.classList.contains("is-playing")) return;
 
   icon.classList.add("is-playing");
@@ -83,11 +86,16 @@ const whenInView = (
 
         observer.unobserve(target);
         // A short wait lets the eye arrive before the motion starts.
-        setTimeout(() => play(target), startDelay);
+        const timer = setTimeout(() => {
+          arrivalTimers.delete(timer);
+          if (motionAllowed()) play(target);
+        }, startDelay);
+        arrivalTimers.add(timer);
       }
     },
     { threshold },
   );
+  arrivalObservers.add(observer);
 
   for (const element of document.querySelectorAll(selector)) {
     observer.observe(element);
@@ -95,16 +103,19 @@ const whenInView = (
 };
 
 const buzz = () => {
-  if ("vibrate" in navigator) navigator.vibrate(buzzDuration);
+  if (motionAllowed() && "vibrate" in navigator)
+    navigator.vibrate(buzzDuration);
 };
 
 const enableTilt = (portrait: HTMLElement) => {
   if (!("DeviceOrientationEvent" in window)) return;
+  let active = true;
+  let visible = false;
 
   const share = (angle: number) =>
     Math.max(-1, Math.min(1, angle / fullTiltAngle));
   const lean = ({ beta, gamma }: DeviceOrientationEvent) => {
-    if (beta === null || gamma === null) return;
+    if (!motionAllowed() || beta === null || gamma === null) return;
 
     portrait.style.setProperty("--tilt-x", `${share(gamma) * tiltReach}px`);
     portrait.style.setProperty(
@@ -117,14 +128,29 @@ const enableTilt = (portrait: HTMLElement) => {
   };
   const listen = () => {
     stop();
-    addEventListener("deviceorientation", lean);
+    if (active && visible && motionAllowed())
+      addEventListener("deviceorientation", lean);
   };
 
+  for (const preference of [reducedMotion, forcedColors]) {
+    preference.addEventListener?.("change", () => {
+      if (motionAllowed()) return;
+      // Ending this lifecycle also invalidates a pending permission request.
+      active = false;
+      stop();
+      portrait.style.removeProperty("--tilt-x");
+      portrait.style.removeProperty("--tilt-y");
+    });
+  }
+
   // The motion sensor costs battery, so it only runs while the portrait shows.
-  new IntersectionObserver(([entry]) => {
-    if (entry?.isIntersecting) listen();
+  const sensorObserver = new IntersectionObserver(([entry]) => {
+    visible = entry?.isIntersecting ?? false;
+    if (visible) listen();
     else stop();
-  }).observe(portrait);
+  });
+  sensorObserver.observe(portrait);
+  arrivalObservers.add(sensorObserver);
 
   /*
    * Listening is harmless where the sensor is locked, because nothing arrives.
@@ -137,13 +163,20 @@ const enableTilt = (portrait: HTMLElement) => {
   portrait.addEventListener(
     "click",
     async () => {
-      if ((await tilt.requestPermission?.()) === "granted") listen();
+      if (!active || !motionAllowed()) return;
+      if (
+        (await tilt.requestPermission?.()) === "granted" &&
+        active &&
+        motionAllowed()
+      )
+        listen();
     },
     { once: true },
   );
 };
 
 const start = () => {
+  if (!motionAllowed()) return;
   document.documentElement.classList.add("is-touch");
 
   whenInView(
@@ -163,7 +196,19 @@ const start = () => {
   if (portrait) enableTilt(portrait);
 };
 
-if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+for (const preference of [reducedMotion, forcedColors]) {
+  preference.addEventListener?.("change", () => {
+    if (motionAllowed()) return;
+    for (const observer of arrivalObservers) observer.disconnect();
+    arrivalObservers.clear();
+    for (const timer of arrivalTimers) clearTimeout(timer);
+    arrivalTimers.clear();
+    for (const icon of document.querySelectorAll(".lucide.is-playing"))
+      icon.classList.remove("is-playing");
+  });
+}
+
+if (motionAllowed()) {
   // Some phones claim they can hover, so a real touch also proves a touchscreen.
   if (matchMedia("(hover: hover)").matches) {
     addEventListener("touchstart", start, { once: true, passive: true });
