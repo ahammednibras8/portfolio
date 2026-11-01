@@ -74,6 +74,21 @@ document.addEventListener("focusin", ({ target }) => {
   if (owner) playGesture(owner);
 });
 
+// A contact tap gets the same forward gesture without waiting for hover or focus.
+document.addEventListener("pointerdown", (event) => {
+  if (
+    event.button !== 0 ||
+    (event.pointerType !== "touch" && event.pointerType !== "pen")
+  )
+    return;
+  const contact =
+    event.target instanceof Element
+      ? event.target.closest(".hero-contact")
+      : null;
+
+  if (contact) playGesture(contact);
+});
+
 const whenInView = (
   selector: string,
   threshold: number,
