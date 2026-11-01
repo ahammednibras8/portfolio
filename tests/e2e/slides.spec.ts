@@ -1,7 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
 
-const hud = (page: Page) => page.getByRole("group", { name: "Part controls" });
-
 // Late fonts reflow the page and move every part, so wait for them first.
 const fontsReady = (page: Page) =>
   page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -14,24 +12,6 @@ const jumpTo = (page: Page, id: string) =>
     // Leave the page as a visitor has it, with smooth anchors when motion is on.
     document.documentElement.style.scrollBehavior = "";
   }, id);
-
-const partTop = (page: Page, id: string) =>
-  page
-    .locator(`#${id}`)
-    .evaluate((part) => Math.round(part.getBoundingClientRect().top));
-
-// Waits until a part rests under the header, never just somewhere above it.
-const landedOn = (page: Page, id: string) =>
-  expect
-    .poll(
-      async () => {
-        const top = await partTop(page, id);
-
-        return top > 30 && top < 80;
-      },
-      { message: `${id} never rested under the header`, timeout: 6000 },
-    )
-    .toBe(true);
 
 test("the right-side dots are removed and header navigation still works", async ({
   page,
@@ -229,7 +209,6 @@ test("reduced motion keeps every piece still", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.locator(".zoom-ready")).toHaveCount(0);
-  await expect(page.locator(".part-hud-count")).toHaveText("01 / 10");
 });
 
 test("without JavaScript nothing is scaled and header links still work", async ({
@@ -240,6 +219,7 @@ test("without JavaScript nothing is scaled and header links still work", async (
 
   await page.goto("/");
   await expect(page.locator(".zoom-ready")).toHaveCount(0);
+  await expect(page.locator(".part-hud")).toHaveCount(0);
 
   await page
     .getByRole("navigation", { name: "Primary" })
@@ -253,103 +233,8 @@ test("print leaves section controls out", async ({ page }) => {
   await page.goto("/");
   await page.emulateMedia({ media: "print" });
 
-  await expect(hud(page)).toBeHidden();
+  await expect(page.locator(".part-hud")).toHaveCount(0);
   await expect(page.locator(".part-rail")).toHaveCount(0);
-});
-
-test("the HUD waits out the first view, then names the part", async ({
-  page,
-}) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-
-  await expect(hud(page)).toBeHidden();
-  await expect(page.locator(".part-hud-count")).toHaveText("01 / 10");
-
-  await jumpTo(page, "cascade");
-  await expect(hud(page)).toBeVisible();
-  await expect(page.locator(".part-hud-count")).toHaveText("03 / 10");
-  await expect(page.locator(".part-hud-name")).toHaveText("Cascade");
-  await expect(page.locator(".part-hud-status")).toHaveText("03 / 10 Cascade");
-});
-
-test("the HUD steps through every part and never gets stuck", async ({
-  page,
-}) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await jumpTo(page, "work");
-  await expect(hud(page)).toBeVisible();
-
-  const next = hud(page).getByRole("button", { name: "Next part" });
-  const previous = hud(page).getByRole("button", { name: "Previous part" });
-  const order = [
-    "cascade",
-    "story",
-    "evidence",
-    "toolbox",
-    "about",
-    "architecture",
-    "deployment",
-    "contact",
-  ];
-
-  for (const id of order) {
-    await next.click();
-    await expect
-      .poll(() => partTop(page, id), { message: id })
-      .toBeLessThan(80);
-    expect(await partTop(page, id), id).toBeGreaterThan(30);
-  }
-
-  // There is nothing after the last part, so Next has nowhere to go.
-  await expect(next).toHaveAttribute("aria-disabled", "true");
-  await expect(previous).toHaveAttribute("aria-disabled", "false");
-
-  // The footer takes the HUD's place once it rises into view.
-  await page.evaluate(() => {
-    window.scrollTo(0, document.documentElement.scrollHeight);
-  });
-  await expect(hud(page)).toBeHidden();
-
-  await jumpTo(page, "contact");
-  await expect(hud(page)).toBeVisible();
-  await page.keyboard.press("ArrowLeft");
-  await expect.poll(() => partTop(page, "contact")).toBeGreaterThan(80);
-  await landedOn(page, "deployment");
-
-  // Going back inside a long part returns to its own start first.
-  await jumpTo(page, "story");
-  await page.evaluate(() => {
-    window.scrollBy(0, 500);
-  });
-  await expect(hud(page)).toBeVisible();
-  await previous.click();
-  await landedOn(page, "story");
-  await previous.click();
-  await landedOn(page, "cascade");
-});
-
-test("arrow keys step parts and leave other keys alone", async ({ page }) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await jumpTo(page, "work");
-
-  await page.keyboard.press("ArrowRight");
-  await expect.poll(() => partTop(page, "cascade")).toBeLessThan(80);
-
-  // A modified arrow belongs to the browser, so it must not step.
-  await page.keyboard.press("Alt+ArrowRight");
-  await page.waitForTimeout(300);
-  expect(await partTop(page, "cascade")).toBeLessThan(80);
-  expect(await partTop(page, "story")).toBeGreaterThan(300);
-
-  await expect(
-    hud(page).getByRole("button", { name: "Next part" }),
-  ).toHaveAttribute("aria-keyshortcuts", "ArrowRight");
 });
 
 test("progress runs along the header and the browser bar matches it", async ({
@@ -378,15 +263,6 @@ test("progress runs along the header and the browser bar matches it", async ({
     .evaluate((header) => getComputedStyle(header, "::after").transform);
 
   expect(bar).toBe("matrix(1, 0, 0, 1, 0, 0)");
-});
-
-test("without JavaScript the HUD never appears", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-
-  await page.goto("/");
-  await expect(page.locator(".part-hud")).toBeHidden();
-  await context.close();
 });
 
 test("sections stay still during content entrances", async ({ page }) => {
@@ -463,71 +339,6 @@ test("section backgrounds have no dotted-circle overlays at any width", async ({
   }
 });
 
-test("keyboard focus stays on a HUD button when its step runs out", async ({
-  page,
-}) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await jumpTo(page, "deployment");
-
-  const next = hud(page).getByRole("button", { name: "Next part" });
-
-  await next.focus();
-  await page.keyboard.press("Enter");
-  await expect.poll(() => partTop(page, "contact")).toBeLessThan(80);
-  await expect(next).toHaveAttribute("aria-disabled", "true");
-  await expect(next).toBeFocused();
-});
-
-test("quick clicks each take a step while the page is still moving", async ({
-  page,
-}) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-  await jumpTo(page, "work");
-  await expect(hud(page)).toBeVisible();
-
-  const next = hud(page).getByRole("button", { name: "Next part" });
-
-  for (let click = 0; click < 3; click += 1) {
-    await next.click();
-    await page.waitForTimeout(100);
-  }
-
-  // Work, then Cascade, Case study, and Lifecycle.
-  await expect
-    .poll(
-      async () => {
-        const top = await partTop(page, "evidence");
-
-        return top > 30 && top < 90;
-      },
-      { timeout: 6000 },
-    )
-    .toBe(true);
-});
-
-test("a held arrow key takes one step, not every part", async ({ page }) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await jumpTo(page, "work");
-
-  // Playwright marks later presses as repeats while a key stays down.
-  for (let press = 0; press < 12; press += 1) {
-    await page.keyboard.down("ArrowRight");
-    await page.waitForTimeout(30);
-  }
-
-  await page.keyboard.up("ArrowRight");
-  await page.waitForTimeout(500);
-
-  await landedOn(page, "cascade");
-  expect(await partTop(page, "story")).toBeGreaterThan(300);
-});
-
 for (const width of [390, 1280]) {
   test(`a jump straight to a part finishes every zoom at ${width}px`, async ({
     page,
@@ -558,36 +369,7 @@ for (const width of [390, 1280]) {
   });
 }
 
-test("remaining section controls are full-size touch targets on every screen", async ({
-  page,
-}) => {
-  for (const width of [320, 390, 1440]) {
-    await page.setViewportSize({ height: 800, width });
-    await page.goto("/");
-    await jumpTo(page, "work");
-    await expect(hud(page)).toBeVisible();
-
-    const sizes = await hud(page)
-      .getByRole("button")
-      .evaluateAll((buttons) =>
-        buttons.map((button) => {
-          const { height, width: wide } = button.getBoundingClientRect();
-
-          return { height, wide };
-        }),
-      );
-
-    expect(sizes).toHaveLength(2);
-    for (const { height, wide } of sizes) {
-      expect(wide, `width at ${width}`).toBeGreaterThanOrEqual(44);
-      expect(height, `height at ${width}`).toBeGreaterThanOrEqual(44);
-    }
-  }
-});
-
-test("focus rings stay visible over the navy header and bands", async ({
-  page,
-}) => {
+test("focus rings stay visible over the navy header", async ({ page }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
@@ -598,35 +380,60 @@ test("focus rings stay visible over the navy header and bands", async ({
   await skip.focus();
   await expect(skip).toBeFocused();
   await expect(skip).toHaveCSS("outline-color", "rgb(255, 255, 255)");
-
-  // The remaining section controls keep a white focus ring on their navy surface.
-  await jumpTo(page, "cascade");
-
-  const next = hud(page).getByRole("button", { name: "Next part" });
-
-  await next.focus();
-  await expect(next).toBeFocused();
-  await expect(next).toHaveCSS("outline-color", "rgb(255, 255, 255)");
-  await expect(next).toHaveCSS("outline-width", "3px");
 });
 
-test("a header jump ends a step in progress, so the next step starts there", async ({
+test("the bottom section counter is absent on mobile and desktop", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ height: 900, width });
+    await page.goto("/");
+
+    for (const id of ["intro", "story", "evidence", "toolbox", "contact"]) {
+      await jumpTo(page, id);
+      await expect(page.locator(".part-hud")).toHaveCount(0);
+      await expect(
+        page.getByRole("group", { name: "Part controls" }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: /^(Previous|Next) part$/ }),
+      ).toHaveCount(0);
+    }
+
+    await expect(page.locator("[aria-keyshortcuts]")).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.documentElement).scrollPaddingBottom,
+      ),
+    ).not.toBe("80px");
+
+    await jumpTo(page, "toolbox");
+    await page.screenshot({
+      path: testInfo.outputPath(`no-bottom-counter-${width}.png`),
+    });
+  }
+});
+
+test("left and right arrows no longer trigger section navigation", async ({
   page,
 }) => {
-  await page.setViewportSize({ height: 800, width: 1280 });
-  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await jumpTo(page, "work");
-  await expect(hud(page)).toBeVisible();
 
-  await hud(page).getByRole("button", { name: "Next part" }).click();
-  await page
-    .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "Contact", exact: true })
-    .click();
-  await landedOn(page, "contact");
+  const start = await page.evaluate(() => scrollY);
+  const allowed = await page.evaluate(() =>
+    ["ArrowLeft", "ArrowRight"].map((key) =>
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key, cancelable: true }),
+      ),
+    ),
+  );
 
-  // A stale step toward Cascade would send this back to Work instead.
-  await hud(page).getByRole("button", { name: "Previous part" }).click();
-  await landedOn(page, "deployment");
+  expect(allowed).toEqual([true, true]);
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowLeft");
+  expect(await page.evaluate(() => scrollY)).toBe(start);
 });

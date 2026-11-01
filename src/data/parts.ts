@@ -1,4 +1,4 @@
-// One reading order for the printed folios and the section controls.
+// One reading order for the printed folios.
 export const parts = [
   { href: "#intro", label: "Intro" },
   { href: "#work", label: "Work" },
