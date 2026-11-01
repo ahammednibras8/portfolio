@@ -1,11 +1,10 @@
 /*
  * Icon gestures finish after pointer and keyboard triggers. Touch screens also
- * play each icon as it enters view and roll the hero dots. Tapping a hero heading
- * rolls them again, taps give a short buzz where phones allow it, and the portrait
- * leans with the phone. Without this decoration, the page simply stays still.
+ * play each primary badge once on arrival. Link taps give a short buzz where
+ * phones allow it, and the portrait leans with the phone. Without this decoration,
+ * the page simply stays still.
  */
 const startDelay = 400;
-const waveDuration = 8000;
 const buzzDuration = 10;
 const tiltReach = 6;
 const fullTiltAngle = 30;
@@ -72,15 +71,6 @@ document.addEventListener("focusin", ({ target }) => {
   if (owner) playGesture(owner);
 });
 
-const rollWave = (section: Element) => {
-  if (section.classList.contains("is-waving")) return;
-
-  section.classList.add("is-waving");
-  setTimeout(() => {
-    section.classList.remove("is-waving");
-  }, waveDuration);
-};
-
 const whenInView = (
   selector: string,
   threshold: number,
@@ -88,9 +78,10 @@ const whenInView = (
 ) => {
   const observer = new IntersectionObserver(
     (entries) => {
-      for (const { isIntersecting, target } of entries) {
-        if (!isIntersecting) continue;
+      for (const { isIntersecting, intersectionRatio, target } of entries) {
+        if (!isIntersecting || intersectionRatio < threshold) continue;
 
+        observer.unobserve(target);
         // A short wait lets the eye arrive before the motion starts.
         setTimeout(() => play(target), startDelay);
       }
@@ -155,16 +146,16 @@ const enableTilt = (portrait: HTMLElement) => {
 const start = () => {
   document.documentElement.classList.add("is-touch");
 
-  whenInView("main svg.lucide", 0.6, playIcon);
-  whenInView(".dot-wave", 0.3, rollWave);
+  whenInView(
+    "main .sticker svg.lucide, .architecture-node-icon",
+    0.6,
+    playIcon,
+  );
 
   document.addEventListener("click", ({ target }) => {
     if (!(target instanceof Element)) return;
 
-    const section = target.closest(".dot-wave > :is(h1, h2)")?.parentElement;
-
-    if (section) rollWave(section);
-    if (section || target.closest("a")) buzz();
+    if (target.closest("a")) buzz();
   });
 
   const portrait = document.querySelector<HTMLElement>(".hero-portrait");

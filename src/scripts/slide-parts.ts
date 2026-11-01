@@ -6,7 +6,7 @@
 import { partLinks, watchCurrentPart } from "./parts";
 
 const pieceSelector = [
-  ".part:not(:first-child) > :not(article, nav)",
+  ".part:not(:first-child) > :not(article, nav, .folio-mark)",
   "article > *",
   ".route-list > li",
 ].join(", ");

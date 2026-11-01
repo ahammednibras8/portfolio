@@ -1,10 +1,7 @@
 /*
- * Depth for the slide parts. Faint halftone orbs drift behind each part and
- * short parts rise into place, both driven by scroll where the browser supports
- * it. Everything here is decoration: orbs stay faint and away from the words,
- * and the rise animates scale only, because animating border-radius repaints a
- * whole screen of background on every frame. Do not make parts sticky so the
- * next one slides over them: the covered part would still take keyboard focus.
+ * Static halftone depth and useful progress for the page parts. Backgrounds
+ * stay still while the content arrives, so the two never compete. Do not make
+ * parts sticky: a covered part would still take keyboard focus.
  */
 
 /* Print keeps its plain document, so the HUD only exists on screen. */
@@ -80,58 +77,6 @@
   @media (forced-colors: active) {
     .part-orb::after {
       display: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      @keyframes part-rise {
-        0% {
-          scale: 0.93;
-        }
-
-        100% {
-          scale: 1;
-        }
-      }
-
-      @keyframes orb-drift {
-        0% {
-          transform: translateY(-14vh) rotate(-12deg) scale(0.9);
-        }
-
-        100% {
-          transform: translateY(14vh) rotate(12deg) scale(1.1);
-        }
-      }
-
-      .part-orb {
-        view-timeline: --part block;
-      }
-
-      .part-orb::after {
-        animation: orb-drift linear both;
-        animation-range: cover;
-        animation-timeline: --part;
-      }
-
-      .part-rise {
-        transform-origin: 50% 0;
-        animation: part-rise linear both;
-        animation-range: entry 0% entry 100%;
-        animation-timeline: --part;
-      }
-
-      /* The Cascade band already rolls its dots, so it runs both together. */
-      .page > .dot-wave.part-rise {
-        animation:
-          dot-wave 6s linear infinite paused,
-          part-rise linear both;
-        animation-range:
-          normal,
-          entry 0% entry 100%;
-        animation-timeline: auto, --part;
-      }
     }
   }
 

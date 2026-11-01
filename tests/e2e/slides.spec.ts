@@ -396,16 +396,13 @@ test("without JavaScript the HUD never appears", async ({ browser }) => {
   await context.close();
 });
 
-test("depth effects run only where scroll-driven animation exists", async ({
+test("sections and halftone orbs stay still during content entrances", async ({
   page,
 }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
 
-  const supported = await page.evaluate(() =>
-    CSS.supports("animation-timeline: view()"),
-  );
   const names = () =>
     page.evaluate(() => ({
       about: getComputedStyle(document.getElementById("about") as Element)
@@ -422,33 +419,19 @@ test("depth effects run only where scroll-driven animation exists", async ({
         .animationName,
     }));
 
-  if (supported) {
-    expect(await names()).toEqual({
-      about: "part-rise",
-      // Cascade keeps rolling its dots while it rises.
-      cascade: "dot-wave, part-rise",
-      intro: "dot-wave",
-      orb: "orb-drift",
-      story: "none",
-    });
-    await expect(page.locator("#about")).toHaveCSS(
-      "animation-timing-function",
-      "linear",
-    );
-    await expect(page.locator("#cascade")).toHaveCSS(
-      "animation-timing-function",
-      "linear, linear",
-    );
-    expect(
-      await page
-        .locator("#about")
-        .evaluate(
-          (part) => getComputedStyle(part, "::after").animationTimingFunction,
-        ),
-    ).toBe("linear");
-  } else {
-    expect((await names()).about).toBe("none");
-  }
+  const still = {
+    about: "none",
+    cascade: "none",
+    intro: "none",
+    orb: "none",
+    story: "none",
+  };
+  expect(await names()).toEqual(still);
+  await page
+    .locator("#about")
+    .evaluate((part) => part.scrollIntoView({ behavior: "instant" }));
+  expect(await names()).toEqual(still);
+  await expect(page.locator(".folio-mark.zoom-ready")).toHaveCount(0);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   expect(await names()).toMatchObject({

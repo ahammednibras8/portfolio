@@ -247,7 +247,9 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("pop-outs settle, then answer hover", async ({ page }) => {
+test("notes and labels stay still while reading or hovering", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -275,10 +277,10 @@ test("pop-outs settle, then answer hover", async ({ page }) => {
     .toEqual({ animation: "none", scale: "none" });
 
   await bubble.hover();
-  await expect.poll(async () => (await read(bubble)).scale).toBe("1.025");
+  expect(await read(bubble)).toEqual({ animation: "none", scale: "none" });
 
   await label.hover();
-  await expect.poll(async () => (await read(label)).scale).toBe("1.025");
+  expect(await read(label)).toEqual({ animation: "none", scale: "none" });
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.mouse.move(0, 0);
@@ -481,7 +483,7 @@ test("the hero shows an optimized portrait in a cartoon frame", async ({
   expect(await placement()).toMatchObject({ belowTitle: true });
 });
 
-test("the headline sweeps on load and hover and stays readable", async ({
+test("the headline stays solid while its highlight draws once", async ({
   browserName,
   page,
 }) => {
@@ -490,14 +492,14 @@ test("the headline sweeps on load and hover and stays readable", async ({
   await page.goto("/");
 
   const headline = page.getByRole("heading", { level: 1 });
-  const keyframes = await headline.evaluate((element) => {
+  const highlight = headline.locator(".hero-name");
+  const keyframes = await highlight.evaluate((element) => {
     const effect = element.getAnimations()[0]?.effect as KeyframeEffect;
 
-    return effect.getKeyframes().map((frame) => frame.backgroundPositionX);
+    return effect.getKeyframes().map((frame) => frame.backgroundSize);
   });
 
-  // A falling position moves the band left to right across the text.
-  expect(keyframes).toEqual(["100%", "0%"]);
+  expect(keyframes).toEqual(["0% 100%", "100% 100%"]);
 
   const style = () =>
     headline.evaluate((element) => {
@@ -507,11 +509,10 @@ test("the headline sweeps on load and hover and stays readable", async ({
         animation: computed.animationName,
         clip: computed.backgroundClip,
         color: computed.color,
-        position: computed.backgroundPositionX,
       };
     });
   const ended = () =>
-    headline.evaluate((element) =>
+    highlight.evaluate((element) =>
       element
         .getAnimations()
         .every(
@@ -521,30 +522,23 @@ test("the headline sweeps on load and hover and stays readable", async ({
         ),
     );
 
-  expect(await style()).toMatchObject({
-    animation: "title-sweep",
-    clip: "text",
-    color: "rgba(0, 0, 0, 0)",
-  });
-
-  await expect.poll(ended, { timeout: 4000 }).toBe(true);
-  expect((await style()).position).toBe("100%");
-
-  await headline.hover();
-  await expect
-    .poll(async () => (await style()).position, { timeout: 3000 })
-    .toBe("0%");
-
-  await page.mouse.move(0, 700);
-  await expect
-    .poll(async () => (await style()).position, { timeout: 3000 })
-    .toBe("100%");
-
   const ordinaryText = {
     animation: "none",
     clip: "border-box",
     color: "rgb(23, 25, 26)",
   };
+
+  expect(await style()).toEqual(ordinaryText);
+
+  await expect.poll(ended, { timeout: 4000 }).toBe(true);
+  await expect(highlight).toHaveCSS("background-size", "100% 100%");
+
+  await headline.hover();
+  expect(await style()).toEqual(ordinaryText);
+  expect(await ended()).toBe(true);
+
+  await page.mouse.move(0, 700);
+  expect(await style()).toEqual(ordinaryText);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   expect(await style()).toMatchObject(ordinaryText);
@@ -1083,8 +1077,20 @@ test.describe("on a touch screen", () => {
     viewport: { height: 915, width: 412 },
   });
 
-  test("icons play once in view and the hero dots roll", async ({ page }) => {
+  test("primary icons arrive once without background or action-arrow motion", async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      document.addEventListener("animationstart", ({ target }) => {
+        if (
+          target instanceof Element &&
+          target.closest(".hero-actions .action-arrow")
+        ) {
+          document.documentElement.dataset.arrowPlayed = "true";
+        }
+      });
+    });
 
     const blocked: string[] = [];
 
@@ -1098,9 +1104,12 @@ test.describe("on a touch screen", () => {
     const flap = page.locator("#contact .lucide-mail > path");
 
     // The script must really run under the production security policy.
-    await expect(hero).toHaveClass(/is-waving/);
+    await expect(page.locator("html")).toHaveClass(/is-touch/);
+    await expect(hero).toHaveCSS("animation-name", "none");
     expect(blocked).toEqual([]);
-    await expect(hero).not.toHaveClass(/is-waving/, { timeout: 11000 });
+    await expect(
+      page.locator(".hero-actions .action-arrow.is-playing"),
+    ).toHaveCount(0);
     await expect(flap).toHaveCSS("animation-name", "none");
 
     await flap.scrollIntoViewIfNeeded();
@@ -1109,8 +1118,26 @@ test.describe("on a touch screen", () => {
     await expect(flap.locator("..")).toHaveCSS("scale", "none");
     await expect(flap).toHaveCSS("animation-name", "none");
 
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-arrow-played",
+      "true",
+    );
     await page.locator("#introduction-heading").tap();
-    await expect(hero).toHaveClass(/is-waving/);
+    await expect(hero).toHaveCSS("animation-name", "none");
+    await flap.scrollIntoViewIfNeeded();
+    // Watch beyond the arrival delay, not just the initial still frame.
+    const replayed = await flap.evaluate(async (part) => {
+      let replayed = false;
+      const noteReplay = () => {
+        replayed = true;
+      };
+      part.addEventListener("animationstart", noteReplay);
+      await new Promise((resolve) => setTimeout(resolve, 1400));
+      part.removeEventListener("animationstart", noteReplay);
+      return replayed;
+    });
+    expect(replayed).toBe(false);
+    expect(blocked).toEqual([]);
   });
 
   test("a phone that claims it can hover still starts on the first touch", async ({
@@ -1131,8 +1158,9 @@ test.describe("on a touch screen", () => {
     await expect(page.locator("html")).not.toHaveClass(/is-touch/);
     await page.touchscreen.tap(20, 300);
     await expect(page.locator("html")).toHaveClass(/is-touch/);
-    await expect(page.locator(".exhibit-hero-portrait")).toHaveClass(
-      /is-waving/,
+    await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
+      "animation-name",
+      "none",
     );
   });
 
@@ -1174,7 +1202,7 @@ test.describe("on a touch screen", () => {
       })
       .toBe("6px 6px");
 
-    await page.locator("#introduction-heading").tap();
+    await page.getByRole("link", { name: "See my work" }).tap();
     await expect(page.locator("html")).toHaveAttribute("data-buzzed", "10");
   });
 
@@ -1442,7 +1470,7 @@ test("icon gestures finish after the pointer leaves and can play again", async (
   await expect(recoveryIcon).not.toHaveClass(/is-playing/);
 });
 
-test("hovering a hero heading rolls a wave through its dots", async ({
+test("hero headings keep their halftone backgrounds still", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -1450,58 +1478,43 @@ test("hovering a hero heading rolls a wave through its dots", async ({
   await page.goto("/");
   await settleScrolling(page);
 
-  const wave = (section: Locator) =>
+  const background = (section: Locator) =>
     section.evaluate((element) => {
       const style = getComputedStyle(element);
-      // Some parts also rise on scroll, so read the dot wave by its own name.
-      const rolling = element
-        .getAnimations()
-        .find(
-          (animation) =>
-            animation instanceof CSSAnimation &&
-            animation.animationName === "dot-wave",
-        );
-
       return {
-        steady: style.animationTimingFunction
-          .split(",")
-          .every((timing) => timing.trim() === "linear"),
+        animation: style.animationName,
         layers: style.backgroundImage.split("radial-gradient").length - 1,
-        reach: Number.parseFloat(style.getPropertyValue("--wave-reach")),
-        state: rolling?.playState ?? style.animationPlayState,
+        position: style.backgroundPosition,
+        scale: style.scale,
       };
     });
 
-  for (const heading of ["#introduction-heading", "#cascade-heading"]) {
+  for (const heading of [
+    "#introduction-heading",
+    "#cascade-heading",
+    "#architecture-heading",
+  ]) {
     const section = page.locator(`section:has(> ${heading})`);
 
     await section.locator(".speech-bubble").hover();
-    expect(await wave(section), heading).toEqual({
-      steady: true,
-      layers: 12,
-      reach: 0,
-      state: "paused",
+    const resting = await background(section);
+    expect(resting, heading).toMatchObject({
+      animation: "none",
+      layers: 1,
+      scale: "none",
     });
 
     await page.locator(heading).hover();
-    await expect.poll(async () => (await wave(section)).state).toBe("running");
-    await expect
-      .poll(async () => (await wave(section)).reach)
-      .toBeGreaterThan(0);
+    expect(await background(section)).toEqual(resting);
 
     await page.mouse.move(0, 0);
-    await expect.poll(async () => (await wave(section)).state).toBe("paused");
-    await expect.poll(async () => (await wave(section)).reach).toBe(0);
+    expect(await background(section)).toEqual(resting);
   }
 
-  // The site diagram hero keeps still, and reduced motion keeps the plain dots.
-  const still = page.locator(".exhibit-hero:not(.dot-wave)");
-
-  await still.locator("h2").hover();
-  expect((await wave(still)).layers).toBe(1);
-
   await page.emulateMedia({ reducedMotion: "reduce" });
-  expect(await wave(page.locator(".exhibit-hero-portrait"))).toMatchObject({
+  expect(
+    await background(page.locator(".exhibit-hero-portrait")),
+  ).toMatchObject({
     layers: 1,
   });
   await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
