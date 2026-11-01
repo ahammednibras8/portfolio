@@ -112,6 +112,34 @@
     --icon-x: 2px;
   }
 
+  /* A single forward pass, then an invisible reset so the label stays still. */
+  :where(.hero-contact) .lucide-arrow-right > path {
+    --icon-part-motion: contact-arrow-travel;
+    --icon-part-duration: 560ms;
+  }
+
+  @keyframes contact-arrow-travel {
+    0% {
+      opacity: 1;
+      translate: 0;
+    }
+
+    42% {
+      opacity: 0;
+      translate: 9px;
+    }
+
+    43% {
+      opacity: 0;
+      translate: -9px;
+    }
+
+    100% {
+      opacity: 1;
+      translate: 0;
+    }
+  }
+
   /* Lift the handle, keeping its ends attached to the case. */
   .lucide-briefcase > path {
     --icon-part-motion: icon-handle;
