@@ -1,10 +1,8 @@
 /*
- * Zooms each piece of the page into place as it arrives, marks the current part
- * in the side rail, and docks onto a part when a scroll stops just short of it.
+ * Zooms each piece of the page into place as it arrives and docks onto a part
+ * when a scroll stops just short of it.
  * Pieces stay centered and visible, and without this script they stay still.
  */
-import { partLinks, watchCurrentPart } from "./parts";
-
 const pieceSelector = [
   ".part:not(:first-child) > :not(article, nav, .folio-mark)",
   "article > *",
@@ -128,19 +126,6 @@ const dockOntoParts = () => {
     { passive: true },
   );
 };
-
-const trackRail = () => {
-  const links = partLinks();
-
-  watchCurrentPart((index) => {
-    links.forEach((link, position) => {
-      if (position === index) link.setAttribute("aria-current", "true");
-      else link.removeAttribute("aria-current");
-    });
-  });
-};
-
-trackRail();
 
 if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
   preparePieces();

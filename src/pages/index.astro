@@ -26,6 +26,7 @@ import {
 } from "@lucide/astro";
 import { Picture } from "astro:assets";
 import portrait from "../assets/portrait-enhanced.png";
+import { parts } from "../data/parts";
 import { projects } from "../data/projects";
 import { toolbox } from "../data/toolbox";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
@@ -42,19 +43,6 @@ const socialImage = {
   width: 1200,
   height: 630,
 } as const;
-
-const parts = [
-  { href: "#intro", label: "Intro" },
-  { href: "#work", label: "Work" },
-  { href: "#cascade", label: "Cascade" },
-  { href: "#story", label: "Case study" },
-  { href: "#evidence", label: "Lifecycle" },
-  { href: "#toolbox", label: "Toolbox" },
-  { href: "#about", label: "About" },
-  { href: "#architecture", label: "This site" },
-  { href: "#deployment", label: "Deployment" },
-  { href: "#contact", label: "Contact" },
-];
 
 const folio = (id: string) =>
   `${String(parts.findIndex(({ href }) => href === `#${id}`) + 1).padStart(2, "0")} / ${parts.length}`;
@@ -718,18 +706,6 @@ const productionPath = [
       </ul>
     </nav>
   </section>
-
-  <nav class="part-rail" aria-label="Page parts">
-    <ol>
-      {parts.map(({ href, label }) => (
-        <li>
-          <a href={href}>
-            <span>{label}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-  </nav>
 
   <div class="part-hud" role="group" aria-label="Part controls" hidden>
     <button
