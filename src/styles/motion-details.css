@@ -179,6 +179,42 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
+    @keyframes portrait-arrive {
+      0% {
+        opacity: 0.85;
+        scale: 0.96;
+      }
+
+      100% {
+        opacity: 1;
+        scale: 1;
+      }
+    }
+
+    @keyframes hero-arrive {
+      0% {
+        scale: 0.985;
+      }
+
+      100% {
+        scale: 1;
+      }
+    }
+
+    #intro > .hero-portrait {
+      animation: portrait-arrive var(--motion-arrival) var(--motion-ease-settle)
+        80ms backwards;
+    }
+
+    #intro > .speech-bubble {
+      animation: hero-arrive var(--motion-arrival) var(--motion-ease-settle)
+        160ms backwards;
+    }
+
+    #intro.motion-settled :is(.hero-name, .hero-portrait, .speech-bubble) {
+      animation: none;
+    }
+
     @keyframes run-step-wash {
       0%,
       100% {
@@ -231,11 +267,19 @@
     }
 
     .hero-name {
-      animation: ink-highlight 900ms var(--motion-ease-settle) 350ms backwards;
+      animation: ink-highlight 720ms var(--motion-ease-settle) 100ms backwards;
     }
 
     .route-link::before {
       transition: scale var(--motion-route) var(--motion-ease-settle);
+    }
+
+    .page .hero-actions .hero-action {
+      transition:
+        background-color var(--motion-standard) var(--motion-ease-settle),
+        box-shadow var(--motion-standard) var(--motion-ease-settle),
+        translate var(--motion-route) var(--motion-ease-settle),
+        scale var(--motion-short) var(--motion-ease-settle);
     }
 
     @media (hover: hover) and (pointer: fine) {

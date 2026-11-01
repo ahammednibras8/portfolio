@@ -40,27 +40,21 @@ test("the right-side dots are removed and header navigation still works", async 
   expect(Math.abs(top - 44)).toBeLessThanOrEqual(2);
 });
 
-test("every short part fills the screen as its own slide", async ({ page }) => {
+test("only the introduction fills a screen; short sections follow their content", async ({
+  page,
+}) => {
   await page.setViewportSize({ height: 900, width: 1440 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await fontsReady(page);
 
-  for (const id of [
-    "intro",
-    "work",
-    "cascade",
-    "toolbox",
-    "architecture",
-    "about",
-  ]) {
-    const height = await page
-      .locator(`#${id}`)
-      .evaluate((part) => part.getBoundingClientRect().height);
-
-    expect(height, id).toBeGreaterThanOrEqual(856);
+  const intro = await page.locator("#intro").boundingBox();
+  expect(intro?.height).toBeGreaterThanOrEqual(856);
+  for (const id of ["cascade", "architecture", "about"]) {
+    const box = await page.locator(`#${id}`).boundingBox();
+    expect(box?.height, id).toBeLessThan(856);
   }
 });
-
 test("pieces zoom in around their center and settle", async ({ page }) => {
   await page.setViewportSize({ height: 800, width: 1280 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -76,12 +70,12 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
     });
 
   await expect(piece).toHaveClass(/zoom-ready/);
-  await expect(piece).toHaveCSS("scale", "0.96");
+  await expect(piece).toHaveCSS("scale", "0.975");
 
   // Waiting pieces stay readable, because motion never hides content.
   expect(await read()).toEqual({
     opacity: "1",
-    scale: "0.96",
+    scale: "0.975",
     translate: "none",
     visibility: "visible",
   });
@@ -172,12 +166,11 @@ test("a slow mouse wheel moves the page on every notch", async ({
   }
 });
 
-test("a scroll that stops just short of a part docks onto it", async ({
+test("scrolling near a section never starts an automatic docking move", async ({
   browserName,
   page,
 }) => {
   test.skip(browserName === "webkit", "Playwright wheel events lag in WebKit.");
-
   await page.setViewportSize({ height: 900, width: 1440 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -188,22 +181,17 @@ test("a scroll that stops just short of a part docks onto it", async ({
     page
       .locator("#work")
       .evaluate((part) => Math.round(part.getBoundingClientRect().top));
-
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = "auto";
     const part = document.querySelector<HTMLElement>("#work");
-
     window.scrollTo(0, (part?.offsetTop ?? 0) - 44 - 140);
   });
+  const before = await top();
   await page.mouse.wheel(0, 60);
-  await expect.poll(top, { timeout: 4000 }).toBe(44);
-
-  // Leaving a part is never undone.
-  await page.mouse.wheel(0, 100);
-  await page.waitForTimeout(600);
-  expect(await top()).toBeLessThan(0);
+  await expect.poll(top).toBe(before - 60);
+  await page.waitForTimeout(700);
+  expect(await top()).toBe(before - 60);
 });
-
 test("reduced motion keeps every piece still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");

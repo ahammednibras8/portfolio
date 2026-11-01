@@ -890,9 +890,7 @@ test("every interactive element answers a hover without needing motion", async (
   await expect.poll(transform(".hero-action .action-arrow")).toBe("none");
 
   await plate.hover();
-  await expect
-    .poll(transform("#contact .route-link h3"))
-    .toBe("matrix(1, 0, 0, 1, 8, 0)");
+  await expect.poll(transform("#contact .route-link h3")).toBe("none");
   await expect
     .poll(transform("#contact .route-link .action-arrow"))
     .toBe("none");
