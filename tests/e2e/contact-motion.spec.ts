@@ -30,10 +30,10 @@ for (const trigger of ["hover", "focus"] as const) {
       for (const animation of animations) animation.pause();
       const path = element.querySelector("path");
       if (!path) throw new Error("Expected the original Lucide arrow.");
-      const frames = [0, 0.126, 0.129, 0.8].map((fraction) => {
+      const frames = [0, 0.1575, 0.16125, 0.8].map((fraction) => {
         for (const animation of animations)
           animation.currentTime =
-            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 3200;
+            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 8000;
         return [...element.children].map((part) => {
           const style = getComputedStyle(part);
           return {
@@ -55,7 +55,7 @@ for (const trigger of ["hover", "focus"] as const) {
     expect(sample.timing).toHaveLength(2);
     expect(
       sample.timing.every(
-        (timing) => timing?.duration === 3200 && timing.iterations === Infinity,
+        (timing) => timing?.duration === 8000 && timing.iterations === Infinity,
       ),
     ).toBe(true);
     for (const [index, frame] of sample.frames.entries()) {

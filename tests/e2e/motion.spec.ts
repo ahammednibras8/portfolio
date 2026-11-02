@@ -332,7 +332,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
   const sample = async (selector: string, progress: number) => {
     const part = page.locator(selector).first();
 
-    // Sample the active 30% of a repeating cycle, independent of its offset.
+    // Sample the active 3 seconds of an 8-second cycle, independent of its offset.
     await part.locator("..").hover();
     return part.evaluate((element, fraction) => {
       const animation = element.getAnimations()[0];
@@ -342,7 +342,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       animation.pause();
       const { delay, duration } = animation.effect.getTiming();
 
-      const phase = fraction * 0.3;
+      const phase = fraction * 0.375;
       animation.currentTime =
         Number(delay ?? 0) +
         Number(duration) *
@@ -390,7 +390,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
 
       animation.pause();
       const timing = animation.effect.getTiming();
-      const phase = 0.72 * 0.3;
+      const phase = 0.72 * 0.375;
       animation.currentTime =
         Number(timing.delay ?? 0) +
         Number(timing.duration) *
