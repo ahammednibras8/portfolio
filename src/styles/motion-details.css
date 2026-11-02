@@ -55,6 +55,62 @@
     background-size: 100% 100%;
   }
 
+  /* Ink travels behind the label; the pill lifts and presses as one surface. */
+  .page .hero-actions .hero-contact {
+    --contact-fill: 0 1;
+    --contact-badge-background: var(--color-canvas);
+    --contact-badge-color: var(--color-action);
+
+    position: relative;
+    isolation: isolate;
+    padding-inline-end: 0.625rem;
+    background: var(--color-surface-raised);
+    border-color: var(--color-action);
+    box-shadow: 0.1875rem 0.1875rem 0 var(--color-action);
+    color: var(--color-action);
+  }
+
+  .hero-contact::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: var(--color-aqua);
+    border-radius: inherit;
+    content: "";
+    pointer-events: none;
+    scale: var(--contact-fill);
+    transform-origin: left;
+  }
+
+  .hero-contact .contact-arrow-badge {
+    background: var(--contact-badge-background);
+    color: var(--contact-badge-color);
+  }
+
+  .page .hero-actions .hero-contact:is(:focus-visible, .is-pressed) {
+    --contact-fill: 1;
+    --contact-badge-background: var(--color-action);
+    --contact-badge-color: var(--color-surface-raised);
+  }
+
+  .page .hero-actions .hero-contact:focus-visible {
+    box-shadow: 0.3125rem 0.3125rem 0 var(--color-action);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .page .hero-actions .hero-contact:hover {
+      --contact-fill: 1;
+      --contact-badge-background: var(--color-action);
+      --contact-badge-color: var(--color-surface-raised);
+
+      box-shadow: 0.3125rem 0.3125rem 0 var(--color-action);
+    }
+  }
+
+  .page .hero-actions .hero-contact.is-pressed {
+    box-shadow: none;
+  }
+
   .hero-portrait {
     isolation: isolate;
   }
@@ -272,6 +328,37 @@
 
     .route-link::before {
       transition: scale var(--motion-route) var(--motion-ease-settle);
+    }
+
+    .page .hero-actions .hero-contact {
+      transition:
+        box-shadow var(--motion-standard) var(--motion-ease-settle),
+        translate var(--motion-route) var(--motion-ease-settle);
+    }
+
+    .hero-contact::before {
+      transition: scale var(--motion-route) var(--motion-ease-settle);
+    }
+
+    .hero-contact .contact-arrow-badge {
+      transition:
+        background-color var(--motion-standard) var(--motion-ease-settle),
+        color var(--motion-standard) var(--motion-ease-settle);
+    }
+
+    .page .hero-actions .hero-contact:focus-visible {
+      translate: -0.125rem -0.125rem;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .page .hero-actions .hero-contact:hover {
+        translate: -0.125rem -0.125rem;
+      }
+    }
+
+    .page .hero-actions .hero-contact.is-pressed {
+      translate: 0.125rem 0.125rem;
+      transition-duration: var(--motion-short);
     }
 
     .page .hero-actions .hero-action {
