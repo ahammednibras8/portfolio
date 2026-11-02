@@ -70,12 +70,12 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
     });
 
   await expect(piece).toHaveClass(/zoom-ready/);
-  await expect(piece).toHaveCSS("scale", "0.975");
+  await expect(piece).toHaveCSS("scale", "0.985");
 
   // Waiting pieces stay readable, because motion never hides content.
   expect(await read()).toEqual({
     opacity: "1",
-    scale: "0.975",
+    scale: "0.985",
     translate: "none",
     visibility: "visible",
   });

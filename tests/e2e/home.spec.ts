@@ -345,7 +345,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   const atRest = await plateTiming();
 
   expect(atRest.property).toBe("translate, rotate, box-shadow");
-  expect(atRest.duration).toBe("0.36s, 0.36s, 0.18s");
+  expect(atRest.duration).toBe("0.24s, 0.24s, 0.18s");
   expect(atRest.timing).toBe(Array(3).fill(settleEase).join(", "));
 
   const title = plate.getByRole("heading", { name: "Email" });

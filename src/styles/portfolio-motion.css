@@ -42,7 +42,7 @@
   @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
     @keyframes zoom-in {
       0% {
-        scale: 0.975;
+        scale: 0.985;
       }
 
       100% {
@@ -51,7 +51,7 @@
     }
 
     .zoom-ready {
-      scale: 0.975;
+      scale: 0.985;
       transform-origin: center;
     }
 

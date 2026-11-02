@@ -54,9 +54,9 @@
   --motion-short: 120ms;
   --motion-standard: 180ms;
   --motion-deliberate: 220ms;
-  --motion-route: 360ms;
-  --motion-arrival: 620ms;
-  --motion-stagger: 60ms;
+  --motion-route: 240ms;
+  --motion-arrival: 480ms;
+  --motion-stagger: 40ms;
   --motion-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-ease-fluid: cubic-bezier(0.45, 0, 0.2, 1);
 
@@ -883,7 +883,7 @@ article ul {
 
   .hero-portrait:hover {
     rotate: 0deg;
-    scale: 1.03;
+    scale: 1.015;
   }
 
   .hero-portrait img {
@@ -1272,14 +1272,6 @@ article > .project-evidence > h4 {
     .site-footer a::after,
     .page a:not([class])::after {
       transition: clip-path var(--motion-route) var(--motion-ease-settle);
-    }
-
-    .route-link:is(:hover, :focus-visible) h3::after,
-    .architecture-node-link:is(:hover, :focus-visible) strong::after,
-    .recovery-link:is(:hover, :focus-visible) strong::after,
-    .site-footer a:is(:hover, :focus-visible)::after,
-    .page a:not([class]):is(:hover, :focus-visible)::after {
-      transition-duration: 420ms;
     }
   }
 }
