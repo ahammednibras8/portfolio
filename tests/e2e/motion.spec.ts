@@ -25,7 +25,8 @@ test("the lifecycle traces its five steps once without moving the text", async (
     for (const animation of document
       .querySelector("#evidence")
       ?.getAnimations() ?? [])
-      animation.finish();
+      if (Number.isFinite(Number(animation.effect?.getTiming().iterations)))
+        animation.finish();
   });
   await expect(page.locator("#evidence")).not.toHaveClass(/zoom-ready/);
 
@@ -105,7 +106,8 @@ test("the lifecycle traces its five steps once without moving the text", async (
   await steps.evaluateAll((elements) => {
     for (const element of elements) {
       for (const animation of element.getAnimations({ subtree: true }))
-        animation.finish();
+        if (Number.isFinite(Number(animation.effect?.getTiming().iterations)))
+          animation.finish();
     }
   });
   await expect(page.locator(".run-path li.is-tracing")).toHaveCount(0);
@@ -166,7 +168,8 @@ test("a phone lifecycle draws downward and waits for steps below the viewport", 
   await page.screenshot({ path: testInfo.outputPath("lifecycle-phone.png") });
   await first.evaluate((element) => {
     for (const animation of element.getAnimations({ subtree: true }))
-      animation.finish();
+      if (Number.isFinite(Number(animation.effect?.getTiming().iterations)))
+        animation.finish();
   });
   await last.scrollIntoViewIfNeeded();
   await expect(last).toHaveClass(/is-tracing/);
@@ -253,13 +256,17 @@ test("project cards stay level and release their press for focus and reduced mot
   await page.setViewportSize({ height: 900, width: 1440 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
     document.documentElement.style.scrollBehavior = "auto";
   });
 
   const card = page.locator(".project-list .route-link").first();
   await card.scrollIntoViewIfNeeded();
   await expect(card.locator("..")).not.toHaveClass(/zoom-ready/);
+  await card.evaluate((element) =>
+    element.scrollIntoView({ behavior: "instant", block: "center" }),
+  );
   await card.hover({ position: { x: 30, y: 30 } });
   await expect(card).toHaveCSS("transform", "none");
   await card.hover({ position: { x: 120, y: 120 } });
@@ -325,9 +332,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
   const sample = async (selector: string, progress: number) => {
     const part = page.locator(selector).first();
 
-    // Each sample starts a fresh one-shot, even for another part of the same SVG.
-    await page.mouse.move(0, 0);
-    await expect(part.locator("..")).not.toHaveClass(/is-playing/);
+    // Sample the active 30% of a repeating cycle, independent of its offset.
     await part.locator("..").hover();
     return part.evaluate((element, fraction) => {
       const animation = element.getAnimations()[0];
@@ -337,7 +342,8 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       animation.pause();
       const { delay, duration } = animation.effect.getTiming();
 
-      animation.currentTime = Number(delay ?? 0) + Number(duration) * fraction;
+      animation.currentTime =
+        Number(delay ?? 0) + Number(duration) * fraction * 0.3;
       const style = getComputedStyle(element);
       const result = {
         origin: style.transformOrigin,
@@ -345,7 +351,6 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
         translate: style.translate.split(" ").map(parseFloat),
       };
 
-      animation.finish();
       return result;
     }, progress);
   };
@@ -380,10 +385,10 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
 
       animation.pause();
       animation.currentTime =
-        Number(animation.effect.getTiming().duration) * 0.72;
+        Number(animation.effect.getTiming().delay ?? 0) +
+        Number(animation.effect.getTiming().duration) * 0.72 * 0.3;
       const turn = parseFloat(getComputedStyle(part).rotate);
 
-      animation.finish();
       return turn;
     }),
   );
@@ -406,7 +411,13 @@ test("tactile icon surfaces stay static with reduced motion and simplify in forc
   await expect(badge.locator("path").first()).toHaveCSS("fill-opacity", "0.38");
   await expect(badge.locator("path").last()).toHaveCSS("fill", "none");
   await badge.hover();
-  await expect(badge.locator("svg")).not.toHaveClass(/is-playing/);
+  expect(
+    await badge
+      .locator("svg > *")
+      .evaluateAll((parts) =>
+        parts.every((part) => getComputedStyle(part).animationName === "none"),
+      ),
+  ).toBe(true);
 
   await page.emulateMedia({ forcedColors: "active" });
   await expect(badge).toHaveCSS("box-shadow", "none");

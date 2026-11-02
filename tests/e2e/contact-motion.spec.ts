@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 for (const trigger of ["hover", "focus"] as const) {
-  test(`Get in touch makes one A-to-B arrow pass on ${trigger}`, async ({
+  test(`Get in touch repeats its A-to-B arrow pass with ${trigger}`, async ({
     page,
   }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -20,26 +20,28 @@ for (const trigger of ["hover", "focus"] as const) {
     );
     if (trigger === "hover") await button.hover();
     else await button.focus();
-    await expect(arrow).toHaveClass(/is-playing/);
+    await expect(arrow).toHaveClass(/is-in-view/);
     await expect(arrow.locator("path").first()).toHaveCSS(
       "animation-name",
-      "contact-arrow-travel",
+      "icon-arrow-travel",
     );
     const sample = await arrow.evaluate((element) => {
       const animations = element.getAnimations({ subtree: true });
       for (const animation of animations) animation.pause();
       const path = element.querySelector("path");
       if (!path) throw new Error("Expected the original Lucide arrow.");
-      const frames = [0, 0.42, 0.43, 1].map((fraction) => {
+      const frames = [0, 0.126, 0.129, 0.8].map((fraction) => {
         for (const animation of animations)
-          animation.currentTime = fraction * 560;
+          animation.currentTime =
+            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 3200;
         return [...element.children].map((part) => {
           const style = getComputedStyle(part);
-          return { translate: style.translate, opacity: style.opacity };
+          return {
+            translate: parseFloat(style.translate),
+            opacity: Number(style.opacity),
+          };
         });
       });
-      // Keep the sampled animations current until the exit/finish assertion.
-      for (const animation of animations) animation.currentTime = 280;
       return {
         frames,
         timing: animations.map((animation) => animation.effect?.getTiming()),
@@ -53,26 +55,29 @@ for (const trigger of ["hover", "focus"] as const) {
     expect(sample.timing).toHaveLength(2);
     expect(
       sample.timing.every(
-        (timing) => timing?.duration === 560 && timing.iterations === 1,
+        (timing) => timing?.duration === 3200 && timing.iterations === Infinity,
       ),
     ).toBe(true);
     for (const [index, frame] of sample.frames.entries()) {
       expect(frame).toHaveLength(2);
       expect(frame[0]).toEqual(frame[1]);
-      if (index === 1)
-        expect(frame[0]).toEqual({ translate: "9px", opacity: "0" });
-      if (index === 2)
-        expect(frame[0]).toEqual({ translate: "-9px", opacity: "0" });
+      if (index === 1 || index === 2) {
+        expect(frame[0]?.translate).toBeCloseTo(index === 1 ? 9 : -9, 3);
+        expect(frame[0]?.opacity).toBeCloseTo(0, 3);
+      }
       if (index === 3) expect(Number(frame[0]?.opacity)).toBe(1);
     }
     if (trigger === "hover") await page.mouse.move(0, 0);
     else await button.evaluate((element) => element.blur());
     await arrow.evaluate((element) => {
       for (const animation of element.getAnimations({ subtree: true }))
-        animation.finish();
+        animation.play();
     });
-    await expect(arrow).not.toHaveClass(/is-playing/);
-    await expect(arrow.locator("path").first()).toHaveCSS("opacity", "1");
+    await expect(arrow.locator("path").first()).toHaveCSS(
+      "animation-play-state",
+      "running",
+    );
+
     await page.screenshot({
       path: testInfo.outputPath(`contact-${trigger}.png`),
     });
@@ -118,7 +123,7 @@ test.describe("on touch screens", () => {
     viewport: { width: 390, height: 844 },
   });
 
-  test("a touch press plays the contact arrow without focus and tapping navigates", async ({
+  test("the contact arrow loops without focus and tapping navigates", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -128,15 +133,11 @@ test.describe("on touch screens", () => {
       exact: true,
     });
     const arrow = button.locator(".action-arrow");
-    await button.dispatchEvent("pointerdown", {
-      pointerType: "touch",
-      button: 0,
-    });
     await expect(button).not.toBeFocused();
-    await expect(arrow).toHaveClass(/is-playing/);
+    await expect(arrow).toHaveClass(/is-in-view/);
     await expect(arrow.locator("path").first()).toHaveCSS(
       "animation-name",
-      "contact-arrow-travel",
+      "icon-arrow-travel",
     );
     await button.tap();
     await expect(page).toHaveURL(/#contact$/);

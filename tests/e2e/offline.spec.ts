@@ -53,20 +53,27 @@ test("the offline page lines up with the header", async ({ page }) => {
 
   expect(new Set(lefts).size).toBe(1);
 
-  const timings = await page
-    .locator(".offline-signal")
-    .evaluate((signal) => [
-      getComputedStyle(signal, "::before").animationTimingFunction,
-      getComputedStyle(signal, "::after").animationTimingFunction,
-      getComputedStyle(signal.querySelector("svg") as SVGElement)
-        .animationTimingFunction,
-    ]);
+  const motion = await page.locator(".offline-signal").evaluate((signal) => {
+    const icon = signal.querySelector("svg") as SVGElement;
+    const detail = getComputedStyle(icon.children[1] as SVGElement);
+    return {
+      rings: ["::before", "::after"].map(
+        (pseudo) => getComputedStyle(signal, pseudo).animationName,
+      ),
+      outer: getComputedStyle(icon).animationName,
+      detail: detail.animationName,
+      timing: detail.animationTimingFunction,
+      iterations: detail.animationIterationCount,
+    };
+  });
 
-  expect(timings).toEqual([
-    "cubic-bezier(0.22, 1, 0.36, 1)",
-    "cubic-bezier(0.22, 1, 0.36, 1)",
-    "cubic-bezier(0.45, 0, 0.2, 1)",
-  ]);
+  expect(motion).toEqual({
+    rings: ["none", "none"],
+    outer: "none",
+    detail: "icon-server-light",
+    timing: "cubic-bezier(0.45, 0, 0.2, 1)",
+    iterations: "infinite",
+  });
 });
 
 test("live pages are never answered from the offline cache", async () => {

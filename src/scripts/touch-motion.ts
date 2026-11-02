@@ -1,120 +1,89 @@
 /*
- * Icon gestures finish after pointer and keyboard triggers. Touch screens also
- * play each primary badge once on arrival. Link taps give a short buzz where
- * phones allow it, and the portrait leans with the phone. Without this decoration,
- * the page simply stays still.
+ * Visible icons repeat a short object-specific gesture with a resting interval.
+ * One shared pause preference controls them; touch haptics and tilt stay separate.
  */
 export {};
 
-const startDelay = 400;
 const buzzDuration = 10;
 const tiltReach = 6;
 const fullTiltAngle = 30;
 const naturalHoldAngle = 45;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const forcedColors = matchMedia("(forced-colors: active)");
-const arrivalObservers = new Set<IntersectionObserver>();
-const arrivalTimers = new Set<ReturnType<typeof setTimeout>>();
-const motionAllowed = () => !reducedMotion.matches && !forcedColors.matches;
+const printing = matchMedia("print");
+const sensorObservers = new Set<IntersectionObserver>();
+const motionAllowed = () =>
+  !reducedMotion.matches && !forcedColors.matches && !printing.matches;
+
+const icons = [...document.querySelectorAll<SVGElement>("main svg.lucide")];
+const controls = [
+  ...document.querySelectorAll<HTMLButtonElement>(".icon-motion-toggle"),
+];
+const storageKey = "portfolio-icon-motion";
+let paused = false;
+const readPreference = () => {
+  try {
+    paused = sessionStorage.getItem(storageKey) === "paused";
+  } catch {
+    // Storage may be blocked; the current visit still has a working pause control.
+  }
+};
+readPreference();
+
+const updateLoops = () => {
+  const blocked = !motionAllowed();
+  document.documentElement.classList.toggle(
+    "icon-loops-running",
+    !blocked && !paused && !document.hidden,
+  );
+  for (const control of controls) {
+    control.disabled = blocked;
+    control.textContent = blocked
+      ? "Icons off — system"
+      : paused
+        ? "Resume icons"
+        : "Pause icons";
+    control.title = blocked
+      ? "Icon motion is disabled by your system preferences."
+      : "";
+  }
+};
+
+if (icons.length > 0 && controls.length > 0) {
+  // Expose the stop mechanism before any icon is allowed to start.
+  for (const control of controls) {
+    control.hidden = false;
+    control.addEventListener("click", () => {
+      paused = !paused;
+      try {
+        sessionStorage.setItem(storageKey, paused ? "paused" : "playing");
+      } catch {
+        // Pausing remains available even without session storage.
+      }
+      updateLoops();
+    });
+  }
+  const observer = new IntersectionObserver((entries) => {
+    for (const { isIntersecting, target } of entries)
+      target.classList.toggle("is-in-view", isIntersecting);
+  });
+  icons.forEach((icon, index) => {
+    icon.style.setProperty("--icon-loop-delay", `${(index % 5) * 140}ms`);
+    icon.classList.add("icon-loop");
+    observer.observe(icon);
+  });
+  for (const preference of [reducedMotion, forcedColors, printing])
+    preference.addEventListener?.("change", updateLoops);
+  document.addEventListener("visibilitychange", updateLoops);
+  addEventListener("pageshow", () => {
+    readPreference();
+    updateLoops();
+  });
+  updateLoops();
+}
 
 type TiltEvent = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<PermissionState>;
-};
-
-const playIcon = async (icon: Element) => {
-  if (!motionAllowed()) return;
-  if (icon.classList.contains("is-playing")) return;
-
-  icon.classList.add("is-playing");
-  await Promise.allSettled(
-    icon.getAnimations({ subtree: true }).map(({ finished }) => finished),
-  );
-  icon.classList.remove("is-playing");
-};
-
-/* A single delegated gesture keeps moving parts attached until they settle. */
-const gestureOwner = (target: EventTarget | null) => {
-  if (!(target instanceof Element)) return;
-
-  return (
-    target.closest(
-      ".route-link, .architecture-node-link, .hero-action, .hero-contact, .section-title, .run-path li, .architecture-recovery",
-    ) ?? target.closest(".sticker, svg.lucide")
-  );
-};
-
-const playGesture = (owner: Element) => {
-  const icons = owner.matches("svg.lucide")
-    ? [owner]
-    : owner.querySelectorAll("svg.lucide");
-
-  for (const icon of icons) {
-    if (!icon.classList.contains("lucide-hand")) void playIcon(icon);
-  }
-};
-
-document.addEventListener("pointerover", (event) => {
-  if (event.pointerType === "touch" || !matchMedia("(hover: hover)").matches)
-    return;
-
-  const owner = gestureOwner(event.target);
-
-  if (
-    owner &&
-    !(
-      event.relatedTarget instanceof Node && owner.contains(event.relatedTarget)
-    )
-  )
-    playGesture(owner);
-});
-
-document.addEventListener("focusin", ({ target }) => {
-  const owner = gestureOwner(target);
-
-  if (owner) playGesture(owner);
-});
-
-// A contact tap gets the same forward gesture without waiting for hover or focus.
-document.addEventListener("pointerdown", (event) => {
-  if (
-    event.button !== 0 ||
-    (event.pointerType !== "touch" && event.pointerType !== "pen")
-  )
-    return;
-  const contact =
-    event.target instanceof Element
-      ? event.target.closest(".hero-contact")
-      : null;
-
-  if (contact) playGesture(contact);
-});
-
-const whenInView = (
-  selector: string,
-  threshold: number,
-  play: (element: Element) => unknown,
-) => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const { isIntersecting, intersectionRatio, target } of entries) {
-        if (!isIntersecting || intersectionRatio < threshold) continue;
-
-        observer.unobserve(target);
-        // A short wait lets the eye arrive before the motion starts.
-        const timer = setTimeout(() => {
-          arrivalTimers.delete(timer);
-          if (motionAllowed()) play(target);
-        }, startDelay);
-        arrivalTimers.add(timer);
-      }
-    },
-    { threshold },
-  );
-  arrivalObservers.add(observer);
-
-  for (const element of document.querySelectorAll(selector)) {
-    observer.observe(element);
-  }
 };
 
 const buzz = () => {
@@ -147,7 +116,7 @@ const enableTilt = (portrait: HTMLElement) => {
       addEventListener("deviceorientation", lean);
   };
 
-  for (const preference of [reducedMotion, forcedColors]) {
+  for (const preference of [reducedMotion, forcedColors, printing]) {
     preference.addEventListener?.("change", () => {
       if (motionAllowed()) return;
       // Ending this lifecycle also invalidates a pending permission request.
@@ -165,7 +134,7 @@ const enableTilt = (portrait: HTMLElement) => {
     else stop();
   });
   sensorObserver.observe(portrait);
-  arrivalObservers.add(sensorObserver);
+  sensorObservers.add(sensorObserver);
 
   /*
    * Listening is harmless where the sensor is locked, because nothing arrives.
@@ -194,12 +163,6 @@ const start = () => {
   if (!motionAllowed()) return;
   document.documentElement.classList.add("is-touch");
 
-  whenInView(
-    "main .sticker svg.lucide, .architecture-node-icon",
-    0.6,
-    playIcon,
-  );
-
   document.addEventListener("click", ({ target }) => {
     if (!(target instanceof Element)) return;
 
@@ -211,15 +174,11 @@ const start = () => {
   if (portrait) enableTilt(portrait);
 };
 
-for (const preference of [reducedMotion, forcedColors]) {
+for (const preference of [reducedMotion, forcedColors, printing]) {
   preference.addEventListener?.("change", () => {
     if (motionAllowed()) return;
-    for (const observer of arrivalObservers) observer.disconnect();
-    arrivalObservers.clear();
-    for (const timer of arrivalTimers) clearTimeout(timer);
-    arrivalTimers.clear();
-    for (const icon of document.querySelectorAll(".lucide.is-playing"))
-      icon.classList.remove("is-playing");
+    for (const observer of sensorObservers) observer.disconnect();
+    sensorObservers.clear();
   });
 }
 

@@ -1,0 +1,331 @@
+import { expect, type Page, test } from "@playwright/test";
+
+const arrow = (page: Page) =>
+  page.locator(".hero-contact .lucide-arrow-right > path").first();
+const control = (page: Page) =>
+  page.locator(".hero-caption .icon-motion-toggle");
+const loopsReady = async (page: Page) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+};
+
+test("all icons have repeating details, quiet rests, and stationary outer SVGs", async ({
+  page,
+}) => {
+  await loopsReady(page);
+  const icons = await page.locator("main svg.lucide").evaluateAll((elements) =>
+    elements.map((element) => {
+      const moving = [...element.children].filter(
+        (part) => getComputedStyle(part).animationName !== "none",
+      );
+      return {
+        type: element.getAttribute("class"),
+        outer: getComputedStyle(element).animationName,
+        count: moving.length,
+        loops: moving.every(
+          (part) =>
+            getComputedStyle(part).animationIterationCount === "infinite",
+        ),
+        rests: moving.every((part) => {
+          const animation = part.getAnimations()[0];
+          const frames =
+            (animation?.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
+          return (
+            frames.some(
+              (frame) => Math.abs(Number(frame.offset) - 0.3) < 0.001,
+            ) && frames.some((frame) => frame.offset === 1)
+          );
+        }),
+      };
+    }),
+  );
+  expect(icons.length).toBeGreaterThan(20);
+  for (const icon of icons) {
+    expect(icon.count, icon.type ?? "icon").toBeGreaterThan(0);
+    expect(icon).toMatchObject({ outer: "none", loops: true, rests: true });
+  }
+});
+
+test("both controls pause every icon without hover bypass or geometry changes", async ({
+  page,
+}, testInfo) => {
+  await loopsReady(page);
+  const controls = page.locator(".icon-motion-toggle");
+  await expect(controls).toHaveCount(2);
+  await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  const before = await control(page).boundingBox();
+  await control(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(controls).toHaveText(["Resume icons", "Resume icons"]);
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  expect(
+    await page
+      .locator("main svg.lucide > *")
+      .evaluateAll((parts) =>
+        parts.every(
+          (part) => getComputedStyle(part).animationPlayState === "paused",
+        ),
+      ),
+  ).toBe(true);
+  const after = await control(page).boundingBox();
+  expect(after?.width).toBe(before?.width);
+  expect(after?.height).toBe(before?.height);
+  expect(after?.height).toBeGreaterThanOrEqual(44);
+  await page.getByRole("link", { name: "Get in touch", exact: true }).hover();
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  await page.screenshot({
+    path: testInfo.outputPath("paused-icons-desktop.png"),
+  });
+  await page.locator(".site-footer .icon-motion-toggle").click();
+  await expect(controls).toHaveText(["Pause icons", "Pause icons"]);
+  await page
+    .locator("#intro")
+    .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+});
+
+test("viewport pause preserves the same animation and resumes its phase", async ({
+  page,
+}) => {
+  await loopsReady(page);
+  await arrow(page).evaluate((element) => {
+    const animation = element.getAnimations()[0];
+    if (!animation) throw new Error("Expected an arrow loop.");
+    animation.id = "viewport-loop-probe";
+  });
+  await page
+    .locator("#contact")
+    .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  const before = await arrow(page).evaluate(async (element) => {
+    const animation = element.getAnimations()[0];
+    if (!animation) throw new Error("Expected the same arrow loop.");
+    // CSS can report paused before the animation's pending pause is committed.
+    await animation.ready;
+    return animation.currentTime;
+  });
+  await page.waitForTimeout(120);
+  expect(
+    await arrow(page).evaluate(
+      (element) => element.getAnimations()[0]?.currentTime,
+    ),
+  ).toBe(before);
+  await page
+    .locator("#intro")
+    .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+  expect(
+    await arrow(page).evaluate((element) => element.getAnimations()[0]?.id),
+  ).toBe("viewport-loop-probe");
+});
+
+test("an icon entering exactly at the viewport edge does not get stuck paused", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(
+    browserName !== "chromium",
+    "Exact edge geometry is measured in Chromium.",
+  );
+  await loopsReady(page);
+  const icon = page.locator("#contact .lucide-mail");
+  // Isolate the observed SVG from its card's clipping and arrival transform.
+  await icon.evaluate((element) => {
+    document.querySelector("main")?.append(element);
+    Object.assign((element as SVGElement).style, {
+      position: "fixed",
+      top: `${innerHeight}px`,
+      left: "16px",
+      width: "24px",
+      height: "24px",
+      translate: "none",
+    });
+  });
+  const observedIcon = page.locator("main > .lucide-mail");
+  const edge = await observedIcon.evaluate(
+    (element) =>
+      new Promise<{ ratio: number; intersects: boolean }>((resolve) => {
+        const observer = new IntersectionObserver(([entry]) => {
+          if (!entry) return;
+          observer.disconnect();
+          resolve({
+            ratio: entry.intersectionRatio,
+            intersects: entry.isIntersecting,
+          });
+        });
+        observer.observe(element);
+      }),
+  );
+  expect(edge).toEqual({ ratio: 0, intersects: true });
+  await expect(observedIcon).toHaveClass(/is-in-view/);
+  await observedIcon.evaluate((element) => {
+    (element as SVGElement).style.top = `${innerHeight - 12}px`;
+  });
+  await expect(observedIcon.locator("path")).toHaveCSS(
+    "animation-play-state",
+    "running",
+  );
+});
+
+test("manual pause survives reload and system-preference changes", async ({
+  browserName,
+  page,
+}) => {
+  await loopsReady(page);
+  await control(page).click();
+  await page.reload();
+  await expect(control(page)).toHaveText("Resume icons");
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(control(page)).toBeDisabled();
+  await expect(control(page)).toHaveText("Icons off — system");
+  await expect(arrow(page)).toHaveCSS("animation-name", "none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(control(page)).toBeEnabled();
+  await expect(control(page)).toHaveText("Resume icons");
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  if (browserName === "chromium") {
+    await page.emulateMedia({ forcedColors: "active" });
+    await expect(arrow(page)).toHaveCSS("animation-name", "none");
+    await page.emulateMedia({ forcedColors: "none" });
+    await expect(control(page)).toHaveText("Resume icons");
+  }
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".icon-motion-toggle:visible")).toHaveCount(0);
+  await expect(arrow(page)).toHaveCSS("animation-name", "none");
+});
+
+test("a hidden document pauses loops without changing the saved choice", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => document.documentElement.hasAttribute("data-test-hidden"),
+    });
+  });
+  await loopsReady(page);
+  await page.evaluate(() => {
+    document.documentElement.setAttribute("data-test-hidden", "");
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  await expect(control(page)).toHaveText("Pause icons");
+  await page.evaluate(() => {
+    document.documentElement.removeAttribute("data-test-hidden");
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+});
+
+test("blocked session storage does not break pause and resume", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(window, "sessionStorage", {
+      configurable: true,
+      get: () => {
+        throw new DOMException("Storage blocked", "SecurityError");
+      },
+    }),
+  );
+  await loopsReady(page);
+  await control(page).click();
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+  await control(page).click();
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+});
+
+test("page restoration rereads the tab's saved pause choice", async ({
+  page,
+}) => {
+  await loopsReady(page);
+  await page.evaluate(() => {
+    sessionStorage.setItem("portfolio-icon-motion", "paused");
+    dispatchEvent(new Event("pageshow"));
+  });
+  await expect(control(page)).toHaveText("Resume icons");
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+});
+
+test("pages without icons do not show an unnecessary motion control", async ({
+  page,
+}) => {
+  await page.goto("/route-that-does-not-exist");
+  await expect(page.locator("main svg.lucide")).toHaveCount(0);
+  await expect(page.locator(".icon-motion-toggle:visible")).toHaveCount(0);
+  await expect(page.locator("html")).not.toHaveClass(/icon-loops-running/);
+});
+
+test("without JavaScript icons stay static and no unusable control is shown", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("/");
+  await expect(page.locator(".icon-loop")).toHaveCount(0);
+  await expect(page.locator(".icon-motion-toggle:visible")).toHaveCount(0);
+  expect(
+    await page
+      .locator("main svg.lucide, main svg.lucide > *")
+      .evaluateAll((elements) =>
+        elements.every(
+          (element) => getComputedStyle(element).animationName === "none",
+        ),
+      ),
+  ).toBe(true);
+  await context.close();
+});
+
+test("the offline icon shares the same pause mechanism and keeps its slash fixed", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/offline/");
+  const arc = page.locator(".lucide-wifi-off > path").nth(1);
+  await expect(arc).toHaveCSS("animation-play-state", "running");
+  await expect(page.locator(".lucide-wifi-off")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await expect(page.locator(".lucide-wifi-off > path").last()).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await page.getByRole("button", { name: "Pause icons", exact: true }).click();
+  await expect(arc).toHaveCSS("animation-play-state", "paused");
+});
+
+test.describe("phone controls", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "Touch-only emulation uses Chromium.",
+  );
+  test.use({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 390, height: 844 },
+  });
+  test("tap toggles loops and the controls fit without an overlay", async ({
+    page,
+  }, testInfo) => {
+    await loopsReady(page);
+    await control(page).tap();
+    await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+    await expect(control(page)).toHaveText("Resume icons");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("paused-icons-phone.png"),
+    });
+    await control(page).tap();
+    await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
+  });
+});

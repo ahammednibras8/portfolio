@@ -870,33 +870,6 @@ article ul {
   }
 }
 
-@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  @keyframes hand-wave {
-    0%,
-    100% {
-      rotate: 0deg;
-    }
-
-    20%,
-    60% {
-      rotate: 12deg;
-    }
-
-    40%,
-    80% {
-      rotate: -6deg;
-    }
-  }
-
-  .sticker-wave svg {
-    transform-origin: bottom center;
-  }
-
-  .sticker-wave svg.is-playing {
-    animation: hand-wave 1200ms var(--motion-ease-fluid) 1;
-  }
-}
-
 @media (hover: hover) and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   /*
    * Respond promptly, then settle gently. Declare transitions at rest so the
@@ -911,10 +884,6 @@ article ul {
   .hero-portrait:hover {
     rotate: 0deg;
     scale: 1.03;
-  }
-
-  .hero-portrait:hover .sticker-wave svg {
-    animation: hand-wave 900ms var(--motion-ease-fluid) 1;
   }
 
   .hero-portrait img {
