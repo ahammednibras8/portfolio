@@ -157,6 +157,25 @@
     scale: 1 1;
   }
 
+  /* Contact cards share the button's contained ink sweep, behind the content. */
+  .page :where(#contact) .route-link {
+    background-image: linear-gradient(var(--color-aqua) 0 0);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 0% 100%;
+    background-clip: padding-box;
+  }
+
+  .page :where(#contact) .route-link:is(:focus-visible, .is-pressed) {
+    background-size: 100% 100%;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .page :where(#contact) .route-link:hover {
+      background-size: 100% 100%;
+    }
+  }
+
   .run-path-step,
   .toolbox dt {
     position: relative;
@@ -327,6 +346,18 @@
         box-shadow var(--motion-standard) var(--motion-ease-settle),
         translate var(--motion-route) var(--motion-ease-settle),
         scale var(--motion-route) var(--motion-ease-spring);
+    }
+
+    .page :where(#contact) .route-link {
+      transition:
+        background-size calc(var(--motion-route) * 1.5) var(--motion-ease-fluid),
+        translate var(--motion-route) var(--motion-ease-settle),
+        rotate var(--motion-route) var(--motion-ease-settle),
+        box-shadow var(--motion-standard) var(--motion-ease-settle);
+    }
+
+    .page :where(#contact) .route-link.is-pressed {
+      transition-duration: var(--motion-short);
     }
 
     .hero-cta .hero-arrow-badge {

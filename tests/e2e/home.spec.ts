@@ -403,9 +403,13 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   const atRest = await plateTiming();
 
-  expect(atRest.property).toBe("translate, rotate, box-shadow");
-  expect(atRest.duration).toBe("0.24s, 0.24s, 0.18s");
-  expect(atRest.timing).toBe(Array(3).fill(settleEase).join(", "));
+  expect(atRest.property).toBe(
+    "background-size, translate, rotate, box-shadow",
+  );
+  expect(atRest.duration).toBe("0.36s, 0.24s, 0.24s, 0.18s");
+  expect(atRest.timing).toBe(
+    [gestureEase, ...Array(3).fill(settleEase)].join(", "),
+  );
 
   const title = plate.getByRole("heading", { name: "Email" });
 
@@ -415,7 +419,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   await expect.poll(() => underlineClip(title)).toBe(underlineDrawn);
   await expect(plate).toHaveCSS("translate", "-2px -2px");
   expect((await plateTiming()).timing).toBe(
-    Array(3).fill(settleEase).join(", "),
+    [gestureEase, ...Array(3).fill(settleEase)].join(", "),
   );
 
   await page.mouse.move(0, 0);
