@@ -122,9 +122,12 @@
     transform-origin: 12px 12px;
   }
 
-  /* Keep animation identity when paused, off-screen, or in a background tab. */
+  /*
+   * Eight-second cycle: 3s of movement (37.5%), then 5s at rest.
+   * Keep animation identity when paused, off-screen, or in a background tab.
+   */
   .page .lucide.icon-loop > * {
-    animation: var(--icon-part-motion, none) 3200ms var(--motion-ease-fluid)
+    animation: var(--icon-part-motion, none) 8000ms var(--motion-ease-fluid)
       calc(var(--icon-loop-delay, 0ms) + var(--icon-part-delay, 0ms)) infinite;
     animation-play-state: paused;
   }
@@ -166,17 +169,17 @@
       translate: 0;
     }
 
-    12.6% {
+    15.75% {
       opacity: 0;
       translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    12.9% {
+    16.125% {
       opacity: 0;
       translate: calc(var(--icon-x, 0px) * -1) calc(var(--icon-y, 0px) * -1);
     }
 
-    30%,
+    37.5%,
     100% {
       opacity: 1;
       translate: 0;
@@ -361,272 +364,272 @@
 
   @keyframes icon-hand-wave {
     0%,
-    30%,
+    37.5%,
     100% {
       rotate: 0deg;
     }
 
-    6%,
-    18% {
+    7.5%,
+    22.5% {
       rotate: 12deg;
     }
 
-    12%,
-    24% {
+    15%,
+    30% {
       rotate: -6deg;
     }
   }
 
   @keyframes icon-direction {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
     }
 
-    5.4% {
+    6.75% {
       translate: calc(var(--icon-x, 0px) * -0.2) calc(var(--icon-y, 0px) * -0.2);
     }
 
-    14.4% {
+    18% {
       translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    23.4% {
+    29.25% {
       translate: calc(var(--icon-x, 0px) * 0.15) calc(var(--icon-y, 0px) * 0.15);
     }
   }
 
   @keyframes icon-handle {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1 1;
     }
 
-    10.2% {
+    12.75% {
       scale: 1 1.07;
     }
 
-    18.6% {
+    23.25% {
       scale: 1 1.025;
     }
 
-    25.8% {
+    32.25% {
       scale: 1 1.004;
     }
   }
 
   @keyframes icon-check-detail {
     0%,
-    30%,
+    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    5.4%,
-    8.4% {
+    6.75%,
+    10.5% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    24.6% {
+    30.75% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-core {
     0%,
-    30%,
+    37.5%,
     100% {
       fill-opacity: 0.12;
     }
 
-    10.8% {
+    13.5% {
       fill-opacity: 0.45;
     }
 
-    21.6% {
+    27% {
       fill-opacity: 0.18;
     }
   }
 
   @keyframes icon-data-row {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
     }
 
-    11.4% {
+    14.25% {
       translate: 0 -1px;
     }
 
-    21.6% {
+    27% {
       translate: 0 -0.15px;
     }
   }
 
   @keyframes icon-pupil {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
     }
 
-    7.8%,
-    11.4% {
+    9.75%,
+    14.25% {
       translate: 1.75px 0;
     }
 
-    18.6%,
-    21.6% {
+    23.25%,
+    27% {
       translate: -1.25px 0;
     }
 
-    27% {
+    33.75% {
       translate: -0.1px 0;
     }
   }
 
   @keyframes icon-branch-path {
     0%,
-    30%,
+    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    6.6% {
+    8.25% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    24.6% {
+    30.75% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-branch-node {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1;
     }
 
-    11.4% {
+    14.25% {
       scale: 1.1;
     }
 
-    22.2% {
+    27.75% {
       scale: 1.015;
     }
   }
 
   @keyframes icon-meridian {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1 1;
     }
 
-    7.5% {
+    9.375% {
       scale: 0.15 1;
     }
 
-    15% {
+    18.75% {
       scale: -1 1;
     }
 
-    22.5% {
+    28.125% {
       scale: -0.15 1;
     }
   }
 
   @keyframes icon-layer {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
     }
 
-    9.6% {
+    12% {
       translate: 0 var(--icon-y);
     }
 
-    18.6% {
+    23.25% {
       translate: 0 calc(var(--icon-y) * 0.4);
     }
 
-    25.8% {
+    32.25% {
       translate: 0 calc(var(--icon-y) * 0.04);
     }
   }
 
   @keyframes icon-panel {
     0%,
-    30%,
+    37.5%,
     100% {
       fill-opacity: 0.12;
     }
 
-    15% {
+    18.75% {
       fill-opacity: 0.38;
     }
   }
 
   @keyframes icon-list-row {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1 1;
     }
 
-    7.2% {
+    9% {
       scale: 0.72 1;
     }
 
-    21.6% {
+    27% {
       scale: 0.97 1;
     }
   }
 
   @keyframes icon-mail-flap {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1 1;
     }
 
-    7.8% {
+    9.75% {
       scale: 1 0.08;
     }
 
-    13.2%,
-    16.8% {
+    16.5%,
+    21% {
       scale: 1 -0.3;
     }
 
-    23.4% {
+    29.25% {
       scale: 1 0.75;
     }
 
-    27.6% {
+    34.5% {
       scale: 1 0.98;
     }
   }
 
   @keyframes icon-typing-dot {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
       stroke-opacity: 1;
     }
 
-    10.8% {
+    13.5% {
       translate: 0 -1.6px;
       stroke-opacity: 0.65;
     }
 
-    22.2% {
+    27.75% {
       translate: 0 -0.2px;
       stroke-opacity: 0.95;
     }
@@ -634,39 +637,39 @@
 
   @keyframes icon-package-seal {
     0%,
-    30%,
+    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    7.5% {
+    9.375% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    22.5% {
+    28.125% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-exhaust {
     0%,
-    30%,
+    37.5%,
     100% {
       scale: 1;
       stroke-opacity: 1;
     }
 
-    7.5% {
+    9.375% {
       scale: 0.85;
       stroke-opacity: 0.65;
     }
 
-    15% {
+    18.75% {
       scale: 1.12;
       stroke-opacity: 1;
     }
 
-    22.5% {
+    28.125% {
       scale: 0.95;
       stroke-opacity: 0.8;
     }
@@ -677,15 +680,15 @@
       rotate: 0deg;
     }
 
-    21.6% {
+    27% {
       rotate: 330deg;
     }
 
-    27% {
+    33.75% {
       rotate: 356deg;
     }
 
-    30%,
+    37.5%,
     100% {
       rotate: 360deg;
     }
@@ -693,24 +696,24 @@
 
   @keyframes icon-server-light {
     0%,
-    30%,
+    37.5%,
     100% {
       stroke-opacity: 1;
     }
 
-    13.5% {
+    16.875% {
       stroke-opacity: 0.3;
     }
   }
 
   @keyframes icon-nod {
     0%,
-    30%,
+    37.5%,
     100% {
       translate: 0 0;
     }
 
-    13.5% {
+    16.875% {
       translate: 0 1px;
     }
   }

@@ -10,7 +10,7 @@ const loopsReady = async (page: Page) => {
   await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
 };
 
-test("all icons have repeating details, quiet rests, and stationary outer SVGs", async ({
+test("all icons move for 3 seconds, rest for 5, and keep their outer SVGs still", async ({
   page,
 }) => {
   await loopsReady(page);
@@ -31,10 +31,25 @@ test("all icons have repeating details, quiet rests, and stationary outer SVGs",
           const animation = part.getAnimations()[0];
           const frames =
             (animation?.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
-          return (
-            frames.some(
-              (frame) => Math.abs(Number(frame.offset) - 0.3) < 0.001,
-            ) && frames.some((frame) => frame.offset === 1)
+          const duration = Number(animation?.effect?.getTiming().duration);
+          const rest = frames.find((frame) => frame.offset === 0.375);
+          const end = frames.find((frame) => frame.offset === 1);
+          const properties = Object.keys(rest ?? {}).filter(
+            (property) =>
+              !["offset", "computedOffset", "easing", "composite"].includes(
+                property,
+              ),
+          );
+          return Boolean(
+            rest &&
+            end &&
+            duration * 0.375 === 3000 &&
+            duration * (1 - 0.375) === 5000 &&
+            properties.every((property) => rest[property] === end[property]) &&
+            !frames.some(
+              (frame) =>
+                Number(frame.offset) > 0.375 && Number(frame.offset) < 1,
+            ),
           );
         }),
       };
@@ -45,6 +60,31 @@ test("all icons have repeating details, quiet rests, and stationary outer SVGs",
     expect(icon.count, icon.type ?? "icon").toBeGreaterThan(0);
     expect(icon).toMatchObject({ outer: "none", loops: true, rests: true });
   }
+});
+
+test("the arrow stays at rest for five seconds and then repeats", async ({
+  page,
+}) => {
+  await loopsReady(page);
+  const states = await arrow(page).evaluate(async (element) => {
+    const animation = element.getAnimations()[0];
+    if (!animation?.effect) throw new Error("Expected an arrow loop.");
+    animation.pause();
+    await animation.ready;
+    const delay = Number(animation.effect.getTiming().delay);
+    return [3000, 4000, 6000, 7999, 8000 + 1260].map((time) => {
+      animation.currentTime = delay + time;
+      const style = getComputedStyle(element);
+      return {
+        opacity: Number(style.opacity),
+        translate: parseFloat(style.translate) || 0,
+      };
+    });
+  });
+  for (const state of states.slice(0, 4))
+    expect(state).toEqual({ opacity: 1, translate: 0 });
+  expect(states[4]?.opacity).toBeCloseTo(0, 3);
+  expect(states[4]?.translate).toBeCloseTo(9, 3);
 });
 
 test("both controls pause every icon without hover bypass or geometry changes", async ({
