@@ -836,7 +836,7 @@ article ul {
     transform: none;
   }
 
-  .hero-actions .hero-action:hover {
+  .hero-actions .hero-action:not(.hero-cta):hover {
     background: var(--color-action-active);
   }
 
@@ -919,7 +919,7 @@ article ul {
       background-size var(--motion-route) var(--motion-ease-settle);
   }
 
-  .page .hero-actions .hero-action,
+  .page .hero-actions .hero-action:not(.hero-cta),
   .page .architecture-node-link {
     transition:
       background-color var(--motion-standard) var(--motion-ease-settle),
@@ -928,12 +928,12 @@ article ul {
       translate var(--motion-route) var(--motion-ease-settle);
   }
 
-  .page .hero-actions .hero-action:hover,
+  .page .hero-actions .hero-action:not(.hero-cta):hover,
   .page .architecture-node-link:is(:hover, :focus-visible) {
     translate: -0.125rem -0.125rem;
   }
 
-  .page .hero-actions .hero-action:active {
+  .page .hero-actions .hero-action:not(.hero-cta):active {
     translate: 0.125rem 0.125rem;
     box-shadow: none;
   }
@@ -1120,6 +1120,10 @@ article > .project-evidence > h4 {
   min-block-size: var(--touch-target);
 }
 
+.hero-actions .hero-cta {
+  transition: none;
+}
+
 .action-arrow {
   flex: none;
 }
@@ -1150,7 +1154,7 @@ article > .project-evidence > h4 {
   text-decoration: none;
 }
 
-.contact-arrow-badge {
+.hero-arrow-badge {
   display: inline-grid;
   flex: none;
   place-items: center;

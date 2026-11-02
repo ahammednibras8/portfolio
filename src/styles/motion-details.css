@@ -55,50 +55,66 @@
     background-size: 100% 100%;
   }
 
-  /* Paint the sweep inside the pill itself, never as a floating layer. */
-  .page .hero-actions .hero-contact {
-    --contact-fill: 0%;
-    --contact-badge-background: var(--color-canvas);
-    --contact-badge-color: var(--color-action);
+  /* Paint the sweep inside the button itself, never as a floating layer. */
+  .page .hero-actions .hero-cta {
+    --hero-badge-background: var(--hero-badge-rest, var(--color-canvas));
+    --hero-badge-color: var(--color-action);
 
     padding-inline-end: 0.625rem;
     background-color: var(--color-surface-raised);
-    background-image: linear-gradient(var(--color-aqua) 0 0);
+    background-image: linear-gradient(var(--hero-sweep, var(--color-aqua)) 0 0);
     background-repeat: no-repeat;
     background-position: left center;
-    background-size: var(--contact-fill) 100%;
+    background-size: 0% 100%;
     background-clip: padding-box;
     border-color: var(--color-action);
     box-shadow: 0.1875rem 0.1875rem 0 var(--color-action);
     color: var(--color-action);
   }
 
-  .hero-contact .contact-arrow-badge {
-    background: var(--contact-badge-background);
-    color: var(--contact-badge-color);
+  .page .hero-actions .hero-action {
+    --hero-sweep: var(--color-action-active);
+    --hero-badge-rest: var(--color-aqua);
+    --hero-badge-active: var(--color-surface-raised);
+    --hero-badge-active-ink: var(--color-action);
+
+    background-color: var(--color-action);
+    color: var(--color-surface-raised);
   }
 
-  .page .hero-actions .hero-contact:is(:focus-visible, .is-pressed) {
-    --contact-fill: 100%;
-    --contact-badge-background: var(--color-action);
-    --contact-badge-color: var(--color-surface-raised);
+  .hero-cta .hero-arrow-badge {
+    background: var(--hero-badge-background);
+    color: var(--hero-badge-color);
   }
 
-  .page .hero-actions .hero-contact:focus-visible {
+  .page .hero-actions .hero-cta:is(:focus-visible, .is-pressed) {
+    --hero-badge-background: var(--hero-badge-active, var(--color-action));
+    --hero-badge-color: var(
+      --hero-badge-active-ink,
+      var(--color-surface-raised)
+    );
+
+    background-size: 100% 100%;
+  }
+
+  .page .hero-actions .hero-cta:focus-visible {
     box-shadow: 0.3125rem 0.3125rem 0 var(--color-action);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .page .hero-actions .hero-contact:hover {
-      --contact-fill: 100%;
-      --contact-badge-background: var(--color-action);
-      --contact-badge-color: var(--color-surface-raised);
+    .page .hero-actions .hero-cta:hover {
+      --hero-badge-background: var(--hero-badge-active, var(--color-action));
+      --hero-badge-color: var(
+        --hero-badge-active-ink,
+        var(--color-surface-raised)
+      );
 
+      background-size: 100% 100%;
       box-shadow: 0.3125rem 0.3125rem 0 var(--color-action);
     }
   }
 
-  .page .hero-actions .hero-contact.is-pressed {
+  .page .hero-actions .hero-cta.is-pressed {
     box-shadow: none;
   }
 
@@ -321,14 +337,14 @@
       transition: scale var(--motion-route) var(--motion-ease-settle);
     }
 
-    .page .hero-actions .hero-contact {
+    .page .hero-actions .hero-cta {
       transition:
         background-size var(--motion-route) var(--motion-ease-settle),
         box-shadow var(--motion-standard) var(--motion-ease-settle),
         translate var(--motion-route) var(--motion-ease-settle);
     }
 
-    .hero-contact .contact-arrow-badge {
+    .hero-cta .hero-arrow-badge {
       transition:
         background-color var(--motion-standard) var(--motion-ease-settle),
         color var(--motion-standard) var(--motion-ease-settle),
@@ -336,39 +352,39 @@
         rotate var(--motion-route) var(--motion-ease-settle);
     }
 
-    .page .hero-actions .hero-contact:focus-visible {
+    .page .hero-actions .hero-cta:focus-visible {
       translate: -0.125rem -0.125rem;
     }
 
     /* The badge owns feedback; its SVG parts keep their independent loop. */
-    .hero-contact:focus-visible .contact-arrow-badge {
+    .hero-cta:focus-visible .hero-arrow-badge {
       scale: 1.12;
       rotate: -12deg;
     }
 
     @media (hover: hover) and (pointer: fine) {
-      .page .hero-actions .hero-contact:hover {
+      .page .hero-actions .hero-cta:hover {
         translate: -0.125rem -0.125rem;
       }
 
-      .hero-contact:hover .contact-arrow-badge {
+      .hero-cta:hover .hero-arrow-badge {
         scale: 1.12;
         rotate: -12deg;
       }
     }
 
-    .page .hero-actions .hero-contact.is-pressed {
+    .page .hero-actions .hero-cta.is-pressed {
       translate: 0.125rem 0.125rem;
       transition-duration: var(--motion-short);
     }
 
-    .hero-contact.is-pressed .contact-arrow-badge {
+    .hero-cta.is-pressed .hero-arrow-badge {
       scale: 0.96;
       rotate: 0deg;
       transition-duration: var(--motion-short);
     }
 
-    .page .hero-actions .hero-action {
+    .page .hero-actions .hero-action:not(.hero-cta) {
       transition:
         background-color var(--motion-standard) var(--motion-ease-settle),
         box-shadow var(--motion-standard) var(--motion-ease-settle),
@@ -400,7 +416,7 @@
     }
 
     .page .project-list .route-link.is-pressed,
-    .page .hero-actions .hero-action:active {
+    .page .hero-actions .hero-action:not(.hero-cta):active {
       box-shadow: 0.125rem 0.125rem 0 var(--color-action);
       scale: 0.985;
       translate: 0.125rem 0.125rem;

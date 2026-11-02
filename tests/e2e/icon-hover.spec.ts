@@ -9,7 +9,6 @@ const cases = [
   [".architecture-recovery", ".architecture-recovery > svg", "20deg", "0px"],
   ["#contact .route-link", "#contact .sticker svg", "-6deg", "0px"],
   ["#contact .route-link", "#contact .action-arrow", "0deg", "2px"],
-  [".hero-action", ".hero-action .action-arrow", "0deg", "0px 2px"],
 ] as const;
 
 test("icon hover is local, directional, and leaves each loop intact", async ({
@@ -76,16 +75,16 @@ test("icon hover is local, directional, and leaves each loop intact", async ({
     await expect(icon).toHaveCSS("translate", "none");
     await loops.dispose();
   }
-  await page.locator(".hero-contact").hover();
-  await expect(page.locator(".contact-arrow-badge")).toHaveCSS("scale", "1.12");
-  await expect(page.locator(".contact-arrow-badge svg")).toHaveCSS(
-    "scale",
-    "none",
-  );
-  await expect(page.locator(".contact-arrow-badge svg")).toHaveCSS(
-    "rotate",
-    "none",
-  );
+  for (const selector of [".hero-contact", ".hero-action"]) {
+    const button = page.locator(selector);
+    await button.hover();
+    await expect(button.locator(".hero-arrow-badge")).toHaveCSS(
+      "scale",
+      "1.12",
+    );
+    await expect(button.locator("svg")).toHaveCSS("scale", "none");
+    await expect(button.locator("svg")).toHaveCSS("rotate", "none");
+  }
 });
 
 test("link focus matches hover and system preferences leave icons still", async ({
@@ -126,6 +125,10 @@ test("icon feedback works without JavaScript", async ({ browser }) => {
   try {
     const page = await context.newPage();
     await page.goto("/");
+    // Keep the hover target still; application scripts remain disabled.
+    await page.evaluate(() => {
+      document.documentElement.style.scrollBehavior = "auto";
+    });
     const link = page.locator('#contact a[href^="mailto:"]');
     await link.hover();
     await expect(link.locator(".sticker svg")).toHaveCSS("scale", "1.12");
