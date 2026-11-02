@@ -2,7 +2,7 @@
 export {};
 
 const pieceSelector = [
-  ".part:not(:first-child) > :not(article, nav, .folio-mark, .sticker, .toolbox, .architecture-diagram)",
+  ".part:not(:first-child) > :not(article, nav, .folio-mark, .sticker, .toolbox, .architecture-diagram, .dot-field)",
   "article > *",
   ".route-list > li",
   ".toolbox > div",

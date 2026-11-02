@@ -3,6 +3,10 @@
   display: none;
 }
 
+.dot-field {
+  display: none;
+}
+
 @media screen and (forced-colors: none) {
   .part {
     position: relative;
@@ -99,11 +103,27 @@
   }
 
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    /* Move the single printed texture, not the heading or another overlay. */
+    /* Replace the printed grid only while its individual dots respond. */
     .page > .exhibit-hero {
-      background-position: var(--dots-x, 0) var(--dots-y, 0);
-      transition: background-position var(--motion-route)
-        var(--motion-ease-settle);
+      isolation: isolate;
+    }
+
+    .page > .exhibit-hero.has-dot-field {
+      background-image: none;
+    }
+
+    .page > .exhibit-hero > .dot-field {
+      grid-area: auto;
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      display: block;
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      margin: 0;
+      pointer-events: none;
+      user-select: none;
     }
   }
 
