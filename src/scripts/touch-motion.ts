@@ -1,7 +1,7 @@
 /*
  * Visible icons repeat a short object-specific gesture with a resting interval.
- * Scrolling changes their direction without resetting their pose. One shared
- * pause preference controls them; touch haptics and tilt stay separate.
+ * Scrolling changes their direction without resetting their pose. System
+ * preferences and visibility control them; haptics and tilt stay separate.
  */
 export {};
 
@@ -18,20 +18,6 @@ const motionAllowed = () =>
 
 const icons = [...document.querySelectorAll<SVGElement>("main svg.lucide")];
 const visibleIcons = new Set<SVGElement>();
-const controls = [
-  ...document.querySelectorAll<HTMLButtonElement>(".icon-motion-toggle"),
-];
-const storageKey = "portfolio-icon-motion";
-let paused = false;
-const readPreference = () => {
-  try {
-    paused = sessionStorage.getItem(storageKey) === "paused";
-  } catch {
-    // Storage may be blocked; the current visit still has a working pause control.
-  }
-};
-readPreference();
-
 const scrollPosition = () =>
   Math.max(
     0,
@@ -40,7 +26,7 @@ const scrollPosition = () =>
 let lastScrollY = scrollPosition();
 let directionFrame = 0;
 let backward = false;
-const loopsAllowed = () => motionAllowed() && !paused && !document.hidden;
+const loopsAllowed = () => motionAllowed() && !document.hidden;
 const resetScroll = () => {
   cancelAnimationFrame(directionFrame);
   directionFrame = 0;
@@ -87,39 +73,14 @@ const setDirection = (nextBackward: boolean) => {
 
 const updateLoops = () => {
   resetScroll();
-  const blocked = !motionAllowed();
   if (loopsAllowed()) syncDirections(visibleIcons);
   document.documentElement.classList.toggle(
     "icon-loops-running",
     loopsAllowed(),
   );
-  for (const control of controls) {
-    control.disabled = blocked;
-    control.textContent = blocked
-      ? "Icons off — system"
-      : paused
-        ? "Resume icons"
-        : "Pause icons";
-    control.title = blocked
-      ? "Icon motion is disabled by your system preferences."
-      : "";
-  }
 };
 
-if (icons.length > 0 && controls.length > 0) {
-  // Expose the stop mechanism before any icon is allowed to start.
-  for (const control of controls) {
-    control.hidden = false;
-    control.addEventListener("click", () => {
-      paused = !paused;
-      try {
-        sessionStorage.setItem(storageKey, paused ? "paused" : "playing");
-      } catch {
-        // Pausing remains available even without session storage.
-      }
-      updateLoops();
-    });
-  }
+if (icons.length > 0) {
   const observer = new IntersectionObserver((entries) => {
     for (const { isIntersecting, target } of entries) {
       const icon = target as SVGElement;
@@ -138,10 +99,7 @@ if (icons.length > 0 && controls.length > 0) {
   for (const preference of [reducedMotion, forcedColors, printing])
     preference.addEventListener?.("change", updateLoops);
   document.addEventListener("visibilitychange", updateLoops);
-  addEventListener("pageshow", () => {
-    readPreference();
-    updateLoops();
-  });
+  addEventListener("pageshow", updateLoops);
   addEventListener(
     "scroll",
     () => {
