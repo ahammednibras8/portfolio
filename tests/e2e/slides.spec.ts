@@ -86,7 +86,7 @@ test("pieces zoom in around their center and settle", async ({ page }) => {
   await expect(piece).toHaveClass(/is-zooming/);
   await expect(piece).toHaveCSS(
     "animation-timing-function",
-    "cubic-bezier(0.16, 1, 0.3, 1)",
+    "cubic-bezier(0.22, 0.61, 0.36, 1)",
   );
 
   const frames = await piece.evaluate((element) => {

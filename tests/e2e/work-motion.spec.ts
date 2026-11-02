@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { freezeCssMotion } from "../helpers/motion";
 
 test("both hero actions fill smoothly and give one bounded spring response", async ({
   page,
@@ -47,10 +48,10 @@ test("both hero actions fill smoothly and give one bounded spring response", asy
       for (const animation of transitions) animation.finish();
       return { samples, dimensions, fillDuration };
     });
-    expect(response.fillDuration).toBeCloseTo(360, 3);
+    expect(response.fillDuration).toBeCloseTo(450, 3);
     expect(response.samples[0]?.scale).toBe(1);
     expect(response.samples[1]?.scale).toBeGreaterThan(1.025);
-    expect(response.samples[1]?.scale).toBeLessThan(1.04);
+    expect(response.samples[1]?.scale).toBeLessThan(1.027);
     expect(response.samples[2]?.scale).toBeCloseTo(1.025, 5);
     expect(response.samples[0]?.fill).toBe(0);
     expect(response.samples[1]?.fill).toBeGreaterThan(0);
@@ -74,6 +75,7 @@ for (const trigger of ["hover", "focus"] as const) {
       height: 900,
     });
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await freezeCssMotion(page, ".hero-action .lucide.icon-active > *");
     await page.goto("/");
     await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
       "scale",
@@ -102,6 +104,25 @@ for (const trigger of ["hover", "focus"] as const) {
     );
     await expect(button).toHaveCSS("background-size", "0% 100%");
     await expect(badge).toHaveCSS("background-color", "rgb(223, 243, 244)");
+    // Hold the entry sweep in the input event, before a browser round-trip can
+    // outlive it. The once-only listener leaves exit and navigation untouched.
+    await button.evaluate(
+      (element, eventName) => {
+        element.addEventListener(
+          eventName,
+          () => {
+            for (const animation of element.getAnimations())
+              if (
+                animation instanceof CSSTransition &&
+                animation.transitionProperty === "background-size"
+              )
+                animation.pause();
+          },
+          { once: true },
+        );
+      },
+      trigger === "hover" ? "pointerover" : "focusin",
+    );
     if (trigger === "hover") await button.hover();
     else await button.focus();
     await arrow.evaluate((element) => {
@@ -186,14 +207,14 @@ for (const trigger of ["hover", "focus"] as const) {
       })),
     );
     expect(gestures).toEqual([
-      { duration: 760, iterations: 1 },
-      { duration: 760, iterations: 1 },
+      { duration: 900, iterations: 1 },
+      { duration: 900, iterations: 1 },
     ]);
     await arrow.evaluate((element) => {
       for (const animation of element.getAnimations({ subtree: true })) {
         animation.pause();
         animation.currentTime =
-          Number(animation.effect?.getTiming().delay ?? 0) + 760;
+          Number(animation.effect?.getTiming().delay ?? 0) + 900;
       }
     });
     await page.screenshot({ path: testInfo.outputPath("work-hover.png") });

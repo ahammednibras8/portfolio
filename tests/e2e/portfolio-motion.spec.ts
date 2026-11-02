@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { freezeHero } from "../helpers/motion";
 
 // Pause new finite gestures before a slow assertion can outlive them.
 const freezeEntrancesAndIcons = (page: Page) =>
@@ -31,14 +32,7 @@ const freezeEntrancesAndIcons = (page: Page) =>
 test("the hero settles around a solid, stationary name", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.addInitScript(() => {
-    document.addEventListener("DOMContentLoaded", () => {
-      for (const element of document.querySelectorAll(
-        "#intro > .hero-portrait, #intro > .speech-bubble, .hero-name",
-      ))
-        for (const animation of element.getAnimations()) animation.pause();
-    });
-  });
+  await freezeHero(page);
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
 
@@ -88,7 +82,7 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
   expect(samples[0]?.frames[0]?.opacity).toBeCloseTo(0.92);
   expect(samples[1]?.frames[0]?.scale).toBeCloseTo(0.985);
   for (const { duration, frames, iterations } of samples) {
-    expect(duration).toBe(560);
+    expect(duration).toBe(640);
     expect(iterations).toBe(1);
     const first = frames[0];
     const last = frames[2];
@@ -157,11 +151,11 @@ test("desktop motion uses one shared timing and easing vocabulary", async ({
     };
   });
   expect(tokens).toEqual({
-    durations: [100, 180, 220, 240, 560, 45, 760],
+    durations: [120, 220, 260, 300, 640, 45, 900],
     easings: [
-      [0.16, 1, 0.3, 1],
-      [0.4, 0, 0.2, 1],
-      [0.34, 1.56, 0.64, 1],
+      [0.22, 0.61, 0.36, 1],
+      [0.45, 0, 0.55, 1],
+      [0.22, 1.12, 0.36, 1],
     ],
   });
 });
@@ -175,20 +169,15 @@ for (const viewport of [
   }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.addInitScript(() => {
-      document.addEventListener("DOMContentLoaded", () => {
-        for (const element of document.querySelectorAll(
-          "#intro > .hero-portrait, #intro > .speech-bubble, .hero-name",
-        ))
-          for (const animation of element.getAnimations()) animation.pause();
-      });
-    });
+    await freezeHero(page);
     await page.goto("/");
     await page.evaluate(async () => {
       await document.fonts.ready;
       for (const element of document.querySelectorAll(
         "#intro > .hero-portrait, #intro > .speech-bubble, .hero-name",
       )) {
+        if (!element.getAnimations().length)
+          throw new Error("Expected a paused hero animation to sample.");
         for (const animation of element.getAnimations()) {
           if (!(animation instanceof CSSAnimation)) continue;
           const timing = animation.effect?.getTiming();
@@ -285,7 +274,7 @@ test("project entrances have a short capped stagger in reading order", async ({
   ]);
   expect(
     samples.every(
-      ({ timing }) => timing.duration === 560 && timing.iterations === 1,
+      ({ timing }) => timing.duration === 640 && timing.iterations === 1,
     ),
   ).toBe(true);
   for (const { frames } of samples) {

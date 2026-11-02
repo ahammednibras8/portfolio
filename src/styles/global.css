@@ -52,16 +52,16 @@
   --touch-target: 2.75rem;
 
   /* Motion explains a state or context change; it never introduces content. */
-  --motion-short: 100ms;
-  --motion-standard: 180ms;
-  --motion-deliberate: 220ms;
-  --motion-route: 240ms;
-  --motion-arrival: 560ms;
+  --motion-short: 120ms;
+  --motion-standard: 220ms;
+  --motion-deliberate: 260ms;
+  --motion-route: 300ms;
+  --motion-arrival: 640ms;
   --motion-stagger: 45ms;
-  --motion-gesture: 760ms;
-  --motion-ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-ease-fluid: cubic-bezier(0.4, 0, 0.2, 1);
-  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-gesture: 900ms;
+  --motion-ease-settle: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-ease-fluid: cubic-bezier(0.45, 0, 0.55, 1);
+  --motion-ease-spring: cubic-bezier(0.22, 1.12, 0.36, 1);
 
   font-family: var(--font-reading);
   font-synthesis: none;
@@ -71,12 +71,12 @@
 /* Touch feedback settles sooner, leaving more time for native scrolling. */
 @media screen and (pointer: coarse) {
   :root {
-    --motion-short: 90ms;
-    --motion-standard: 140ms;
-    --motion-route: 180ms;
-    --motion-arrival: 400ms;
+    --motion-short: 100ms;
+    --motion-standard: 180ms;
+    --motion-route: 240ms;
+    --motion-arrival: 480ms;
     --motion-stagger: 24ms;
-    --motion-gesture: 620ms;
+    --motion-gesture: 760ms;
   }
 }
 

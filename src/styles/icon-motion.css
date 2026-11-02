@@ -361,14 +361,16 @@
       rotate: 0deg;
     }
 
-    20%,
-    60% {
-      rotate: 12deg;
+    24% {
+      rotate: 10deg;
     }
 
-    40%,
-    80% {
-      rotate: -6deg;
+    48% {
+      rotate: -5deg;
+    }
+
+    72% {
+      rotate: 3deg;
     }
   }
 
@@ -513,16 +515,8 @@
       scale: 1 1;
     }
 
-    25% {
-      scale: 0.15 1;
-    }
-
     50% {
       scale: -1 1;
-    }
-
-    75% {
-      scale: -0.15 1;
     }
   }
 
@@ -577,21 +571,9 @@
       scale: 1 1;
     }
 
-    26% {
-      scale: 1 0.08;
-    }
-
     44%,
     56% {
       scale: 1 -0.3;
-    }
-
-    78% {
-      scale: 1 0.75;
-    }
-
-    92% {
-      scale: 1 0.98;
     }
   }
 
@@ -654,14 +636,6 @@
   @keyframes icon-turn {
     0% {
       rotate: 0deg;
-    }
-
-    72% {
-      rotate: 330deg;
-    }
-
-    90% {
-      rotate: 356deg;
     }
 
     100% {

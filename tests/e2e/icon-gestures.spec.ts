@@ -76,6 +76,7 @@ test("every icon has a finite part gesture without an animated outer SVG or rest
         .map((animation) => {
           const effect = animation.effect as KeyframeEffect;
           return {
+            name: (animation as CSSAnimation).animationName,
             duration: effect.getTiming().duration,
             iterations: effect.getTiming().iterations,
             direction: effect.getTiming().direction,
@@ -95,17 +96,76 @@ test("every icon has a finite part gesture without an animated outer SVG or rest
     expect(icon.parts.length, icon.type ?? "icon").toBeGreaterThan(0);
     for (const part of icon.parts) {
       expect(part).toMatchObject({
-        duration: 760,
+        duration: 900,
         iterations: 1,
         direction: "normal",
       });
       expect(part.offsets[0]).toBe(0);
       expect(part.offsets.at(-1)).toBe(1);
-      expect(part.offsets.some((offset) => offset > 0.375 && offset < 1)).toBe(
-        true,
-      );
+      if (part.name === "icon-turn") expect(part.offsets).toEqual([0, 1]);
+      else
+        expect(
+          part.offsets.some((offset) => offset > 0.375 && offset < 1),
+        ).toBe(true);
     }
   }
+});
+
+test("rotation, globe, and envelope move through uninterrupted gesture segments", async ({
+  page,
+}) => {
+  await prepare(page);
+  const profiles = await page.evaluate(() =>
+    (
+      [
+        [".lucide-rotate-cw > path", "rotate"],
+        [".lucide-globe > path", "scale"],
+        [".lucide-mail > path", "scale"],
+      ] as const
+    ).map(([selector, property]) => {
+      const part = document.querySelector(selector);
+      if (!part?.parentElement) throw new Error("Expected an icon part.");
+      part.parentElement.classList.add("icon-active");
+      const animation = part.getAnimations()[0];
+      if (!animation?.effect) throw new Error("Expected an icon gesture.");
+      const effect = animation.effect as KeyframeEffect;
+      animation.pause();
+      const { delay = 0, duration } = effect.getTiming();
+      return {
+        offsets: effect.getKeyframes().map((frame) => frame.computedOffset),
+        values: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1].map((phase) => {
+          animation.currentTime = delay + Number(duration) * phase;
+          return getComputedStyle(part).getPropertyValue(property);
+        }),
+      };
+    }),
+  );
+  const expectedOffsets = [
+    [0, 1],
+    [0, 0.5, 1],
+    [0, 0.44, 0.56, 1],
+  ];
+  profiles.forEach(({ offsets }, index) => {
+    const expected = expectedOffsets[index];
+    if (!expected) throw new Error("Expected a gesture profile.");
+    expect(offsets).toHaveLength(expected.length);
+    offsets.forEach((offset, frame) =>
+      expect(offset).toBeCloseTo(Number(expected[frame]), 6),
+    );
+  });
+  const [turn, globe, mail] = profiles;
+  if (!turn || !globe || !mail) throw new Error("Expected all three gestures.");
+  const angles = turn.values.map(parseFloat);
+  expect(angles[0]).toBe(0);
+  expect(angles[3]).toBeCloseTo(180);
+  expect(angles[6]).toBeCloseTo(360);
+  for (let index = 1; index < angles.length; index++)
+    expect(angles[index]).toBeGreaterThan(Number(angles[index - 1]));
+  // Both ends settle gently instead of restarting ease-in at intermediate stops.
+  expect(angles[1]).toBeLessThan(15);
+  expect(360 - Number(angles[5])).toBeLessThan(15);
+  expect(Number(globe.values[3]?.split(" ")[0])).toBeCloseTo(-1);
+  expect(Number(mail.values[3]?.split(" ")[1])).toBeCloseTo(-0.3);
 });
 
 test("decorative icons greet once with arrival delays while action and lifecycle icons wait for interaction", async ({
@@ -127,7 +187,7 @@ test("decorative icons greet once with arrival delays while action and lifecycle
       };
     });
   expect(handTiming.delay).toBe(400);
-  const waveOffsets = [0, 0.2, 0.4, 0.6, 0.8, 1];
+  const waveOffsets = [0, 0.24, 0.48, 0.72, 1];
   expect(handTiming.offsets).toHaveLength(waveOffsets.length);
   // Engines expose fractional keyframes at different numeric precision.
   waveOffsets.forEach((offset, index) =>
@@ -295,7 +355,7 @@ test("cleanup waits for the last delayed part of a multi-part gesture", async ({
     80,
     3,
   );
-  expect(timing.lastDuration).toBe(760);
+  expect(timing.lastDuration).toBe(900);
   expect(timing.lastState).toBe("paused");
   await expect(icon).toHaveClass(/icon-active/);
   await finish(icon);
@@ -542,7 +602,7 @@ test.describe("phone gestures", () => {
     await expect(hand).toHaveClass(/icon-active/);
     await expect(hand.locator("path").first()).toHaveCSS(
       "animation-duration",
-      "0.62s",
+      "0.76s",
     );
     await expect(hand.locator("path").first()).toHaveCSS(
       "animation-iteration-count",
