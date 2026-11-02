@@ -1,7 +1,9 @@
 /* A delegated press keeps card and hero-button feedback finite on touch screens. */
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const forcedColors = matchMedia("(forced-colors: active)");
-const surfaces = document.querySelectorAll(".project-list, .hero-cta");
+const surfaces = document.querySelectorAll(
+  ".project-list, .hero-cta, #contact .route-link",
+);
 let pressedLink: HTMLElement | null = null;
 
 const release = () => {
@@ -18,7 +20,11 @@ for (const surface of surfaces) {
       event.target instanceof Element
         ? event.target.closest<HTMLElement>(".route-link, .hero-cta")
         : null;
-    if (reducedMotion.matches && !link?.matches(".hero-cta")) return;
+    if (
+      reducedMotion.matches &&
+      !link?.matches(".hero-cta, #contact .route-link")
+    )
+      return;
     pressedLink = link;
     pressedLink?.classList.add("is-pressed");
   });
