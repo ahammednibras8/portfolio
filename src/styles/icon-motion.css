@@ -72,6 +72,56 @@
     transform-origin: 12px 12px;
   }
 
+  /* Hover owns the glyph; its looping details keep their own clocks. */
+  .page .lucide:not(.hero-contact .lucide) {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    transition:
+      scale var(--motion-route) var(--motion-ease-settle),
+      rotate var(--motion-route) var(--motion-ease-settle),
+      translate var(--motion-route) var(--motion-ease-settle);
+  }
+
+  .page .lucide-arrow-right {
+    --icon-hover-turn: 0deg;
+    --icon-hover-x: 2px;
+  }
+
+  .page .lucide-arrow-down {
+    --icon-hover-turn: 0deg;
+    --icon-hover-y: 2px;
+  }
+
+  .page .lucide-hand {
+    --icon-hover-turn: -10deg;
+  }
+
+  .page .lucide-rotate-cw {
+    --icon-hover-turn: 20deg;
+  }
+
+  .page a:focus-visible .lucide:not(.hero-contact .lucide) {
+    scale: 1.12;
+    rotate: var(--icon-hover-turn, -6deg);
+    translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .page
+      :is(
+        .lucide:hover,
+        a:hover .lucide,
+        .sticker:hover .lucide,
+        .section-title:hover .lucide,
+        .run-path li:hover .lucide,
+        .architecture-recovery:hover > .lucide
+      ):not(.hero-contact .lucide) {
+      scale: 1.12;
+      rotate: var(--icon-hover-turn, -6deg);
+      translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
+    }
+  }
+
   /*
    * Eight-second cycle: 3s of movement (37.5%), then 5s at rest.
    * Keep animation identity when paused, off-screen, or in a background tab.
