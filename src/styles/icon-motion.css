@@ -1,4 +1,62 @@
 /* Keep Lucide geometry unchanged. Give its ink a surface and its parts a job. */
+.icon-motion-toggle {
+  display: none;
+}
+
+@media screen {
+  .hero-caption {
+    display: flex;
+    min-block-size: var(--touch-target);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-interface);
+  }
+
+  .icon-motion-toggle:not([hidden]) {
+    display: inline-flex;
+    width: 9rem;
+    min-block-size: var(--touch-target);
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: none;
+    border: 0;
+    border-radius: 0.25rem;
+    color: inherit;
+    font-family: var(--font-technical);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+  }
+
+  .icon-motion-toggle:disabled {
+    text-decoration: none;
+    cursor: default;
+  }
+
+  .icon-motion-toggle:not(:disabled):hover {
+    text-decoration-thickness: 0.125rem;
+  }
+
+  @media (height < 30rem) {
+    .page > #intro > .speech-bubble {
+      padding-block: var(--space-interface);
+    }
+  }
+
+  @media (width >= 72rem) {
+    .site-footer .icon-motion-toggle {
+      grid-column: 2 / span 4;
+      grid-row: 2;
+      justify-self: start;
+    }
+  }
+}
+
 @media screen and (forced-colors: none) {
   .page .sticker {
     --icon-tone: var(--color-surface-raised);
@@ -64,32 +122,18 @@
     transform-origin: 12px 12px;
   }
 
-  /* One gesture finishes even after hover ends; touch uses the same parts. */
-  .page .lucide.is-playing > * {
-    animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-      var(--motion-ease-fluid) var(--icon-part-delay, 0ms) 1;
+  /* Keep animation identity when paused, off-screen, or in a background tab. */
+  .page .lucide.icon-loop > * {
+    animation: var(--icon-part-motion, none) 3200ms var(--motion-ease-fluid)
+      calc(var(--icon-loop-delay, 0ms) + var(--icon-part-delay, 0ms)) infinite;
+    animation-play-state: paused;
+  }
+
+  .icon-loops-running .page .lucide.icon-loop.is-in-view > * {
+    animation-play-state: running;
   }
 
   @media (hover: hover) {
-    .page
-      :where(
-        .route-link:is(:hover, :focus-visible),
-        .architecture-node-link:is(:hover, :focus-visible),
-        .hero-action:is(:hover, :focus-visible),
-        .hero-contact:is(:hover, :focus-visible),
-        .section-title:hover,
-        .sticker:hover,
-        .run-path li:hover,
-        .architecture-recovery:hover,
-        .architecture-recovery:focus-within
-      )
-      .lucide
-      > *,
-    .page .lucide:hover > * {
-      animation: var(--icon-part-motion, none) var(--icon-part-duration, 640ms)
-        var(--motion-ease-fluid) var(--icon-part-delay, 0ms) 1;
-    }
-
     .page .gallery-wall-compact .sticker {
       transition: box-shadow var(--motion-standard) var(--motion-ease-settle);
     }
@@ -103,41 +147,42 @@
   }
 
   .lucide-arrow-down > path {
-    --icon-part-motion: icon-direction;
-    --icon-y: 2px;
+    --icon-part-motion: icon-arrow-travel;
+    --icon-y: 9px;
   }
 
   .lucide-arrow-right > path {
-    --icon-part-motion: icon-direction;
-    --icon-x: 2px;
+    --icon-part-motion: icon-arrow-travel;
+    --icon-x: 9px;
   }
 
-  /* A single forward pass, then an invisible reset so the label stays still. */
-  :where(.hero-contact) .lucide-arrow-right > path {
-    --icon-part-motion: contact-arrow-travel;
-    --icon-part-duration: 560ms;
-  }
-
-  @keyframes contact-arrow-travel {
+  @keyframes icon-arrow-travel {
     0% {
       opacity: 1;
       translate: 0;
     }
 
-    42% {
+    12.6% {
       opacity: 0;
-      translate: 9px;
+      translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    43% {
+    12.9% {
       opacity: 0;
-      translate: -9px;
+      translate: calc(var(--icon-x, 0px) * -1) calc(var(--icon-y, 0px) * -1);
     }
 
+    30%,
     100% {
       opacity: 1;
       translate: 0;
     }
+  }
+
+  .lucide-hand > path {
+    --icon-part-motion: icon-hand-wave;
+
+    transform-origin: 12px 21px;
   }
 
   /* Lift the handle, keeping its ends attached to the case. */
@@ -149,7 +194,6 @@
 
   .lucide-circle-check > path {
     --icon-part-motion: icon-check-detail;
-    --icon-part-duration: 1100ms;
     --icon-stroke-length: 11.5;
 
     stroke-dasharray: var(--icon-stroke-length);
@@ -173,7 +217,6 @@
 
   .lucide-cpu > rect:where(:last-child) {
     --icon-part-motion: icon-core;
-    --icon-part-duration: 760ms;
 
     fill: currentcolor;
     fill-opacity: 0.12;
@@ -204,25 +247,21 @@
   /* Turn the meridian inside the fixed globe. */
   .lucide-globe > path:where(:first-of-type) {
     --icon-part-motion: icon-meridian;
-    --icon-part-duration: 800ms;
   }
 
   .lucide-layers > path:where(:first-child) {
     --icon-part-motion: icon-layer;
-    --icon-part-duration: 820ms;
     --icon-y: -2px;
   }
 
   .lucide-layers > path:where(:last-child) {
     --icon-part-motion: icon-layer;
-    --icon-part-duration: 740ms;
     --icon-part-delay: 80ms;
     --icon-y: 1.5px;
   }
 
   .lucide-layout-dashboard > rect {
     --icon-part-motion: icon-panel;
-    --icon-part-duration: 460ms;
 
     fill: currentcolor;
     fill-opacity: 0.12;
@@ -242,7 +281,6 @@
 
   .lucide-list-ordered > path:where(:nth-child(-n + 3)) {
     --icon-part-motion: icon-list-row;
-    --icon-part-duration: 460ms;
 
     transform-origin: 11px 12px;
   }
@@ -258,14 +296,13 @@
   /* Fold the flap around its existing hinge, leaving the envelope fixed. */
   .lucide-mail > path {
     --icon-part-motion: icon-mail-flap;
-    --icon-part-duration: 940ms;
 
     transform-origin: 12px 7px;
+    vector-effect: non-scaling-stroke;
   }
 
   .lucide-message-circle-more > path:where(:not(:first-child)) {
     --icon-part-motion: icon-typing-dot;
-    --icon-part-duration: 420ms;
   }
 
   .lucide-message-circle-more > path:where(:nth-child(3)) {
@@ -286,19 +323,16 @@
 
   .lucide-rocket > path:where(:nth-child(2)) {
     --icon-part-motion: icon-exhaust;
-    --icon-part-duration: 720ms;
 
     transform-origin: 9px 15px;
   }
 
   .lucide-rotate-cw > path {
     --icon-part-motion: icon-turn;
-    --icon-part-duration: 800ms;
   }
 
   .lucide-server > line {
     --icon-part-motion: icon-server-light;
-    --icon-part-duration: 440ms;
   }
 
   .lucide-server > line:where(:last-child) {
@@ -307,7 +341,6 @@
 
   .lucide-shield-check > path:where(:last-child) {
     --icon-part-motion: icon-check-detail;
-    --icon-part-duration: 1000ms;
     --icon-stroke-length: 8.5;
 
     stroke-dasharray: var(--icon-stroke-length);
@@ -317,242 +350,279 @@
     --icon-part-motion: icon-nod;
   }
 
+  /* The disconnected slash stays fixed; only the nearby signal arc softens. */
+  .lucide-wifi-off > path:where(:nth-child(2)) {
+    --icon-part-motion: icon-server-light;
+  }
+
+  @keyframes icon-hand-wave {
+    0%,
+    30%,
+    100% {
+      rotate: 0deg;
+    }
+
+    6%,
+    18% {
+      rotate: 12deg;
+    }
+
+    12%,
+    24% {
+      rotate: -6deg;
+    }
+  }
+
   @keyframes icon-direction {
     0%,
+    30%,
     100% {
       translate: 0 0;
     }
 
-    18% {
+    5.4% {
       translate: calc(var(--icon-x, 0px) * -0.2) calc(var(--icon-y, 0px) * -0.2);
     }
 
-    48% {
+    14.4% {
       translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    78% {
+    23.4% {
       translate: calc(var(--icon-x, 0px) * 0.15) calc(var(--icon-y, 0px) * 0.15);
     }
   }
 
   @keyframes icon-handle {
     0%,
+    30%,
     100% {
       scale: 1 1;
     }
 
-    34% {
+    10.2% {
       scale: 1 1.07;
     }
 
-    62% {
+    18.6% {
       scale: 1 1.025;
     }
 
-    86% {
+    25.8% {
       scale: 1 1.004;
     }
   }
 
   @keyframes icon-check-detail {
     0%,
+    30%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    18%,
-    28% {
+    5.4%,
+    8.4% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    82% {
+    24.6% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-core {
     0%,
+    30%,
     100% {
       fill-opacity: 0.12;
     }
 
-    36% {
+    10.8% {
       fill-opacity: 0.45;
     }
 
-    72% {
+    21.6% {
       fill-opacity: 0.18;
     }
   }
 
   @keyframes icon-data-row {
     0%,
+    30%,
     100% {
       translate: 0 0;
     }
 
-    38% {
+    11.4% {
       translate: 0 -1px;
     }
 
-    72% {
+    21.6% {
       translate: 0 -0.15px;
     }
   }
 
   @keyframes icon-pupil {
     0%,
+    30%,
     100% {
       translate: 0 0;
     }
 
-    26%,
-    38% {
+    7.8%,
+    11.4% {
       translate: 1.75px 0;
     }
 
-    62%,
-    72% {
+    18.6%,
+    21.6% {
       translate: -1.25px 0;
     }
 
-    90% {
+    27% {
       translate: -0.1px 0;
     }
   }
 
   @keyframes icon-branch-path {
     0%,
+    30%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    22% {
+    6.6% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    82% {
+    24.6% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-branch-node {
     0%,
+    30%,
     100% {
       scale: 1;
     }
 
-    38% {
+    11.4% {
       scale: 1.1;
     }
 
-    74% {
+    22.2% {
       scale: 1.015;
     }
   }
 
   @keyframes icon-meridian {
     0%,
+    30%,
     100% {
       scale: 1 1;
     }
 
-    25% {
+    7.5% {
       scale: 0.15 1;
     }
 
-    50% {
+    15% {
       scale: -1 1;
     }
 
-    75% {
+    22.5% {
       scale: -0.15 1;
     }
   }
 
   @keyframes icon-layer {
     0%,
+    30%,
     100% {
       translate: 0 0;
     }
 
-    32% {
+    9.6% {
       translate: 0 var(--icon-y);
     }
 
-    62% {
+    18.6% {
       translate: 0 calc(var(--icon-y) * 0.4);
     }
 
-    86% {
+    25.8% {
       translate: 0 calc(var(--icon-y) * 0.04);
     }
   }
 
   @keyframes icon-panel {
     0%,
+    30%,
     100% {
       fill-opacity: 0.12;
     }
 
-    50% {
+    15% {
       fill-opacity: 0.38;
     }
   }
 
   @keyframes icon-list-row {
     0%,
+    30%,
     100% {
       scale: 1 1;
     }
 
-    24% {
+    7.2% {
       scale: 0.72 1;
     }
 
-    72% {
+    21.6% {
       scale: 0.97 1;
     }
   }
 
   @keyframes icon-mail-flap {
     0%,
+    30%,
     100% {
       scale: 1 1;
     }
 
-    26% {
+    7.8% {
       scale: 1 0.08;
     }
 
-    44%,
-    56% {
+    13.2%,
+    16.8% {
       scale: 1 -0.3;
     }
 
-    78% {
+    23.4% {
       scale: 1 0.75;
     }
 
-    92% {
+    27.6% {
       scale: 1 0.98;
     }
   }
 
   @keyframes icon-typing-dot {
     0%,
+    30%,
     100% {
       translate: 0 0;
       stroke-opacity: 1;
     }
 
-    36% {
+    10.8% {
       translate: 0 -1.6px;
       stroke-opacity: 0.65;
     }
 
-    74% {
+    22.2% {
       translate: 0 -0.2px;
       stroke-opacity: 0.95;
     }
@@ -560,37 +630,39 @@
 
   @keyframes icon-package-seal {
     0%,
+    30%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    25% {
+    7.5% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    75% {
+    22.5% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-exhaust {
     0%,
+    30%,
     100% {
       scale: 1;
       stroke-opacity: 1;
     }
 
-    25% {
+    7.5% {
       scale: 0.85;
       stroke-opacity: 0.65;
     }
 
-    50% {
+    15% {
       scale: 1.12;
       stroke-opacity: 1;
     }
 
-    75% {
+    22.5% {
       scale: 0.95;
       stroke-opacity: 0.8;
     }
@@ -601,14 +673,15 @@
       rotate: 0deg;
     }
 
-    72% {
+    21.6% {
       rotate: 330deg;
     }
 
-    90% {
+    27% {
       rotate: 356deg;
     }
 
+    30%,
     100% {
       rotate: 360deg;
     }
@@ -616,22 +689,24 @@
 
   @keyframes icon-server-light {
     0%,
+    30%,
     100% {
       stroke-opacity: 1;
     }
 
-    45% {
+    13.5% {
       stroke-opacity: 0.3;
     }
   }
 
   @keyframes icon-nod {
     0%,
+    30%,
     100% {
       translate: 0 0;
     }
 
-    45% {
+    13.5% {
       translate: 0 1px;
     }
   }

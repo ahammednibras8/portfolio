@@ -232,7 +232,15 @@ test.describe("touch motion preferences", () => {
       "data-buzzed",
       "true",
     );
-    await expect(page.locator(".is-playing")).toHaveCount(0);
+    expect(
+      await page
+        .locator("main svg.lucide > *")
+        .evaluateAll((parts) =>
+          parts.every(
+            (part) => getComputedStyle(part).animationName === "none",
+          ),
+        ),
+    ).toBe(true);
   });
 
   test("a late sensor permission cannot revive a retired visibility lifecycle", async ({

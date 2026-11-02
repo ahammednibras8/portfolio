@@ -930,18 +930,22 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   const portrait = page.locator(".hero-portrait");
 
   await expect(hand).toHaveCSS("animation-name", "none");
+  await expect(hand.locator("path").first()).toHaveCSS(
+    "animation-name",
+    "icon-hand-wave",
+  );
+  await expect(hand.locator("path").first()).toHaveCSS(
+    "animation-iteration-count",
+    "infinite",
+  );
   await settleScrolling(page);
   await portrait.hover();
-  await expect(hand).toHaveCSS("animation-name", "hand-wave");
-  await expect(hand).toHaveCSS("animation-iteration-count", "1");
-  await expect
-    .poll(() => hand.evaluate((icon) => icon.getAnimations().length))
-    .toBe(0);
-
-  await page.mouse.move(0, 0);
   await expect(hand).toHaveCSS("animation-name", "none");
-  await portrait.hover();
-  await expect(hand).toHaveCSS("animation-name", "hand-wave");
+  await page.mouse.move(0, 0);
+  await expect(hand.locator("path").first()).toHaveCSS(
+    "animation-play-state",
+    "running",
+  );
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".sticker-wave svg")).toHaveCSS(
@@ -950,7 +954,7 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   );
 });
 
-test("icon details animate once while the SVG and its outline stay still", async ({
+test("icon details loop while the SVG and its outline stay still", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -969,7 +973,6 @@ test("icon details animate once while the SVG and its outline stay still", async
 
   for (const type of types) {
     if (!type) throw new Error("Expected a Lucide icon type.");
-    if (type === "lucide-hand") continue;
 
     const icon = page.locator(`main svg.${type}`).first();
     await icon.hover();
@@ -988,7 +991,7 @@ test("icon details animate once while the SVG and its outline stay still", async
     const moving = state.details.filter((part) => part.animation !== "none");
     expect(moving.length, type).toBeGreaterThan(0);
     expect(
-      moving.every((part) => part.iterations === "1"),
+      moving.every((part) => part.iterations === "infinite"),
       type,
     ).toBe(true);
     expect(
@@ -1075,66 +1078,34 @@ test.describe("on a touch screen", () => {
     viewport: { height: 915, width: 412 },
   });
 
-  test("primary icons arrive once without background or action-arrow motion", async ({
+  test("phone icons loop without hover and pause outside the viewport", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.addInitScript(() => {
-      document.addEventListener("animationstart", ({ target }) => {
-        if (
-          target instanceof Element &&
-          target.closest(".hero-actions .action-arrow")
-        ) {
-          document.documentElement.dataset.arrowPlayed = "true";
-        }
-      });
-    });
-
     const blocked: string[] = [];
-
     page.on("console", (message) => {
       if (message.type() === "error") blocked.push(message.text());
     });
     await page.goto("/");
     await settleScrolling(page);
-
-    const hero = page.locator(".exhibit-hero-portrait");
-    const flap = page.locator("#contact .lucide-mail > path");
-
-    // The script must really run under the production security policy.
     await expect(page.locator("html")).toHaveClass(/is-touch/);
-    await expect(hero).toHaveCSS("animation-name", "none");
-    expect(blocked).toEqual([]);
-    await expect(
-      page.locator(".hero-actions .action-arrow.is-playing"),
-    ).toHaveCount(0);
-    await expect(flap).toHaveCSS("animation-name", "none");
-
+    await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
+      "animation-name",
+      "none",
+    );
+    const arrow = page.locator(".hero-contact .action-arrow path").first();
+    const flap = page.locator("#contact .lucide-mail > path");
+    await expect(arrow).toHaveCSS("animation-iteration-count", "infinite");
+    await expect(arrow).toHaveCSS("animation-play-state", "running");
+    await expect(flap).toHaveCSS("animation-play-state", "paused");
     await flap.scrollIntoViewIfNeeded();
     await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
+    await expect(flap).toHaveCSS("animation-play-state", "running");
     await expect(flap.locator("..")).toHaveCSS("animation-name", "none");
-    await expect(flap.locator("..")).toHaveCSS("scale", "none");
-    await expect(flap).toHaveCSS("animation-name", "none");
-
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-arrow-played",
-      "true",
-    );
-    await page.locator("#introduction-heading").tap();
-    await expect(hero).toHaveCSS("animation-name", "none");
-    await flap.scrollIntoViewIfNeeded();
-    // Watch beyond the arrival delay, not just the initial still frame.
-    const replayed = await flap.evaluate(async (part) => {
-      let replayed = false;
-      const noteReplay = () => {
-        replayed = true;
-      };
-      part.addEventListener("animationstart", noteReplay);
-      await new Promise((resolve) => setTimeout(resolve, 1400));
-      part.removeEventListener("animationstart", noteReplay);
-      return replayed;
-    });
-    expect(replayed).toBe(false);
+    await page
+      .locator("#intro")
+      .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+    await expect(flap).toHaveCSS("animation-play-state", "paused");
     expect(blocked).toEqual([]);
   });
 
@@ -1245,7 +1216,15 @@ test.describe("on a touch screen", () => {
     await page.locator("#contact").scrollIntoViewIfNeeded();
     await page.locator("#introduction-heading").tap();
 
-    await expect(page.locator(".is-waving, .is-playing")).toHaveCount(0);
+    expect(
+      await page
+        .locator("main svg.lucide > *")
+        .evaluateAll((parts) =>
+          parts.every(
+            (part) => getComputedStyle(part).animationName === "none",
+          ),
+        ),
+    ).toBe(true);
   });
 });
 
@@ -1392,80 +1371,6 @@ test("a phone on its side keeps the portrait beside the buttons", async ({
 
   expect(action.y + action.height).toBeLessThanOrEqual(375);
   expect(portrait.x).toBeGreaterThan(action.x + action.width);
-});
-
-test("icon gestures finish after the pointer leaves and can play again", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-  await settleScrolling(page);
-
-  for (const node of ["verify", "approval"]) {
-    const link = page.locator(
-      `.architecture-node-${node} .architecture-node-link`,
-    );
-    const check = link.locator("svg.lucide > path").last();
-
-    // Stretch the gesture so even a slow machine can leave mid-draw.
-    await link.evaluate((anchor) => {
-      const icon = anchor.querySelector<SVGElement>("svg.lucide");
-
-      for (const part of icon?.children ?? []) {
-        (part as SVGElement).style.setProperty(
-          "--icon-part-duration",
-          "3300ms",
-        );
-      }
-    });
-
-    const playing = () =>
-      check.evaluate((part) =>
-        part
-          .getAnimations()
-          .some(
-            (animation) =>
-              animation instanceof CSSAnimation &&
-              animation.playState === "running",
-          ),
-      );
-
-    await link.hover();
-    await expect.poll(playing, node).toBe(true);
-    await page.mouse.move(0, 0);
-
-    expect(await playing(), node).toBe(true);
-    await expect(check).toHaveCSS("animation-name", "none", { timeout: 6000 });
-
-    await link.hover();
-    await expect.poll(playing, node).toBe(true);
-    await page.mouse.move(0, 0);
-  }
-
-  // Other objects also complete their action instead of snapping shut on exit.
-  const mail = page.locator('#contact a[href^="mailto:"]');
-  const flap = mail.locator(".lucide-mail > path");
-
-  await mail.hover();
-  await expect(flap).toHaveCSS("animation-timing-function", gestureEase);
-  await page.mouse.move(0, 0);
-  await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
-  await expect(flap).toHaveCSS("animation-name", "none");
-  await expect(mail.locator(".lucide-mail")).not.toHaveClass(/is-playing/);
-
-  // Recovery's focused link and its sibling icon share the surrounding group.
-  const recovery = page.locator(".architecture-recovery");
-  const recoveryIcon = recovery.locator(".lucide-rotate-cw");
-  await recovery.getByRole("link").focus();
-  await expect(recoveryIcon).toHaveClass(/is-playing/);
-  await recovery.getByRole("link").evaluate((link) => {
-    (link as HTMLElement).blur();
-  });
-  await expect(recoveryIcon.locator("path").first()).toHaveCSS(
-    "animation-name",
-    "icon-turn",
-  );
-  await expect(recoveryIcon).not.toHaveClass(/is-playing/);
 });
 
 test("hero headings keep their halftone backgrounds still", async ({
