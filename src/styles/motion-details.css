@@ -55,31 +55,22 @@
     background-size: 100% 100%;
   }
 
-  /* Ink travels behind the label; the pill lifts and presses as one surface. */
+  /* Paint the sweep inside the pill itself, never as a floating layer. */
   .page .hero-actions .hero-contact {
-    --contact-fill: 0 1;
+    --contact-fill: 0%;
     --contact-badge-background: var(--color-canvas);
     --contact-badge-color: var(--color-action);
 
-    position: relative;
-    isolation: isolate;
     padding-inline-end: 0.625rem;
-    background: var(--color-surface-raised);
+    background-color: var(--color-surface-raised);
+    background-image: linear-gradient(var(--color-aqua) 0 0);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: var(--contact-fill) 100%;
+    background-clip: padding-box;
     border-color: var(--color-action);
     box-shadow: 0.1875rem 0.1875rem 0 var(--color-action);
     color: var(--color-action);
-  }
-
-  .hero-contact::before {
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    background: var(--color-aqua);
-    border-radius: inherit;
-    content: "";
-    pointer-events: none;
-    scale: var(--contact-fill);
-    transform-origin: left;
   }
 
   .hero-contact .contact-arrow-badge {
@@ -88,7 +79,7 @@
   }
 
   .page .hero-actions .hero-contact:is(:focus-visible, .is-pressed) {
-    --contact-fill: 1;
+    --contact-fill: 100%;
     --contact-badge-background: var(--color-action);
     --contact-badge-color: var(--color-surface-raised);
   }
@@ -99,7 +90,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .page .hero-actions .hero-contact:hover {
-      --contact-fill: 1;
+      --contact-fill: 100%;
       --contact-badge-background: var(--color-action);
       --contact-badge-color: var(--color-surface-raised);
 
@@ -332,12 +323,9 @@
 
     .page .hero-actions .hero-contact {
       transition:
+        background-size var(--motion-route) var(--motion-ease-settle),
         box-shadow var(--motion-standard) var(--motion-ease-settle),
         translate var(--motion-route) var(--motion-ease-settle);
-    }
-
-    .hero-contact::before {
-      transition: scale var(--motion-route) var(--motion-ease-settle);
     }
 
     .hero-contact .contact-arrow-badge {
