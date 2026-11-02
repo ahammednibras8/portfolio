@@ -128,13 +128,14 @@ const prepare = () => {
     { threshold: [0, 0.3] },
   );
 
-  for (const piece of pieces) {
-    // Initial and anchor-restored views stay put. Nothing ever waits hidden.
-    if (
-      piece.getBoundingClientRect().top <= innerHeight ||
-      piece.contains(document.activeElement)
-    )
-      continue;
+  // Read the complete layout before adding classes; don't alternate reads and writes.
+  // Initial and anchor-restored views stay put. Nothing ever waits hidden.
+  const waiting = pieces.filter(
+    (piece) =>
+      piece.getBoundingClientRect().top > innerHeight &&
+      !piece.contains(document.activeElement),
+  );
+  for (const piece of waiting) {
     pending.add(piece);
     piece.classList.add("zoom-ready");
     observer.observe(piece);
