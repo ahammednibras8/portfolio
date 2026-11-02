@@ -72,14 +72,14 @@
     color: var(--color-action);
   }
 
-  .page .hero-actions .hero-action {
-    --hero-sweep: var(--color-action-active);
-    --hero-badge-rest: var(--color-aqua);
-    --hero-badge-active: var(--color-surface-raised);
-    --hero-badge-active-ink: var(--color-action);
+  .page .hero-actions .hero-action.hero-cta {
+    --hero-sweep: #ffc1a6;
+    --hero-badge-rest: var(--color-surface-raised);
+    --hero-badge-active: var(--color-action);
+    --hero-badge-active-ink: var(--color-surface-raised);
 
-    background-color: var(--color-action);
-    color: var(--color-surface-raised);
+    background-color: #f5a080;
+    color: var(--color-action);
   }
 
   .hero-cta .hero-arrow-badge {
