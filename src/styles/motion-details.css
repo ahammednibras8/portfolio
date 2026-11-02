@@ -343,21 +343,40 @@
     .hero-contact .contact-arrow-badge {
       transition:
         background-color var(--motion-standard) var(--motion-ease-settle),
-        color var(--motion-standard) var(--motion-ease-settle);
+        color var(--motion-standard) var(--motion-ease-settle),
+        scale var(--motion-route) var(--motion-ease-settle),
+        rotate var(--motion-route) var(--motion-ease-settle);
     }
 
     .page .hero-actions .hero-contact:focus-visible {
       translate: -0.125rem -0.125rem;
     }
 
+    /* The badge owns feedback; its SVG parts keep their independent loop. */
+    .hero-contact:focus-visible .contact-arrow-badge {
+      scale: 1.12;
+      rotate: -12deg;
+    }
+
     @media (hover: hover) and (pointer: fine) {
       .page .hero-actions .hero-contact:hover {
         translate: -0.125rem -0.125rem;
+      }
+
+      .hero-contact:hover .contact-arrow-badge {
+        scale: 1.12;
+        rotate: -12deg;
       }
     }
 
     .page .hero-actions .hero-contact.is-pressed {
       translate: 0.125rem 0.125rem;
+      transition-duration: var(--motion-short);
+    }
+
+    .hero-contact.is-pressed .contact-arrow-badge {
+      scale: 0.96;
+      rotate: 0deg;
       transition-duration: var(--motion-short);
     }
 
