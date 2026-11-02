@@ -17,6 +17,7 @@ const motionAllowed = () =>
   !reducedMotion.matches && !forcedColors.matches && !printing.matches;
 
 const icons = [...document.querySelectorAll<SVGElement>("main svg.lucide")];
+const visibleIcons = new Set<SVGElement>();
 const controls = [
   ...document.querySelectorAll<HTMLButtonElement>(".icon-motion-toggle"),
 ];
@@ -38,20 +39,21 @@ const scrollPosition = () =>
   );
 let lastScrollY = scrollPosition();
 let directionFrame = 0;
-let nextBackward = false;
+let backward = false;
+const loopsAllowed = () => motionAllowed() && !paused && !document.hidden;
 const resetScroll = () => {
   cancelAnimationFrame(directionFrame);
   directionFrame = 0;
   lastScrollY = scrollPosition();
 };
 
-const setDirection = (backward: boolean) => {
-  const root = document.documentElement;
-  if (root.classList.contains("icon-loops-backward") === backward) return;
-
+const syncDirections = (targets: Iterable<SVGElement>) => {
+  const changing = [...targets].filter(
+    (icon) => icon.classList.contains("is-backward") !== backward,
+  );
   // Mirror the active phase as CSS reverses it: the pose stays exactly the same.
   // Positive clocks keep infinite loops away from a negative-playback endpoint.
-  const phases = icons.flatMap((icon) =>
+  const phases = changing.flatMap((icon) =>
     icon.getAnimations({ subtree: true }).flatMap((animation) => {
       const target = (animation.effect as KeyframeEffect | null)?.target;
       if (
@@ -65,20 +67,31 @@ const setDirection = (backward: boolean) => {
       if (typeof duration !== "number" || duration <= 0) return [];
       const time = Number(animation.currentTime ?? 0);
       const offset = Number(delay ?? 0);
+      // Waiting icons keep their original delay and unanimated resting pose.
+      if (animation.currentTime === null || time < offset) return [];
       const phase = (((time - offset) % duration) + duration) % duration;
       return [{ animation, time: offset + duration - phase }];
     }),
   );
-  root.classList.toggle("icon-loops-backward", backward);
+  // Read the whole visible batch before applying any style or clock changes.
+  for (const icon of changing) icon.classList.toggle("is-backward", backward);
   for (const { animation, time } of phases) animation.currentTime = time;
+};
+
+const setDirection = (nextBackward: boolean) => {
+  if (backward === nextBackward) return;
+  backward = nextBackward;
+  document.documentElement.classList.toggle("icon-loops-backward", backward);
+  syncDirections(visibleIcons);
 };
 
 const updateLoops = () => {
   resetScroll();
   const blocked = !motionAllowed();
+  if (loopsAllowed()) syncDirections(visibleIcons);
   document.documentElement.classList.toggle(
     "icon-loops-running",
-    !blocked && !paused && !document.hidden,
+    loopsAllowed(),
   );
   for (const control of controls) {
     control.disabled = blocked;
@@ -108,8 +121,14 @@ if (icons.length > 0 && controls.length > 0) {
     });
   }
   const observer = new IntersectionObserver((entries) => {
-    for (const { isIntersecting, target } of entries)
-      target.classList.toggle("is-in-view", isIntersecting);
+    for (const { isIntersecting, target } of entries) {
+      const icon = target as SVGElement;
+      if (isIntersecting) {
+        visibleIcons.add(icon);
+        if (loopsAllowed()) syncDirections([icon]);
+      } else visibleIcons.delete(icon);
+      icon.classList.toggle("is-in-view", isIntersecting);
+    }
   });
   icons.forEach((icon, index) => {
     icon.style.setProperty("--icon-loop-delay", `${(index % 5) * 140}ms`);
@@ -126,18 +145,20 @@ if (icons.length > 0 && controls.length > 0) {
   addEventListener(
     "scroll",
     () => {
-      const position = scrollPosition();
-      const distance = position - lastScrollY;
-      // Ignore small input jitter while allowing slow movement to accumulate.
-      if (Math.abs(distance) < 4) return;
-      lastScrollY = position;
-      if (!motionAllowed() || paused || document.hidden) return;
-      nextBackward = distance < 0;
+      if (!loopsAllowed()) {
+        lastScrollY = scrollY;
+        return;
+      }
       if (directionFrame) return;
       directionFrame = requestAnimationFrame(() => {
         directionFrame = 0;
-        if (motionAllowed() && !paused && !document.hidden)
-          setDirection(nextBackward);
+        if (!loopsAllowed()) return;
+        // Read geometry once per frame, not once per incoming scroll event.
+        const position = scrollPosition();
+        const distance = position - lastScrollY;
+        if (Math.abs(distance) < 4) return;
+        lastScrollY = position;
+        setDirection(distance < 0);
       });
     },
     { passive: true },
@@ -162,7 +183,8 @@ const enableTilt = (portrait: HTMLElement) => {
   const share = (angle: number) =>
     Math.max(-1, Math.min(1, angle / fullTiltAngle));
   const lean = ({ beta, gamma }: DeviceOrientationEvent) => {
-    if (!motionAllowed() || beta === null || gamma === null) return;
+    if (!motionAllowed() || document.hidden || beta === null || gamma === null)
+      return;
 
     portrait.style.setProperty("--tilt-x", `${share(gamma) * tiltReach}px`);
     portrait.style.setProperty(
@@ -175,9 +197,13 @@ const enableTilt = (portrait: HTMLElement) => {
   };
   const listen = () => {
     stop();
-    if (active && visible && motionAllowed())
+    if (active && visible && !document.hidden && motionAllowed())
       addEventListener("deviceorientation", lean);
   };
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stop();
+    else listen();
+  });
 
   for (const preference of [reducedMotion, forcedColors, printing]) {
     preference.addEventListener?.("change", () => {

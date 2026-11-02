@@ -181,8 +181,8 @@
   @media (prefers-reduced-motion: no-preference) {
     @keyframes portrait-arrive {
       0% {
-        opacity: 0.85;
-        scale: 0.96;
+        opacity: 0.92;
+        scale: 0.98;
       }
 
       100% {
@@ -193,7 +193,7 @@
 
     @keyframes hero-arrive {
       0% {
-        scale: 0.985;
+        scale: 0.99;
       }
 
       100% {
@@ -267,7 +267,7 @@
     }
 
     .hero-name {
-      animation: ink-highlight 720ms var(--motion-ease-settle) 100ms backwards;
+      animation: ink-highlight 500ms var(--motion-ease-settle) 100ms backwards;
     }
 
     .route-link::before {

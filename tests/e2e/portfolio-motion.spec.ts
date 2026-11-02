@@ -17,7 +17,11 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
   const samples = await page.evaluate(() =>
     [".hero-portrait", "#intro > .speech-bubble"].map((selector) => {
       const element = document.querySelector(selector) as HTMLElement;
-      const animation = element.getAnimations()[0];
+      const name =
+        selector === ".hero-portrait" ? "portrait-arrive" : "hero-arrive";
+      const animation = element
+        .getAnimations()
+        .find((motion) => (motion as CSSAnimation).animationName === name);
       if (!animation?.effect)
         throw new Error("Expected a composed hero entrance.");
       const timing = animation.effect.getTiming();
@@ -52,8 +56,11 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
     }),
   );
   expect(samples.map(({ delay }) => delay)).toEqual([80, 160]);
+  expect(samples[0]?.frames[0]?.scale).toBeCloseTo(0.98);
+  expect(samples[0]?.frames[0]?.opacity).toBeCloseTo(0.92);
+  expect(samples[1]?.frames[0]?.scale).toBeCloseTo(0.99);
   for (const { duration, frames, iterations } of samples) {
-    expect(duration).toBe(620);
+    expect(duration).toBe(480);
     expect(iterations).toBe(1);
     const first = frames[0];
     const last = frames[2];
@@ -65,7 +72,7 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
     expect(last.y).toBeCloseTo(first.y, 1);
     expect(
       frames.every(
-        ({ opacity, translate }) => opacity >= 0.85 && translate === "none",
+        ({ opacity, translate }) => opacity >= 0.92 && translate === "none",
       ),
     ).toBe(true);
   }
@@ -90,6 +97,53 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
       ),
   ).toBe(false);
 });
+
+for (const viewport of [
+  { width: 1280, height: 800, label: "desktop" },
+  { width: 390, height: 844, label: "phone" },
+]) {
+  test(`motion-enabled ${viewport.label} composition stays readable`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      document.addEventListener("DOMContentLoaded", () => {
+        for (const element of document.querySelectorAll(
+          "#intro > .hero-portrait, #intro > .speech-bubble, .hero-name",
+        ))
+          for (const animation of element.getAnimations()) animation.pause();
+      });
+    });
+    await page.goto("/");
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      for (const element of document.querySelectorAll(
+        "#intro > .hero-portrait, #intro > .speech-bubble, .hero-name",
+      )) {
+        for (const animation of element.getAnimations()) {
+          if (!(animation instanceof CSSAnimation)) continue;
+          const timing = animation.effect?.getTiming();
+          animation.currentTime =
+            Number(timing?.delay ?? 0) + Number(timing?.duration) / 2;
+        }
+      }
+    });
+    await expect(page.locator("h1")).toHaveCSS("opacity", "1");
+    await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath(`motion-polish-${viewport.label}.png`),
+    });
+  });
+}
 
 test("reading units never zoom inside another zooming unit", async ({
   page,
@@ -136,11 +190,11 @@ test("project entrances have a short capped stagger in reading order", async ({
       }),
     );
   expect(timings.map(({ delay }) => Math.round(delay ?? 0))).toEqual([
-    0, 60, 120, 180, 180, 180,
+    0, 40, 80, 120, 120, 120,
   ]);
   expect(
     timings.every(
-      ({ duration, iterations }) => duration === 620 && iterations === 1,
+      ({ duration, iterations }) => duration === 480 && iterations === 1,
     ),
   ).toBe(true);
 });
@@ -296,6 +350,71 @@ test.describe("touch motion preferences", () => {
         element.style.getPropertyValue("--tilt-x"),
       ),
     ).toBe("");
+  });
+});
+
+test.describe("background portrait sensor", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "Phone sensors are exercised in Chromium.",
+  );
+  test.use({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 412, height: 915 },
+  });
+  test("sensor updates pause in hidden tabs and do not resume offscreen", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        get: () => document.documentElement.hasAttribute("data-test-hidden"),
+      });
+    });
+    await page.goto("/");
+    const portrait = page.locator(".hero-portrait");
+    const lean = async (gamma: number) => {
+      await page.evaluate(
+        (gamma) =>
+          dispatchEvent(
+            new DeviceOrientationEvent("deviceorientation", {
+              beta: 75,
+              gamma,
+            }),
+          ),
+        gamma,
+      );
+      return portrait.evaluate((element) =>
+        element.style.getPropertyValue("--tilt-x"),
+      );
+    };
+    await expect.poll(() => lean(30)).toBe("6px");
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("data-test-hidden", "");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(await lean(-30)).toBe("6px");
+    await page.evaluate(() => {
+      document.documentElement.removeAttribute("data-test-hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect.poll(() => lean(-30)).toBe("-6px");
+    await page
+      .locator("#contact")
+      .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+    await expect(page.locator("#contact")).toBeInViewport();
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await page.evaluate(() =>
+      document.dispatchEvent(new Event("visibilitychange")),
+    );
+    expect(await lean(30)).toBe("-6px");
   });
 });
 

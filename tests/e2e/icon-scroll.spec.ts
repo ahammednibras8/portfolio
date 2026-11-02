@@ -139,6 +139,217 @@ test("tiny scroll jitter is ignored but slow movement accumulates", async ({
   await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
 });
 
+test("scroll reversals leave offscreen clocks untouched", async ({ page }) => {
+  await prepare(page);
+  await scrollTo(page, 100);
+  const detail = page.locator("#contact .lucide-mail > path");
+  const before = await detail.evaluate(async (element) => {
+    const animation = element.getAnimations()[0];
+    if (!animation) throw new Error("Expected an offscreen icon loop.");
+    await animation.ready;
+    animation.currentTime =
+      Number(animation.effect?.getTiming().delay ?? 0) + 1440;
+    return animation.currentTime;
+  });
+  await scrollTo(page, 60);
+  await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
+  await expect(detail).toHaveCSS("animation-play-state", "paused");
+  await expect(detail).toHaveCSS("animation-direction", "normal");
+  expect(
+    await detail.evaluate((element) => element.getAnimations()[0]?.currentTime),
+  ).toBe(before);
+  await scrollTo(page, 100);
+  await expect(arrow(page)).toHaveCSS("animation-direction", "normal");
+  expect(
+    await detail.evaluate((element) => element.getAnimations()[0]?.currentTime),
+  ).toBe(before);
+});
+
+test("an icon re-entering while paused synchronizes direction only on resume", async ({
+  page,
+}) => {
+  await prepare(page);
+  await scrollTo(page, 100);
+  await scrollTo(page, 60);
+  await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
+  await page.locator(".hero-caption .icon-motion-toggle").click();
+  const before = await page
+    .locator("#contact .lucide-mail")
+    .evaluate(async (element) => {
+      const animation = element.getAnimations({ subtree: true })[0];
+      if (!animation) throw new Error("Expected an offscreen loop.");
+      for (
+        let parent = element.parentElement;
+        parent && parent !== document.querySelector("main");
+        parent = parent.parentElement
+      ) {
+        parent.style.scale = "none";
+        parent.style.transform = "none";
+      }
+      await animation.ready;
+      animation.id = "reentry-loop";
+      animation.currentTime =
+        Number(animation.effect?.getTiming().delay ?? 0) + 1440;
+      const clock = Object.getOwnPropertyDescriptor(
+        Animation.prototype,
+        "currentTime",
+      );
+      if (!clock?.get || !clock.set)
+        throw new Error("Expected an animation clock.");
+      element.setAttribute("data-seeks", "0");
+      Object.defineProperty(animation, "currentTime", {
+        configurable: true,
+        get: () => clock.get?.call(animation),
+        set(time) {
+          element.setAttribute(
+            "data-seeks",
+            String(Number(element.getAttribute("data-seeks")) + 1),
+          );
+          clock.set?.call(animation, time);
+        },
+      });
+      const time = animation.currentTime;
+      Object.assign((element as SVGElement).style, {
+        position: "fixed",
+        top: "100px",
+        left: "16px",
+      });
+      return time;
+    });
+  const returning = page.locator("#contact .lucide-mail");
+  await expect(returning).toHaveClass(/is-in-view/);
+  await expect(returning.locator("path")).toHaveCSS(
+    "animation-direction",
+    "normal",
+  );
+  await expect(returning).toHaveAttribute("data-seeks", "0");
+  expect(
+    await returning.evaluate(
+      (element) => element.getAnimations({ subtree: true })[0]?.currentTime,
+    ),
+  ).toBe(before);
+  await page.locator(".hero-caption .icon-motion-toggle").click();
+  await expect(returning.locator("path")).toHaveCSS(
+    "animation-direction",
+    "reverse",
+  );
+  await expect(returning.locator("path")).toHaveCSS(
+    "animation-play-state",
+    "running",
+  );
+  await expect(returning).toHaveAttribute("data-seeks", "1");
+  expect(
+    await returning.evaluate(
+      (element) => element.getAnimations({ subtree: true })[0]?.id,
+    ),
+  ).toBe("reentry-loop");
+});
+
+for (const direction of ["normal", "reverse"] as const) {
+  test(`a restored icon keeps its initial delay when synchronizing to ${direction}`, async ({
+    page,
+  }) => {
+    await prepare(page);
+    await scrollTo(page, 100);
+    if (direction === "reverse") await scrollTo(page, 60);
+    await page.locator("#contact .lucide-mail").evaluate((icon, direction) => {
+      icon.classList.toggle("is-backward", direction === "normal");
+      (icon as SVGElement).style.setProperty("--icon-loop-delay", "500ms");
+    }, direction);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(arrow(page)).toHaveCSS("animation-name", "none");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(
+      page.locator(".hero-caption .icon-motion-toggle"),
+    ).toBeEnabled();
+    await page.locator("#contact .lucide-mail").evaluate(async (icon) => {
+      const animation = icon.getAnimations({ subtree: true })[0];
+      const clock = Object.getOwnPropertyDescriptor(
+        Animation.prototype,
+        "currentTime",
+      );
+      if (!animation || !clock?.get || !clock.set)
+        throw new Error("Expected an animation clock.");
+      await animation.ready;
+      if (animation.currentTime !== 0)
+        throw new Error("Expected a waiting offscreen icon.");
+      icon.setAttribute("data-seeks", "0");
+      Object.defineProperty(animation, "currentTime", {
+        configurable: true,
+        get: () => clock.get?.call(animation),
+        set(time) {
+          icon.setAttribute(
+            "data-seeks",
+            String(Number(icon.getAttribute("data-seeks")) + 1),
+          );
+          clock.set?.call(animation, time);
+        },
+      });
+      for (
+        let parent = icon.parentElement;
+        parent && parent !== document.querySelector("main");
+        parent = parent.parentElement
+      ) {
+        parent.style.scale = "none";
+        parent.style.transform = "none";
+      }
+      animation.id = "delay-probe";
+      Object.assign((icon as SVGElement).style, {
+        position: "fixed",
+        top: "100px",
+        left: "16px",
+      });
+    });
+    const returning = page.locator("#contact .lucide-mail");
+    await expect(returning).toHaveClass(/is-in-view/);
+    await expect(returning.locator("path")).toHaveCSS(
+      "animation-direction",
+      direction,
+    );
+    await expect(returning).toHaveAttribute("data-seeks", "0");
+    expect(
+      await returning.evaluate(
+        (icon) => icon.getAnimations({ subtree: true })[0]?.id,
+      ),
+    ).toBe("delay-probe");
+  });
+}
+
+test("a burst of scroll events reads page geometry once per frame", async ({
+  page,
+}) => {
+  await prepare(page);
+  await scrollTo(page, 100);
+  const reads = await page.evaluate(async () => {
+    const getter = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      "scrollHeight",
+    )?.get;
+    if (!getter) throw new Error("Expected native scroll geometry.");
+    let reads = 0;
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      get() {
+        reads++;
+        return getter.call(this);
+      },
+    });
+    try {
+      for (let index = 0; index < 20; index++)
+        dispatchEvent(new Event("scroll"));
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+      return reads;
+    } finally {
+      Reflect.deleteProperty(document.documentElement, "scrollHeight");
+    }
+  });
+  expect(reads).toBeGreaterThan(0);
+  // One reading-progress frame and one icon-direction frame share the burst.
+  expect(reads).toBeLessThanOrEqual(2);
+});
+
 test("system preferences suppress scroll reversal and do not revive icon motion", async ({
   page,
   browserName,
