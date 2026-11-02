@@ -72,7 +72,7 @@
     transform-origin: 12px 12px;
   }
 
-  /* Hover owns the glyph; its looping details keep their own clocks. */
+  /* A restrained hover response frames one object-specific gesture. */
   .page .lucide:not(.hero-cta .lucide) {
     transform-box: view-box;
     transform-origin: 50% 50%;
@@ -93,16 +93,17 @@
   }
 
   .page .lucide-hand {
-    --icon-hover-turn: -10deg;
+    --icon-hover-turn: -6deg;
   }
 
   .page .lucide-rotate-cw {
-    --icon-hover-turn: 20deg;
+    --icon-hover-turn: 12deg;
   }
 
+  .page .architecture-recovery:has(a:focus-visible) > .lucide,
   .page a:focus-visible .lucide:not(.hero-cta .lucide) {
-    scale: 1.12;
-    rotate: var(--icon-hover-turn, -6deg);
+    scale: 1.06;
+    rotate: var(--icon-hover-turn, 0deg);
     translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
   }
 
@@ -116,28 +117,21 @@
         .run-path li:hover .lucide,
         .architecture-recovery:hover > .lucide
       ):not(.hero-cta .lucide) {
-      scale: 1.12;
-      rotate: var(--icon-hover-turn, -6deg);
+      scale: 1.06;
+      rotate: var(--icon-hover-turn, 0deg);
       translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
     }
   }
 
-  /*
-   * Eight-second cycle: 3s of movement (37.5%), then 5s at rest.
-   * Keep animation identity when paused, off-screen, or in a background tab.
-   */
-  .page .lucide.icon-loop > * {
-    animation: var(--icon-part-motion, none) 8000ms var(--motion-ease-fluid)
-      calc(var(--icon-loop-delay, 0ms) + var(--icon-part-delay, 0ms)) infinite;
-    animation-play-state: paused;
-  }
-
-  .page .lucide.icon-loop.is-backward > * {
-    animation-direction: reverse;
-  }
-
-  .icon-loops-running .page .lucide.icon-loop.is-in-view > * {
-    animation-play-state: running;
+  /* The class exists only for a finite greeting or deliberate interaction. */
+  .page .lucide.icon-active > * {
+    animation-name: var(--icon-part-motion, none);
+    animation-duration: var(--motion-gesture);
+    animation-timing-function: var(--motion-ease-fluid);
+    animation-delay: calc(
+      var(--icon-arrival-delay, 0ms) + var(--icon-part-delay, 0ms)
+    );
+    animation-fill-mode: both;
   }
 
   @media (hover: hover) {
@@ -169,17 +163,16 @@
       translate: 0;
     }
 
-    15.75% {
+    42% {
       opacity: 0;
       translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    16.125% {
+    43% {
       opacity: 0;
       translate: calc(var(--icon-x, 0px) * -1) calc(var(--icon-y, 0px) * -1);
     }
 
-    37.5%,
     100% {
       opacity: 1;
       translate: 0;
@@ -364,272 +357,257 @@
 
   @keyframes icon-hand-wave {
     0%,
-    37.5%,
     100% {
       rotate: 0deg;
     }
 
-    7.5%,
-    22.5% {
+    20%,
+    60% {
       rotate: 12deg;
     }
 
-    15%,
-    30% {
+    40%,
+    80% {
       rotate: -6deg;
     }
   }
 
   @keyframes icon-direction {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
     }
 
-    6.75% {
+    18% {
       translate: calc(var(--icon-x, 0px) * -0.2) calc(var(--icon-y, 0px) * -0.2);
     }
 
-    18% {
+    48% {
       translate: var(--icon-x, 0) var(--icon-y, 0);
     }
 
-    29.25% {
+    78% {
       translate: calc(var(--icon-x, 0px) * 0.15) calc(var(--icon-y, 0px) * 0.15);
     }
   }
 
   @keyframes icon-handle {
     0%,
-    37.5%,
     100% {
       scale: 1 1;
     }
 
-    12.75% {
+    34% {
       scale: 1 1.07;
     }
 
-    23.25% {
+    62% {
       scale: 1 1.025;
     }
 
-    32.25% {
+    86% {
       scale: 1 1.004;
     }
   }
 
   @keyframes icon-check-detail {
     0%,
-    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    6.75%,
-    10.5% {
+    18%,
+    28% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    30.75% {
+    82% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-core {
     0%,
-    37.5%,
     100% {
       fill-opacity: 0.12;
     }
 
-    13.5% {
+    36% {
       fill-opacity: 0.45;
     }
 
-    27% {
+    72% {
       fill-opacity: 0.18;
     }
   }
 
   @keyframes icon-data-row {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
     }
 
-    14.25% {
+    38% {
       translate: 0 -1px;
     }
 
-    27% {
+    72% {
       translate: 0 -0.15px;
     }
   }
 
   @keyframes icon-pupil {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
     }
 
-    9.75%,
-    14.25% {
+    26%,
+    38% {
       translate: 1.75px 0;
     }
 
-    23.25%,
-    27% {
+    62%,
+    72% {
       translate: -1.25px 0;
     }
 
-    33.75% {
+    90% {
       translate: -0.1px 0;
     }
   }
 
   @keyframes icon-branch-path {
     0%,
-    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    8.25% {
+    22% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    30.75% {
+    82% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-branch-node {
     0%,
-    37.5%,
     100% {
       scale: 1;
     }
 
-    14.25% {
+    38% {
       scale: 1.1;
     }
 
-    27.75% {
+    74% {
       scale: 1.015;
     }
   }
 
   @keyframes icon-meridian {
     0%,
-    37.5%,
     100% {
       scale: 1 1;
     }
 
-    9.375% {
+    25% {
       scale: 0.15 1;
     }
 
-    18.75% {
+    50% {
       scale: -1 1;
     }
 
-    28.125% {
+    75% {
       scale: -0.15 1;
     }
   }
 
   @keyframes icon-layer {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
     }
 
-    12% {
+    32% {
       translate: 0 var(--icon-y);
     }
 
-    23.25% {
+    62% {
       translate: 0 calc(var(--icon-y) * 0.4);
     }
 
-    32.25% {
+    86% {
       translate: 0 calc(var(--icon-y) * 0.04);
     }
   }
 
   @keyframes icon-panel {
     0%,
-    37.5%,
     100% {
       fill-opacity: 0.12;
     }
 
-    18.75% {
+    50% {
       fill-opacity: 0.38;
     }
   }
 
   @keyframes icon-list-row {
     0%,
-    37.5%,
     100% {
       scale: 1 1;
     }
 
-    9% {
+    24% {
       scale: 0.72 1;
     }
 
-    27% {
+    72% {
       scale: 0.97 1;
     }
   }
 
   @keyframes icon-mail-flap {
     0%,
-    37.5%,
     100% {
       scale: 1 1;
     }
 
-    9.75% {
+    26% {
       scale: 1 0.08;
     }
 
-    16.5%,
-    21% {
+    44%,
+    56% {
       scale: 1 -0.3;
     }
 
-    29.25% {
+    78% {
       scale: 1 0.75;
     }
 
-    34.5% {
+    92% {
       scale: 1 0.98;
     }
   }
 
   @keyframes icon-typing-dot {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
       stroke-opacity: 1;
     }
 
-    13.5% {
+    36% {
       translate: 0 -1.6px;
       stroke-opacity: 0.65;
     }
 
-    27.75% {
+    74% {
       translate: 0 -0.2px;
       stroke-opacity: 0.95;
     }
@@ -637,39 +615,37 @@
 
   @keyframes icon-package-seal {
     0%,
-    37.5%,
     100% {
       stroke-dashoffset: 0;
     }
 
-    9.375% {
+    25% {
       stroke-dashoffset: var(--icon-stroke-length);
     }
 
-    28.125% {
+    75% {
       stroke-dashoffset: 0;
     }
   }
 
   @keyframes icon-exhaust {
     0%,
-    37.5%,
     100% {
       scale: 1;
       stroke-opacity: 1;
     }
 
-    9.375% {
+    25% {
       scale: 0.85;
       stroke-opacity: 0.65;
     }
 
-    18.75% {
+    50% {
       scale: 1.12;
       stroke-opacity: 1;
     }
 
-    28.125% {
+    75% {
       scale: 0.95;
       stroke-opacity: 0.8;
     }
@@ -680,15 +656,14 @@
       rotate: 0deg;
     }
 
-    27% {
+    72% {
       rotate: 330deg;
     }
 
-    33.75% {
+    90% {
       rotate: 356deg;
     }
 
-    37.5%,
     100% {
       rotate: 360deg;
     }
@@ -696,24 +671,22 @@
 
   @keyframes icon-server-light {
     0%,
-    37.5%,
     100% {
       stroke-opacity: 1;
     }
 
-    16.875% {
+    45% {
       stroke-opacity: 0.3;
     }
   }
 
   @keyframes icon-nod {
     0%,
-    37.5%,
     100% {
       translate: 0 0;
     }
 
-    16.875% {
+    45% {
       translate: 0 1px;
     }
   }

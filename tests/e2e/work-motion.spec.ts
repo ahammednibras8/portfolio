@@ -104,6 +104,10 @@ for (const trigger of ["hover", "focus"] as const) {
     await expect(badge).toHaveCSS("background-color", "rgb(223, 243, 244)");
     if (trigger === "hover") await button.hover();
     else await button.focus();
+    await arrow.evaluate((element) => {
+      for (const animation of element.getAnimations({ subtree: true }))
+        animation.pause();
+    });
     // Check the real sweep mid-flight, while its navy label stays readable.
     await button.evaluate(async (element) => {
       const fill = element
@@ -175,21 +179,21 @@ for (const trigger of ["hover", "focus"] as const) {
     await expect(badge).toHaveCSS("rotate", "-12deg");
     await expect(arrow).toHaveCSS("scale", "none");
     await expect(arrow).toHaveCSS("rotate", "none");
-    const loops = await arrow.evaluate((element) =>
+    const gestures = await arrow.evaluate((element) =>
       element.getAnimations({ subtree: true }).map((animation) => ({
         duration: animation.effect?.getTiming().duration,
-        iterations: animation.effect?.getTiming().iterations === Infinity,
+        iterations: animation.effect?.getTiming().iterations,
       })),
     );
-    expect(loops).toEqual([
-      { duration: 8000, iterations: true },
-      { duration: 8000, iterations: true },
+    expect(gestures).toEqual([
+      { duration: 760, iterations: 1 },
+      { duration: 760, iterations: 1 },
     ]);
     await arrow.evaluate((element) => {
       for (const animation of element.getAnimations({ subtree: true })) {
         animation.pause();
         animation.currentTime =
-          Number(animation.effect?.getTiming().delay ?? 0) + 6000;
+          Number(animation.effect?.getTiming().delay ?? 0) + 760;
       }
     });
     await page.screenshot({ path: testInfo.outputPath("work-hover.png") });

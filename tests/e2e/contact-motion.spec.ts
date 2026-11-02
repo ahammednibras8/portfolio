@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 
 for (const trigger of ["hover", "focus"] as const) {
-  test(`Get in touch repeats its A-to-B arrow pass with ${trigger}`, async ({
+  test(`Get in touch makes one A-to-B arrow pass with ${trigger}`, async ({
     page,
   }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -21,6 +21,10 @@ for (const trigger of ["hover", "focus"] as const) {
     );
     if (trigger === "hover") await button.hover();
     else await button.focus();
+    await arrow.evaluate((element) => {
+      for (const animation of element.getAnimations({ subtree: true }))
+        animation.pause();
+    });
     await expect(button).toHaveCSS("translate", "-2px -2px");
     await expect(button).toHaveCSS("scale", "1.025");
     await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
@@ -47,7 +51,7 @@ for (const trigger of ["hover", "focus"] as const) {
         (element) => getComputedStyle(element, "::before").content,
       ),
     ).toBe("none");
-    await expect(arrow).toHaveClass(/is-in-view/);
+    await expect(arrow).toHaveClass(/icon-active/);
     await expect(arrow.locator("path").first()).toHaveCSS(
       "animation-name",
       "icon-arrow-travel",
@@ -57,10 +61,10 @@ for (const trigger of ["hover", "focus"] as const) {
       for (const animation of animations) animation.pause();
       const path = element.querySelector("path");
       if (!path) throw new Error("Expected the original Lucide arrow.");
-      const frames = [0, 0.1575, 0.16125, 0.8].map((fraction) => {
+      const frames = [0, 0.42, 0.43, 1].map((fraction) => {
         for (const animation of animations)
           animation.currentTime =
-            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 8000;
+            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 760;
         return [...element.children].map((part) => {
           const style = getComputedStyle(part);
           return {
@@ -83,7 +87,7 @@ for (const trigger of ["hover", "focus"] as const) {
     expect(sample.timing).toHaveLength(2);
     expect(
       sample.timing.every(
-        (timing) => timing?.duration === 8000 && timing.iterations === Infinity,
+        (timing) => timing?.duration === 760 && timing.iterations === 1,
       ),
     ).toBe(true);
     for (const [index, frame] of sample.frames.entries()) {
@@ -107,11 +111,11 @@ for (const trigger of ["hover", "focus"] as const) {
     );
     await arrow.evaluate((element) => {
       for (const animation of element.getAnimations({ subtree: true }))
-        animation.play();
+        animation.finish();
     });
     await expect(arrow.locator("path").first()).toHaveCSS(
-      "animation-play-state",
-      "running",
+      "animation-name",
+      "none",
     );
 
     await page.screenshot({
@@ -365,7 +369,7 @@ test.describe("on touch screens", () => {
     viewport: { width: 390, height: 844 },
   });
 
-  test("the contact arrow loops without focus and tapping navigates", async ({
+  test("the contact arrow waits for touch and tapping navigates", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -376,11 +380,20 @@ test.describe("on touch screens", () => {
     });
     const arrow = button.locator(".action-arrow");
     await expect(button).not.toBeFocused();
-    await expect(arrow).toHaveClass(/is-in-view/);
+    await expect(arrow).not.toHaveClass(/icon-active/);
+    await expect(arrow.locator("path").first()).toHaveCSS(
+      "animation-name",
+      "none",
+    );
+    await button.dispatchEvent("pointerdown", {
+      pointerType: "touch",
+      button: 0,
+    });
     await expect(arrow.locator("path").first()).toHaveCSS(
       "animation-name",
       "icon-arrow-travel",
     );
+    await button.dispatchEvent("pointercancel", { pointerType: "touch" });
     await button.tap();
     await expect(page).toHaveURL(/#contact$/);
     await expect(
