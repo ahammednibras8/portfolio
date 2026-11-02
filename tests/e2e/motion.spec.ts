@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { parts } from "../../src/data/parts";
+import { freezeCssMotion } from "../helpers/motion";
 
 test("the lifecycle traces its five steps once without moving the text", async ({
   page,
@@ -57,7 +58,9 @@ test("the lifecycle traces its five steps once without moving the text", async (
         connector.currentTime = connector.effect.getTiming().delay ?? 0;
       return {
         delay,
+        duration,
         iterations,
+        connectorTiming: connector?.effect?.getTiming(),
         resting,
         highlight: style.backgroundColor,
         opacity: style.opacity,
@@ -83,6 +86,7 @@ test("the lifecycle traces its five steps once without moving the text", async (
   ]);
   for (const [index, sample] of samples.entries()) {
     expect(sample).toMatchObject({
+      duration: 900,
       iterations: 1,
       resting: "rgb(255, 255, 255)",
       highlight: "rgb(223, 243, 244)",
@@ -92,7 +96,18 @@ test("the lifecycle traces its five steps once without moving the text", async (
       translate: "none",
       stationary: true,
     });
-    if (index < 4) expect(sample.connectorStart).toBe("0 1");
+    if (index < 4) {
+      expect(sample.connectorStart).toBe("0 1");
+      expect(sample.connectorTiming).toMatchObject({
+        delay: sample.delay + 240,
+        duration: 640,
+        iterations: 1,
+      });
+      expect(
+        Number(sample.connectorTiming?.delay) +
+          Number(sample.connectorTiming?.duration),
+      ).toBeLessThan(sample.delay + Number(sample.duration));
+    }
   }
 
   await steps.evaluateAll((elements) => {
@@ -320,6 +335,7 @@ test("project cards stay level and release their press for focus and reduced mot
 test("icon gestures use attached hinges, separated layers, and one clockwise turn", async ({
   page,
 }) => {
+  await freezeCssMotion(page, ".page .lucide.icon-active > *");
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   await page.evaluate(() => {
@@ -390,7 +406,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
 
       animation.pause();
       const timing = animation.effect.getTiming();
-      const phase = 0.72;
+      const phase = 0.5;
       animation.currentTime =
         Number(timing.delay ?? 0) +
         Number(timing.duration) *
@@ -400,7 +416,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       return turn;
     }),
   );
-  expect(turns).toEqual([330, 330]);
+  expect(turns).toEqual([180, 180]);
 });
 
 test("moving inside a heading does not replay its completed icon gesture", async ({

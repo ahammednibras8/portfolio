@@ -10,8 +10,8 @@ const primaryLinks = ["/", "/#work", "/#about", "/#contact"];
 
 const underlineHidden = "inset(0px 100% 0px 0px)";
 const underlineDrawn = "inset(0px)";
-const settleEase = "cubic-bezier(0.16, 1, 0.3, 1)";
-const gestureEase = "cubic-bezier(0.4, 0, 0.2, 1)";
+const settleEase = "cubic-bezier(0.22, 0.61, 0.36, 1)";
+const gestureEase = "cubic-bezier(0.45, 0, 0.55, 1)";
 const underlineClip = (element: Locator) =>
   element.evaluate((node) => getComputedStyle(node, "::after").clipPath);
 
@@ -406,7 +406,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   expect(atRest.property).toBe(
     "background-size, translate, rotate, box-shadow",
   );
-  expect(atRest.duration).toBe("0.36s, 0.24s, 0.24s, 0.18s");
+  expect(atRest.duration).toBe("0.64s, 0.3s, 0.3s, 0.22s");
   expect(atRest.timing).toBe(
     [gestureEase, ...Array(3).fill(settleEase)].join(", "),
   );
@@ -596,7 +596,7 @@ test("the headline stays solid while its highlight draws once", async ({
   expect(introduction.easing).toBe(settleEase);
   expect(introduction.timing).toMatchObject({
     delay: 120,
-    duration: 460,
+    duration: 640,
     iterations: 1,
   });
 
@@ -1060,7 +1060,7 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   );
   await expect(hand.locator("path").first()).toHaveCSS(
     "animation-duration",
-    "0.76s",
+    "0.9s",
   );
   await expect(hand.locator("path").first()).toHaveCSS(
     "animation-delay",
@@ -1162,7 +1162,7 @@ test("icon details make one gesture while the SVG and its outline stay still", a
     expect(state.count, type).toBe(moving.length);
     for (const part of moving) {
       expect(part, type).toMatchObject({
-        duration: "0.76s",
+        duration: "0.9s",
         iterations: "1",
         timing: gestureEase,
       });
@@ -1309,7 +1309,7 @@ test.describe("on a touch screen", () => {
     await flap.scrollIntoViewIfNeeded();
     await expect(envelope).toHaveClass(/\bicon-active\b/);
     await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
-    await expect(flap).toHaveCSS("animation-duration", "0.62s");
+    await expect(flap).toHaveCSS("animation-duration", "0.76s");
     await expect(flap).toHaveCSS("animation-iteration-count", "1");
     await expect(envelope).toHaveCSS("animation-name", "none");
     await finishGesture(envelope);

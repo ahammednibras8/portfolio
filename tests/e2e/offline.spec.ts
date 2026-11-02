@@ -74,7 +74,7 @@ test("the offline page lines up with the header", async ({ page }) => {
     rings: ["none", "none"],
     outer: "none",
     detail: "icon-server-light",
-    timing: "cubic-bezier(0.4, 0, 0.2, 1)",
+    timing: "cubic-bezier(0.45, 0, 0.55, 1)",
     iterations: "1",
   });
   await expect(page.locator(".offline-signal svg")).not.toHaveClass(

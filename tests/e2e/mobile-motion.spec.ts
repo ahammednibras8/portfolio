@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { freezeHero } from "../helpers/motion";
 
 const freezeGestures = (page: Page) =>
   page.addInitScript(() => {
@@ -37,21 +38,7 @@ test.describe("mobile motion budget", () => {
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await freezeGestures(page);
-    await page.addInitScript(() => {
-      document.addEventListener("DOMContentLoaded", () => {
-        for (const element of document.querySelectorAll(
-          "#intro > .hero-portrait, #intro > .speech-bubble",
-        ))
-          for (const animation of element.getAnimations())
-            if (
-              animation instanceof CSSAnimation &&
-              ["portrait-arrive", "hero-arrive"].includes(
-                animation.animationName,
-              )
-            )
-              animation.pause();
-      });
-    });
+    await freezeHero(page);
     await page.goto("/");
     expect(
       await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
@@ -91,8 +78,8 @@ test.describe("mobile motion budget", () => {
       });
       return { tokens, arrivals };
     });
-    expect(timing.tokens).toEqual([90, 140, 180, 400, 24, 620]);
-    expect(timing.arrivals).toEqual([400, 400]);
+    expect(timing.tokens).toEqual([100, 180, 240, 480, 24, 760]);
+    expect(timing.arrivals).toEqual([480, 480]);
     const button = page.getByRole("link", { name: "See my work", exact: true });
     await button.scrollIntoViewIfNeeded();
     const icon = button.locator("svg");
@@ -123,18 +110,18 @@ test.describe("mobile motion budget", () => {
     }));
     expect(gestures.outer).toBe(0);
     expect(gestures.parts).toEqual([
-      { duration: 620, iterations: 1, delay: 0, state: "paused" },
-      { duration: 620, iterations: 1, delay: 0, state: "paused" },
+      { duration: 760, iterations: 1, delay: 0, state: "paused" },
+      { duration: 760, iterations: 1, delay: 0, state: "paused" },
     ]);
     await expect(button).toHaveCSS("scale", "0.985");
-    await expect(button).toHaveCSS("transition-duration", "0.09s");
+    await expect(button).toHaveCSS("transition-duration", "0.1s");
     await button.dispatchEvent("pointercancel", { pointerType: "touch" });
     await expect(button).toHaveCSS("scale", "none");
     await expect(button).toHaveCSS("background-size", "0% 100%");
     const durations = await button.evaluate((element) =>
       getComputedStyle(element).transitionDuration.split(", ").map(parseFloat),
     );
-    expect(durations[0]).toBeCloseTo(0.27);
+    expect(durations[0]).toBeCloseTo(0.36);
     // Releasing a press leaves its gesture free to complete.
     await expect(icon).toHaveClass(/icon-active/);
     await icon.evaluate(async (element) => {
@@ -150,6 +137,97 @@ test.describe("mobile motion budget", () => {
     await expect(
       page.getByRole("heading", { name: "Selected work", exact: true }),
     ).toBeInViewport();
+  });
+
+  test("project cards ease through touch press and release without snapping", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/#work");
+    const card = page.locator(".project-list .route-link").first();
+    await card.focus();
+    await card.evaluate((element) => (element as HTMLElement).blur());
+    const result = await card.evaluate((element) => {
+      const durations = getComputedStyle(element).transitionDuration;
+      const down = new PointerEvent("pointerdown", {
+        pointerType: "touch",
+        button: 0,
+        bubbles: true,
+        cancelable: true,
+      });
+      element.dispatchEvent(down);
+      const sample = () => {
+        const transition = element
+          .getAnimations()
+          .find(
+            (animation) =>
+              animation instanceof CSSTransition &&
+              animation.transitionProperty === "scale",
+          );
+        if (!transition?.effect) throw new Error("Expected eased card scale.");
+        transition.pause();
+        const duration = Number(transition.effect.getTiming().duration);
+        transition.currentTime = duration / 2;
+        const midpoint = parseFloat(getComputedStyle(element).scale);
+        transition.finish();
+        const endpoint = getComputedStyle(element).scale;
+        return { duration, midpoint, endpoint };
+      };
+      const press = sample();
+      element.dispatchEvent(
+        new PointerEvent("pointercancel", {
+          pointerType: "touch",
+          bubbles: true,
+        }),
+      );
+      const release = sample();
+      return { durations, press, release, prevented: down.defaultPrevented };
+    });
+    expect(result.durations).toBe("0.24s, 0.24s, 0.18s, 0.1s");
+    expect(result.prevented).toBe(false);
+    for (const sample of [result.press, result.release]) {
+      expect(sample.duration).toBe(100);
+      expect(sample.midpoint).toBeGreaterThan(0.985);
+      expect(sample.midpoint).toBeLessThan(1);
+    }
+    expect(result.press.endpoint).toBe("0.985");
+    expect(result.release.endpoint).toBe("none");
+    await expect(card).not.toHaveClass(/is-pressed/);
+  });
+
+  test("mobile lifecycle connectors finish before their highlight is cleaned up", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/#evidence");
+    const step = page.locator(".run-path li").first();
+    await expect(step).toHaveClass(/is-tracing/);
+    const timings = await step.evaluate((element) =>
+      element
+        .getAnimations({ subtree: true })
+        .filter(
+          (animation) =>
+            animation instanceof CSSAnimation &&
+            ["run-step-wash", "run-line-draw"].includes(
+              animation.animationName,
+            ),
+        )
+        .map((animation) => ({
+          name: (animation as CSSAnimation).animationName,
+          ...animation.effect?.getTiming(),
+        })),
+    );
+    const wash = timings.find(({ name }) => name === "run-step-wash");
+    const connector = timings.find(({ name }) => name === "run-line-draw");
+    expect(wash).toMatchObject({ duration: 760, iterations: 1 });
+    expect(connector).toMatchObject({
+      duration: 480,
+      iterations: 1,
+      delay: Number(wash?.delay) + 240,
+    });
+    expect(Number(connector?.delay) + Number(connector?.duration)).toBeLessThan(
+      Number(wash?.delay) + Number(wash?.duration),
+    );
   });
 
   test("startup reads all entrance positions before writing waiting classes", async ({

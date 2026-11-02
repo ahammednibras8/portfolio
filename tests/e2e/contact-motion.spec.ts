@@ -64,7 +64,7 @@ for (const trigger of ["hover", "focus"] as const) {
       const frames = [0, 0.42, 0.43, 1].map((fraction) => {
         for (const animation of animations)
           animation.currentTime =
-            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 760;
+            Number(animation.effect?.getTiming().delay ?? 0) + fraction * 900;
         return [...element.children].map((part) => {
           const style = getComputedStyle(part);
           return {
@@ -87,7 +87,7 @@ for (const trigger of ["hover", "focus"] as const) {
     expect(sample.timing).toHaveLength(2);
     expect(
       sample.timing.every(
-        (timing) => timing?.duration === 760 && timing.iterations === 1,
+        (timing) => timing?.duration === 900 && timing.iterations === 1,
       ),
     ).toBe(true);
     for (const [index, frame] of sample.frames.entries()) {

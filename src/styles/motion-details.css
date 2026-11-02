@@ -166,22 +166,48 @@
     scale: 1 1;
   }
 
-  /* Contact cards share the button's contained ink sweep, behind the content. */
+  /* A feathered ink wash expands from the icon corner, inside the card paint. */
   .page :where(#contact) .route-link {
-    background-image: linear-gradient(var(--color-aqua) 0 0);
+    --contact-tile-surface: var(--color-aqua);
+    --contact-tile-ink: var(--color-action);
+    --contact-tile-edge: var(--color-action);
+
+    background-image: radial-gradient(
+      ellipse at top right,
+      var(--color-aqua) 22%,
+      var(--color-canvas) 58%,
+      transparent 72%
+    );
     background-repeat: no-repeat;
-    background-position: left center;
-    background-size: 0% 100%;
+    background-position: right top;
+    background-size: 0% 0%;
     background-clip: padding-box;
   }
 
   .page :where(#contact) .route-link:is(:focus-visible, .is-pressed) {
-    background-size: 100% 100%;
+    --contact-tile-surface: var(--color-action);
+    --contact-tile-ink: var(--color-surface-raised);
+    --contact-tile-edge: var(--color-aqua);
+
+    background-size: 180% 180%;
+  }
+
+  .page #contact .route-link .sticker {
+    background: var(--contact-tile-surface);
+    box-shadow:
+      0.125rem 0.125rem 0 var(--contact-tile-edge),
+      inset 0 0.125rem 0 var(--color-surface-raised),
+      inset 0 -0.125rem 0 rgb(1 58 99 / 16%);
+    color: var(--contact-tile-ink);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .page :where(#contact) .route-link:hover {
-      background-size: 100% 100%;
+      --contact-tile-surface: var(--color-action);
+      --contact-tile-ink: var(--color-surface-raised);
+      --contact-tile-edge: var(--color-aqua);
+
+      background-size: 180% 180%;
     }
   }
 
@@ -322,12 +348,12 @@
     }
 
     .run-path li.is-tracing {
-      animation: run-step-wash 720ms var(--motion-ease-fluid)
+      animation: run-step-wash var(--motion-gesture) var(--motion-ease-fluid)
         calc(200ms + var(--run-order, 0) * 180ms) 1 backwards;
     }
 
     .run-path li.is-tracing:not(:last-child)::after {
-      animation: run-line-draw 420ms var(--motion-ease-settle)
+      animation: run-line-draw var(--motion-arrival) var(--motion-ease-settle)
         calc(440ms + var(--run-order, 0) * 180ms) 1 backwards;
     }
 
@@ -342,7 +368,8 @@
     }
 
     .hero-name {
-      animation: ink-highlight 460ms var(--motion-ease-settle) 120ms backwards;
+      animation: ink-highlight var(--motion-arrival) var(--motion-ease-settle)
+        120ms backwards;
     }
 
     .route-link::before {
@@ -359,14 +386,21 @@
 
     .page :where(#contact) .route-link {
       transition:
-        background-size calc(var(--motion-route) * 1.5) var(--motion-ease-fluid),
+        background-size var(--motion-arrival) var(--motion-ease-fluid),
         translate var(--motion-route) var(--motion-ease-settle),
         rotate var(--motion-route) var(--motion-ease-settle),
         box-shadow var(--motion-standard) var(--motion-ease-settle);
     }
 
     .page :where(#contact) .route-link.is-pressed {
-      transition-duration: var(--motion-short);
+      transition-duration: var(--motion-standard);
+    }
+
+    .page #contact .route-link .sticker {
+      transition:
+        background-color var(--motion-standard) var(--motion-ease-settle),
+        color var(--motion-standard) var(--motion-ease-settle),
+        box-shadow var(--motion-standard) var(--motion-ease-settle);
     }
 
     .hero-cta .hero-arrow-badge {
@@ -421,16 +455,20 @@
         scale var(--motion-short) var(--motion-ease-settle);
     }
 
-    @media (hover: hover) and (pointer: fine) {
-      /* Cards lift as one surface; pointer position never bends their text. */
-      .page .project-list .route-link {
-        transition:
-          translate var(--motion-route) var(--motion-ease-settle),
-          rotate var(--motion-route) var(--motion-ease-settle),
-          box-shadow var(--motion-standard) var(--motion-ease-settle),
-          scale var(--motion-short) var(--motion-ease-settle);
-      }
+    /* Press and release settle on touch too, without a sticky hover state. */
+    .page .project-list .route-link {
+      transition:
+        translate var(--motion-route) var(--motion-ease-settle),
+        rotate var(--motion-route) var(--motion-ease-settle),
+        box-shadow var(--motion-standard) var(--motion-ease-settle),
+        scale var(--motion-short) var(--motion-ease-settle);
+    }
 
+    .page .project-list .route-link.is-pressed {
+      transition-duration: var(--motion-short);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
       .page .project-list .route-link:is(:hover, :focus-visible) {
         box-shadow: 0.5rem 0.5rem 0 var(--color-action);
       }

@@ -80,7 +80,7 @@ test("icon hover is local, directional, and leaves each finite gesture intact", 
           previous.every((animation) => current.includes(animation)) &&
           gestures.every(
             (animation) =>
-              animation.effect?.getTiming().duration === 760 &&
+              animation.effect?.getTiming().duration === 900 &&
               animation.effect.getTiming().iterations === 1,
           )
         );

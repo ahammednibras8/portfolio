@@ -70,7 +70,7 @@ test("mouse movement gently shifts only the existing dot texture", async ({
       );
       await expect(surface).toHaveCSS("background-image", original.image);
       await expect(surface).toHaveCSS("background-size", original.size);
-      await expect(surface).toHaveCSS("transition-duration", "0.24s");
+      await expect(surface).toHaveCSS("transition-duration", "0.3s");
       await expect(surface).toHaveCSS("animation-name", "none");
       expect(original.image.split("radial-gradient")).toHaveLength(2);
       expect(await heading.boundingBox()).toEqual(before);
