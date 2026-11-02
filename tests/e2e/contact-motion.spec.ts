@@ -30,6 +30,14 @@ for (const trigger of ["hover", "focus"] as const) {
       "color",
       "rgb(255, 255, 255)",
     );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "scale",
+      "1.12",
+    );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "rotate",
+      "-12deg",
+    );
     await expect
       .poll(() =>
         button.evaluate((element) =>
@@ -92,6 +100,14 @@ for (const trigger of ["hover", "focus"] as const) {
     }
     if (trigger === "hover") await page.mouse.move(0, 0);
     else await button.evaluate((element) => element.blur());
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "scale",
+      "none",
+    );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "rotate",
+      "none",
+    );
     await arrow.evaluate((element) => {
       for (const animation of element.getAnimations({ subtree: true }))
         animation.play();
@@ -123,6 +139,14 @@ test("contact motion is static with reduced motion and forced colors", async ({
   await button.focus();
   await expect(button).toHaveCSS("translate", "none");
   await expect(button).toHaveCSS("transition-duration", "0s");
+  await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+    "rotate",
+    "none",
+  );
   expect(
     await button.evaluate(
       (element) => getComputedStyle(element, "::before").transitionDuration,
@@ -138,6 +162,14 @@ test("contact motion is static with reduced motion and forced colors", async ({
     await button.hover();
     await expect(path).toHaveCSS("animation-name", "none");
     await expect(button).toHaveCSS("box-shadow", "none");
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "scale",
+      "none",
+    );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "rotate",
+      "none",
+    );
     expect(
       await button.evaluate(
         (element) => getComputedStyle(element, "::before").content,
@@ -166,6 +198,14 @@ test("the contact pill presses and releases without changing its layout", async 
     await expect(button).toHaveClass(/is-pressed/);
     await expect(button).toHaveCSS("box-shadow", "none");
     await expect(button).toHaveCSS("translate", "2px 2px");
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "scale",
+      "0.96",
+    );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "rotate",
+      "0deg",
+    );
     await expect(button).toHaveCSS("opacity", "1");
     const pressed = await button.boundingBox();
     expect(pressed?.width).toBe(before?.width);
@@ -178,6 +218,14 @@ test("the contact pill presses and releases without changing its layout", async 
   await button.evaluate((element) => element.blur());
   await expect(button).not.toHaveClass(/is-pressed/);
   await expect(button).toHaveCSS("translate", "none");
+  await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+    "rotate",
+    "none",
+  );
   await expect
     .poll(() =>
       button.evaluate((element) =>
@@ -242,9 +290,25 @@ test.describe("on touch screens", () => {
         "translate",
         reducedMotion === "reduce" ? "none" : "2px 2px",
       );
+      await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+        "scale",
+        reducedMotion === "reduce" ? "none" : "0.96",
+      );
+      await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+        "rotate",
+        reducedMotion === "reduce" ? "none" : "0deg",
+      );
       await button.dispatchEvent("pointercancel", { pointerType: "touch" });
       await expect(button).not.toHaveClass(/is-pressed/);
       await expect(button).toHaveCSS("translate", "none");
+      await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+        "scale",
+        "none",
+      );
+      await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+        "rotate",
+        "none",
+      );
       await expect
         .poll(() =>
           button.evaluate((element) =>
