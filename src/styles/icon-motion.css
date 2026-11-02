@@ -129,6 +129,10 @@
     animation-play-state: paused;
   }
 
+  .icon-loops-backward .page .lucide.icon-loop > * {
+    animation-direction: reverse;
+  }
+
   .icon-loops-running .page .lucide.icon-loop.is-in-view > * {
     animation-play-state: running;
   }

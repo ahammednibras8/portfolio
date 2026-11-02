@@ -342,8 +342,13 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       animation.pause();
       const { delay, duration } = animation.effect.getTiming();
 
+      const phase = fraction * 0.3;
       animation.currentTime =
-        Number(delay ?? 0) + Number(duration) * fraction * 0.3;
+        Number(delay ?? 0) +
+        Number(duration) *
+          (animation.effect.getTiming().direction === "reverse"
+            ? 1 - phase
+            : phase);
       const style = getComputedStyle(element);
       const result = {
         origin: style.transformOrigin,
@@ -384,9 +389,12 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       if (!animation?.effect) throw new Error("Expected both arrow parts.");
 
       animation.pause();
+      const timing = animation.effect.getTiming();
+      const phase = 0.72 * 0.3;
       animation.currentTime =
-        Number(animation.effect.getTiming().delay ?? 0) +
-        Number(animation.effect.getTiming().duration) * 0.72 * 0.3;
+        Number(timing.delay ?? 0) +
+        Number(timing.duration) *
+          (timing.direction === "reverse" ? 1 - phase : phase);
       const turn = parseFloat(getComputedStyle(part).rotate);
 
       return turn;

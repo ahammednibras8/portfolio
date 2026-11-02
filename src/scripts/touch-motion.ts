@@ -1,6 +1,7 @@
 /*
  * Visible icons repeat a short object-specific gesture with a resting interval.
- * One shared pause preference controls them; touch haptics and tilt stay separate.
+ * Scrolling changes their direction without resetting their pose. One shared
+ * pause preference controls them; touch haptics and tilt stay separate.
  */
 export {};
 
@@ -30,7 +31,50 @@ const readPreference = () => {
 };
 readPreference();
 
+const scrollPosition = () =>
+  Math.max(
+    0,
+    Math.min(scrollY, document.documentElement.scrollHeight - innerHeight),
+  );
+let lastScrollY = scrollPosition();
+let directionFrame = 0;
+let nextBackward = false;
+const resetScroll = () => {
+  cancelAnimationFrame(directionFrame);
+  directionFrame = 0;
+  lastScrollY = scrollPosition();
+};
+
+const setDirection = (backward: boolean) => {
+  const root = document.documentElement;
+  if (root.classList.contains("icon-loops-backward") === backward) return;
+
+  // Mirror the active phase as CSS reverses it: the pose stays exactly the same.
+  // Positive clocks keep infinite loops away from a negative-playback endpoint.
+  const phases = icons.flatMap((icon) =>
+    icon.getAnimations({ subtree: true }).flatMap((animation) => {
+      const target = (animation.effect as KeyframeEffect | null)?.target;
+      if (
+        !(animation instanceof CSSAnimation) ||
+        !animation.animationName.startsWith("icon-") ||
+        !(target instanceof Element) ||
+        target.parentNode !== icon
+      )
+        return [];
+      const { delay, duration } = animation.effect?.getTiming() ?? {};
+      if (typeof duration !== "number" || duration <= 0) return [];
+      const time = Number(animation.currentTime ?? 0);
+      const offset = Number(delay ?? 0);
+      const phase = (((time - offset) % duration) + duration) % duration;
+      return [{ animation, time: offset + duration - phase }];
+    }),
+  );
+  root.classList.toggle("icon-loops-backward", backward);
+  for (const { animation, time } of phases) animation.currentTime = time;
+};
+
 const updateLoops = () => {
+  resetScroll();
   const blocked = !motionAllowed();
   document.documentElement.classList.toggle(
     "icon-loops-running",
@@ -79,6 +123,25 @@ if (icons.length > 0 && controls.length > 0) {
     readPreference();
     updateLoops();
   });
+  addEventListener(
+    "scroll",
+    () => {
+      const position = scrollPosition();
+      const distance = position - lastScrollY;
+      // Ignore small input jitter while allowing slow movement to accumulate.
+      if (Math.abs(distance) < 4) return;
+      lastScrollY = position;
+      if (!motionAllowed() || paused || document.hidden) return;
+      nextBackward = distance < 0;
+      if (directionFrame) return;
+      directionFrame = requestAnimationFrame(() => {
+        directionFrame = 0;
+        if (motionAllowed() && !paused && !document.hidden)
+          setDirection(nextBackward);
+      });
+    },
+    { passive: true },
+  );
   updateLoops();
 }
 
