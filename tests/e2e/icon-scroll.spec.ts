@@ -2,6 +2,14 @@ import { expect, type Page, test } from "@playwright/test";
 
 const arrow = (page: Page) =>
   page.locator(".hero-contact .lucide-arrow-right > path").first();
+const setHidden = (page: Page, hidden: boolean) =>
+  page.evaluate((hidden) => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: hidden,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  }, hidden);
 const prepare = async (page: Page) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
@@ -103,11 +111,11 @@ test("direction changes preserve the pose and identity of every moving part", as
   expect(await snapshot(false)).toEqual(forward);
 });
 
-test("paused scrolling never seeks icons and resuming keeps the saved phase", async ({
+test("background scrolling never seeks icons and visibility restores the saved phase", async ({
   page,
 }) => {
   await prepare(page);
-  await page.locator(".hero-caption .icon-motion-toggle").click();
+  await setHidden(page, true);
   const before = await arrow(page).evaluate(async (element) => {
     const animation = element.getAnimations()[0];
     await animation?.ready;
@@ -121,7 +129,7 @@ test("paused scrolling never seeks icons and resuming keeps the saved phase", as
     ),
   ).toBe(before);
   await expect(arrow(page)).toHaveCSS("animation-direction", "normal");
-  await page.locator(".hero-caption .icon-motion-toggle").click();
+  await setHidden(page, false);
   await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
   await scrollTo(page, 20);
   await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
@@ -165,14 +173,14 @@ test("scroll reversals leave offscreen clocks untouched", async ({ page }) => {
   ).toBe(before);
 });
 
-test("an icon re-entering while paused synchronizes direction only on resume", async ({
+test("an icon re-entering while hidden synchronizes direction only when visible", async ({
   page,
 }) => {
   await prepare(page);
   await scrollTo(page, 100);
   await scrollTo(page, 60);
   await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
-  await page.locator(".hero-caption .icon-motion-toggle").click();
+  await setHidden(page, true);
   const before = await page
     .locator("#contact .lucide-mail")
     .evaluate(async (element) => {
@@ -228,7 +236,7 @@ test("an icon re-entering while paused synchronizes direction only on resume", a
       (element) => element.getAnimations({ subtree: true })[0]?.currentTime,
     ),
   ).toBe(before);
-  await page.locator(".hero-caption .icon-motion-toggle").click();
+  await setHidden(page, false);
   await expect(returning.locator("path")).toHaveCSS(
     "animation-direction",
     "reverse",
@@ -259,9 +267,7 @@ for (const direction of ["normal", "reverse"] as const) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(arrow(page)).toHaveCSS("animation-name", "none");
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await expect(
-      page.locator(".hero-caption .icon-motion-toggle"),
-    ).toBeEnabled();
+    await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
     await page.locator("#contact .lucide-mail").evaluate(async (icon) => {
       const animation = icon.getAnimations({ subtree: true })[0];
       const clock = Object.getOwnPropertyDescriptor(
@@ -361,7 +367,7 @@ test("system preferences suppress scroll reversal and do not revive icon motion"
   await expect(page.locator("html")).not.toHaveClass(/icon-loops-backward/);
   await expect(arrow(page)).toHaveCSS("animation-name", "none");
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await expect(page.locator(".hero-caption .icon-motion-toggle")).toBeEnabled();
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "running");
   await scrollTo(page, 20);
   await expect(arrow(page)).toHaveCSS("animation-direction", "reverse");
   if (browserName === "chromium") {
@@ -442,38 +448,28 @@ test("offscreen startup delays and full-turn boundaries keep the same rendered p
   expect(await snapshot(false)).toEqual(before);
 });
 
-for (const reason of ["pause", "hidden"] as const) {
-  test(`a queued direction change is canceled when ${reason} takes effect`, async ({
-    page,
-  }) => {
-    await prepare(page);
-    await scrollTo(page, 100);
-    await page.evaluate((reason) => {
-      addEventListener(
-        "scroll",
-        () => {
-          if (reason === "pause")
-            document
-              .querySelector<HTMLButtonElement>(
-                ".hero-caption .icon-motion-toggle",
-              )
-              ?.click();
-          else {
-            Object.defineProperty(document, "hidden", {
-              configurable: true,
-              value: true,
-            });
-            document.dispatchEvent(new Event("visibilitychange"));
-          }
-        },
-        { once: true },
-      );
-    }, reason);
-    await scrollTo(page, 60);
-    await expect(page.locator("html")).not.toHaveClass(/icon-loops-backward/);
-    await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+test("a queued direction change is canceled when the document is hidden", async ({
+  page,
+}) => {
+  await prepare(page);
+  await scrollTo(page, 100);
+  await page.evaluate(() => {
+    addEventListener(
+      "scroll",
+      () => {
+        Object.defineProperty(document, "hidden", {
+          configurable: true,
+          value: true,
+        });
+        document.dispatchEvent(new Event("visibilitychange"));
+      },
+      { once: true },
+    );
   });
-}
+  await scrollTo(page, 60);
+  await expect(page.locator("html")).not.toHaveClass(/icon-loops-backward/);
+  await expect(arrow(page)).toHaveCSS("animation-play-state", "paused");
+});
 
 test.describe("phone scroll direction", () => {
   test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
