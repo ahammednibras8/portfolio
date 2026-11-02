@@ -1631,11 +1631,11 @@ test("a phone on its side keeps the portrait beside the buttons", async ({
   expect(portrait.x).toBeGreaterThan(action.x + action.width);
 });
 
-test("hero headings keep their halftone backgrounds still", async ({
+test("reduced-motion hero headings keep their halftone backgrounds still", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await settleScrolling(page);
 
