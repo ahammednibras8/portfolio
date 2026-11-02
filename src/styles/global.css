@@ -29,6 +29,7 @@
   --color-action-active: #012a4a;
   --color-aqua: #8fd8dc;
   --color-focus: #007a73;
+  --color-selection: var(--color-focus);
   --color-surface-recessed: rgb(23 25 26 / var(--alpha-atmosphere));
 
   /* Typography: reading and technical text stacks. */
@@ -100,6 +101,15 @@ body {
   color: var(--color-ink-primary);
   font-size: 1rem;
   line-height: 1.55;
+}
+
+/* A stable teal highlight stays distinct on white, aqua, and navy surfaces. */
+@media screen and (forced-colors: none) {
+  ::selection {
+    background-color: var(--color-selection);
+    color: var(--color-surface-raised);
+    text-shadow: none;
+  }
 }
 
 h1,
