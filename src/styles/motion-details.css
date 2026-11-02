@@ -73,12 +73,12 @@
   }
 
   .page .hero-actions .hero-action.hero-cta {
-    --hero-sweep: #ffc1a6;
+    --hero-sweep: #99d0f5;
     --hero-badge-rest: var(--color-surface-raised);
     --hero-badge-active: var(--color-action);
     --hero-badge-active-ink: var(--color-surface-raised);
 
-    background-color: #f5a080;
+    background-color: #b9e2ff;
     color: var(--color-action);
   }
 

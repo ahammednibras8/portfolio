@@ -21,7 +21,7 @@ for (const trigger of ["hover", "focus"] as const) {
     const badge = button.locator(".hero-arrow-badge");
     const arrow = badge.locator("svg");
     await expect(button).toHaveAttribute("href", "#work");
-    await expect(button).toHaveCSS("background-color", "rgb(245, 160, 128)");
+    await expect(button).toHaveCSS("background-color", "rgb(185, 226, 255)");
     await expect(button).toHaveCSS("background-size", "0% 100%");
     await expect(badge).toHaveCSS("background-color", "rgb(255, 255, 255)");
     if (trigger === "hover") await button.hover();
@@ -50,7 +50,7 @@ for (const trigger of ["hover", "focus"] as const) {
     await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
     await expect(button).toHaveCSS(
       "background-image",
-      "linear-gradient(rgb(255, 193, 166) 0px, rgb(255, 193, 166) 0px)",
+      "linear-gradient(rgb(153, 208, 245) 0px, rgb(153, 208, 245) 0px)",
     );
     const contrasts = await button.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -212,8 +212,16 @@ test("See my work still navigates without JavaScript", async ({ browser }) => {
   try {
     const page = await context.newPage();
     await page.goto("/");
+    // WebKit's pointer-stability check needs the finite hero entrance to settle.
+    await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+      "scale",
+      "none",
+    );
     await page.getByRole("link", { name: "See my work", exact: true }).click();
     await expect(page).toHaveURL(/#work$/);
+    await expect(
+      page.getByRole("heading", { name: "Selected work", exact: true }),
+    ).toBeInViewport();
   } finally {
     await context.close();
   }
