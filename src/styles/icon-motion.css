@@ -73,7 +73,7 @@
   }
 
   /* Hover owns the glyph; its looping details keep their own clocks. */
-  .page .lucide:not(.hero-contact .lucide) {
+  .page .lucide:not(.hero-cta .lucide) {
     transform-box: view-box;
     transform-origin: 50% 50%;
     transition:
@@ -100,7 +100,7 @@
     --icon-hover-turn: 20deg;
   }
 
-  .page a:focus-visible .lucide:not(.hero-contact .lucide) {
+  .page a:focus-visible .lucide:not(.hero-cta .lucide) {
     scale: 1.12;
     rotate: var(--icon-hover-turn, -6deg);
     translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
@@ -115,7 +115,7 @@
         .section-title:hover .lucide,
         .run-path li:hover .lucide,
         .architecture-recovery:hover > .lucide
-      ):not(.hero-contact .lucide) {
+      ):not(.hero-cta .lucide) {
       scale: 1.12;
       rotate: var(--icon-hover-turn, -6deg);
       translate: var(--icon-hover-x, 0) var(--icon-hover-y, 0);
