@@ -1,5 +1,70 @@
 import { expect, test } from "@playwright/test";
 
+test("both hero actions fill smoothly and give one bounded spring response", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  for (const name of ["See my work", "Get in touch"]) {
+    const button = page.getByRole("link", { name, exact: true });
+    const response = await button.evaluate(async (element) => {
+      if (!(element instanceof HTMLAnchorElement))
+        throw new Error("Expected a native hero link.");
+      const dimensions = [element.offsetWidth, element.offsetHeight];
+      void getComputedStyle(element).scale;
+      element.focus();
+      const transitions = element
+        .getAnimations()
+        .filter(
+          (animation): animation is CSSTransition =>
+            animation instanceof CSSTransition,
+        );
+      const pop = transitions.find(
+        (animation) => animation.transitionProperty === "scale",
+      );
+      const fill = transitions.find(
+        (animation) => animation.transitionProperty === "background-size",
+      );
+      if (!pop?.effect || !fill?.effect)
+        throw new Error("Expected the shared pop and fill transitions.");
+      for (const animation of transitions) animation.pause();
+      await Promise.all(transitions.map((animation) => animation.ready));
+      const samples = [0, 0.6, 1].map((fraction) => {
+        pop.currentTime = Number(pop.effect?.getTiming().duration) * fraction;
+        fill.currentTime = Number(fill.effect?.getTiming().duration) * fraction;
+        const style = getComputedStyle(element);
+        return {
+          scale: Number(style.scale),
+          fill: parseFloat(style.backgroundSize),
+          dimensions: [element.offsetWidth, element.offsetHeight],
+        };
+      });
+      const fillDuration = fill.effect.getTiming().duration;
+      for (const animation of transitions) animation.finish();
+      return { samples, dimensions, fillDuration };
+    });
+    expect(response.fillDuration).toBeCloseTo(360, 3);
+    expect(response.samples[0]?.scale).toBe(1);
+    expect(response.samples[1]?.scale).toBeGreaterThan(1.025);
+    expect(response.samples[1]?.scale).toBeLessThan(1.04);
+    expect(response.samples[2]?.scale).toBeCloseTo(1.025, 5);
+    expect(response.samples[0]?.fill).toBe(0);
+    expect(response.samples[1]?.fill).toBeGreaterThan(0);
+    expect(response.samples[1]?.fill).toBeLessThan(100);
+    expect(response.samples[2]?.fill).toBe(100);
+    for (const sample of response.samples)
+      expect(sample.dimensions).toEqual(response.dimensions);
+    await button.evaluate((element) => element.blur());
+    await expect(button).toHaveCSS("scale", "none");
+    await expect(button).toHaveCSS("background-size", "0% 100%");
+  }
+  await expect(page).not.toHaveURL(/#(?:work|contact)$/);
+});
+
 for (const trigger of ["hover", "focus"] as const) {
   test(`See my work matches the contact feedback on ${trigger}`, async ({
     page,
@@ -21,9 +86,22 @@ for (const trigger of ["hover", "focus"] as const) {
     const badge = button.locator(".hero-arrow-badge");
     const arrow = badge.locator("svg");
     await expect(button).toHaveAttribute("href", "#work");
-    await expect(button).toHaveCSS("background-color", "rgb(185, 226, 255)");
+    const contact = page.getByRole("link", {
+      name: "Get in touch",
+      exact: true,
+    });
+    await expect(button).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    expect(
+      await button.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      ),
+    ).toBe(
+      await contact.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      ),
+    );
     await expect(button).toHaveCSS("background-size", "0% 100%");
-    await expect(badge).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(badge).toHaveCSS("background-color", "rgb(223, 243, 244)");
     if (trigger === "hover") await button.hover();
     else await button.focus();
     // Check the real sweep mid-flight, while its navy label stays readable.
@@ -50,7 +128,7 @@ for (const trigger of ["hover", "focus"] as const) {
     await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
     await expect(button).toHaveCSS(
       "background-image",
-      "linear-gradient(rgb(153, 208, 245) 0px, rgb(153, 208, 245) 0px)",
+      "linear-gradient(rgb(143, 216, 220) 0px, rgb(143, 216, 220) 0px)",
     );
     const contrasts = await button.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -90,6 +168,7 @@ for (const trigger of ["hover", "focus"] as const) {
     });
     await expect(button).toHaveCSS("background-size", "100% 100%");
     await expect(button).toHaveCSS("translate", "-2px -2px");
+    await expect(button).toHaveCSS("scale", "1.025");
     await expect(badge).toHaveCSS("background-color", "rgb(1, 58, 99)");
     await expect(badge).toHaveCSS("color", "rgb(255, 255, 255)");
     await expect(badge).toHaveCSS("scale", "1.12");
@@ -118,6 +197,7 @@ for (const trigger of ["hover", "focus"] as const) {
     else await button.evaluate((element) => element.blur());
     await expect(button).toHaveCSS("background-size", "0% 100%");
     await expect(button).toHaveCSS("translate", "none");
+    await expect(button).toHaveCSS("scale", "none");
     await expect(badge).toHaveCSS("scale", "none");
     await expect(badge).toHaveCSS("rotate", "none");
     await page.screenshot({ path: testInfo.outputPath("work-rest.png") });
@@ -141,7 +221,11 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
     );
     const button = page.locator(".hero-action");
     const badge = button.locator(".hero-arrow-badge");
-    const before = await button.boundingBox();
+    const dimensions = await button.evaluate((element) => {
+      if (!(element instanceof HTMLAnchorElement))
+        throw new Error("Expected a native work link.");
+      return [element.offsetWidth, element.offsetHeight];
+    });
     for (const release of ["pointercancel", "pointerleave"] as const) {
       await button.locator("svg path").first().dispatchEvent("pointerdown", {
         button: 0,
@@ -158,13 +242,22 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
         "scale",
         reducedMotion === "reduce" ? "none" : "0.96",
       );
-      const pressed = await button.boundingBox();
-      expect(pressed?.width).toBe(before?.width);
-      expect(pressed?.height).toBe(before?.height);
+      await expect(button).toHaveCSS(
+        "scale",
+        reducedMotion === "reduce" ? "none" : "0.985",
+      );
+      expect(
+        await button.evaluate((element) => {
+          if (!(element instanceof HTMLAnchorElement))
+            throw new Error("Expected a native work link.");
+          return [element.offsetWidth, element.offsetHeight];
+        }),
+      ).toEqual(dimensions);
       await button.dispatchEvent(release, { pointerType: "touch" });
       await expect(button).not.toHaveClass(/is-pressed/);
       await expect(button).toHaveCSS("background-size", "0% 100%");
       await expect(button).toHaveCSS("translate", "none");
+      await expect(button).toHaveCSS("scale", "none");
       await expect(badge).toHaveCSS("scale", "none");
     }
     await expect(page).not.toHaveURL(/#work$/);
@@ -187,6 +280,7 @@ test("work-button system fallbacks are static and keep the native link", async (
     });
     if (mode !== "print") await button.focus();
     await expect(button).toHaveCSS("translate", "none");
+    await expect(button).toHaveCSS("scale", "none");
     await expect(button).toHaveCSS("transition-duration", "0s");
     await expect(badge).toHaveCSS("scale", "none");
     await expect(badge).toHaveCSS("rotate", "none");

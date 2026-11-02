@@ -65,6 +65,17 @@
   text-rendering: optimizelegibility;
 }
 
+/* Touch feedback settles sooner, leaving more time for native scrolling. */
+@media screen and (pointer: coarse) {
+  :root {
+    --motion-short: 100ms;
+    --motion-standard: 150ms;
+    --motion-route: 180ms;
+    --motion-arrival: 360ms;
+    --motion-stagger: 24ms;
+  }
+}
+
 *,
 *::before,
 *::after {

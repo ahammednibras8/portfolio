@@ -22,6 +22,7 @@ for (const trigger of ["hover", "focus"] as const) {
     if (trigger === "hover") await button.hover();
     else await button.focus();
     await expect(button).toHaveCSS("translate", "-2px -2px");
+    await expect(button).toHaveCSS("scale", "1.025");
     await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
     await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
       "background-color",
@@ -172,7 +173,8 @@ for (const width of [1280, 320]) {
         return fill;
       }, entering);
       let previous = entering ? 0 : 100;
-      for (const fraction of [0.04, 0.25, 0.65]) {
+      // Sample after the smooth-start fill has cleared the rounded leading edge.
+      for (const fraction of [0.15, 0.35, 0.65]) {
         await transition.evaluate((animation, progress) => {
           animation.currentTime =
             Number(animation.effect?.getTiming().duration) * progress;
@@ -251,6 +253,7 @@ test("contact motion is static with reduced motion and forced colors", async ({
   const path = button.locator(".action-arrow path").first();
   await button.focus();
   await expect(button).toHaveCSS("translate", "none");
+  await expect(button).toHaveCSS("scale", "none");
   await expect(button).toHaveCSS("transition-duration", "0s");
   await expect(button).toHaveCSS("background-size", "100% 100%");
   await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
@@ -271,6 +274,7 @@ test("contact motion is static with reduced motion and forced colors", async ({
     await button.hover();
     await expect(path).toHaveCSS("animation-name", "none");
     await expect(button).toHaveCSS("box-shadow", "none");
+    await expect(button).toHaveCSS("scale", "none");
     await expect(button).toHaveCSS("background-image", "none");
     await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
       "scale",
@@ -300,7 +304,11 @@ test("the contact pill presses and releases without changing its layout", async 
     "scale",
     "none",
   );
-  const before = await button.boundingBox();
+  const dimensions = await button.evaluate((element) => {
+    if (!(element instanceof HTMLAnchorElement))
+      throw new Error("Expected a native contact link.");
+    return [element.offsetWidth, element.offsetHeight];
+  });
   const neighbor = await page.locator(".hero-action").boundingBox();
   await button.hover();
   await page.mouse.down();
@@ -308,6 +316,7 @@ test("the contact pill presses and releases without changing its layout", async 
     await expect(button).toHaveClass(/is-pressed/);
     await expect(button).toHaveCSS("box-shadow", "none");
     await expect(button).toHaveCSS("translate", "2px 2px");
+    await expect(button).toHaveCSS("scale", "0.985");
     await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
       "scale",
       "0.96",
@@ -317,9 +326,13 @@ test("the contact pill presses and releases without changing its layout", async 
       "0deg",
     );
     await expect(button).toHaveCSS("opacity", "1");
-    const pressed = await button.boundingBox();
-    expect(pressed?.width).toBe(before?.width);
-    expect(pressed?.height).toBe(before?.height);
+    expect(
+      await button.evaluate((element) => {
+        if (!(element instanceof HTMLAnchorElement))
+          throw new Error("Expected a native contact link.");
+        return [element.offsetWidth, element.offsetHeight];
+      }),
+    ).toEqual(dimensions);
     expect(await page.locator(".hero-action").boundingBox()).toEqual(neighbor);
     await page.mouse.move(0, 0);
   } finally {
@@ -328,6 +341,7 @@ test("the contact pill presses and releases without changing its layout", async 
   await button.evaluate((element) => element.blur());
   await expect(button).not.toHaveClass(/is-pressed/);
   await expect(button).toHaveCSS("translate", "none");
+  await expect(button).toHaveCSS("scale", "none");
   await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
     "scale",
     "none",
@@ -394,6 +408,10 @@ test.describe("on touch screens", () => {
         "translate",
         reducedMotion === "reduce" ? "none" : "2px 2px",
       );
+      await expect(button).toHaveCSS(
+        "scale",
+        reducedMotion === "reduce" ? "none" : "0.985",
+      );
       await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
         "scale",
         reducedMotion === "reduce" ? "none" : "0.96",
@@ -405,6 +423,7 @@ test.describe("on touch screens", () => {
       await button.dispatchEvent("pointercancel", { pointerType: "touch" });
       await expect(button).not.toHaveClass(/is-pressed/);
       await expect(button).toHaveCSS("translate", "none");
+      await expect(button).toHaveCSS("scale", "none");
       await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
         "scale",
         "none",

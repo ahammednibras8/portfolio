@@ -137,21 +137,47 @@ const enableTilt = (portrait: HTMLElement) => {
   if (!("DeviceOrientationEvent" in window)) return;
   let active = true;
   let visible = false;
+  let tiltFrame = 0;
+  let latestTilt: { beta: number; gamma: number } | null = null;
+  let lastX: number | null = null;
+  let lastY: number | null = null;
 
   const share = (angle: number) =>
     Math.max(-1, Math.min(1, angle / fullTiltAngle));
-  const lean = ({ beta, gamma }: DeviceOrientationEvent) => {
-    if (!motionAllowed() || document.hidden || beta === null || gamma === null)
+  const applyTilt = () => {
+    tiltFrame = 0;
+    const sample = latestTilt;
+    latestTilt = null;
+    if (!sample || !active || !visible || !motionAllowed() || document.hidden)
       return;
-
-    portrait.style.setProperty("--tilt-x", `${share(gamma) * tiltReach}px`);
-    portrait.style.setProperty(
-      "--tilt-y",
-      `${share(beta - naturalHoldAngle) * tiltReach}px`,
-    );
+    const x = share(sample.gamma) * tiltReach;
+    const y = share(sample.beta - naturalHoldAngle) * tiltReach;
+    if (x !== lastX) portrait.style.setProperty("--tilt-x", `${x}px`);
+    if (y !== lastY) portrait.style.setProperty("--tilt-y", `${y}px`);
+    lastX = x;
+    lastY = y;
+  };
+  const lean = ({ beta, gamma }: DeviceOrientationEvent) => {
+    if (
+      !active ||
+      !visible ||
+      !motionAllowed() ||
+      document.hidden ||
+      beta === null ||
+      gamma === null ||
+      !Number.isFinite(beta) ||
+      !Number.isFinite(gamma)
+    )
+      return;
+    latestTilt = { beta, gamma };
+    // Coalesce fast sensor events, and never run a frame loop while idle.
+    if (!tiltFrame) tiltFrame = requestAnimationFrame(applyTilt);
   };
   const stop = () => {
     removeEventListener("deviceorientation", lean);
+    cancelAnimationFrame(tiltFrame);
+    tiltFrame = 0;
+    latestTilt = null;
   };
   const listen = () => {
     stop();
