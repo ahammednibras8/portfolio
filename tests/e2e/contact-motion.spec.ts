@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import sharp from "sharp";
 
 for (const trigger of ["hover", "focus"] as const) {
   test(`Get in touch repeats its A-to-B arrow pass with ${trigger}`, async ({
@@ -38,16 +39,11 @@ for (const trigger of ["hover", "focus"] as const) {
       "rotate",
       "-12deg",
     );
-    await expect
-      .poll(() =>
-        button.evaluate((element) =>
-          parseFloat(getComputedStyle(element, "::before").scale),
-        ),
-      )
-      .toBe(1);
+    await expect(button).toHaveCSS("background-size", "100% 100%");
+    await expect(button).toHaveCSS("background-clip", "padding-box");
     expect(
       await button.evaluate(
-        (element) => getComputedStyle(element, "::before").pointerEvents,
+        (element) => getComputedStyle(element, "::before").content,
       ),
     ).toBe("none");
     await expect(arrow).toHaveClass(/is-in-view/);
@@ -128,6 +124,123 @@ for (const trigger of ["hover", "focus"] as const) {
   });
 }
 
+for (const width of [1280, 320]) {
+  test(`contact fill stays inside its rounded outline at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    const button = page.getByRole("link", {
+      name: "Get in touch",
+      exact: true,
+    });
+    await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+      "scale",
+      "none",
+    );
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toHaveCSS("background-size", "0% 100%");
+    await expect(button).toHaveCSS("background-clip", "padding-box");
+    // Do not clip the badge or the keyboard outline to contain the paint.
+    await expect(button).toHaveCSS("overflow", "visible");
+    await button.locator("svg").evaluate((element) => {
+      for (const animation of element.getAnimations({ subtree: true })) {
+        animation.pause();
+        animation.currentTime = 6000;
+      }
+    });
+
+    for (const entering of [true, false]) {
+      const transition = await button.evaluateHandle(async (element, enter) => {
+        // Flush the resting state before starting a real CSS transition.
+        void getComputedStyle(element).backgroundSize;
+        if (enter) element.focus();
+        else element.blur();
+        const animations = element.getAnimations();
+        const fill = animations.find(
+          (animation) =>
+            animation instanceof CSSTransition &&
+            animation.transitionProperty === "background-size",
+        );
+        if (!fill)
+          throw new Error("Expected the contact background transition.");
+        for (const animation of animations)
+          if (animation !== fill) animation.finish();
+        fill.pause();
+        await fill.ready;
+        return fill;
+      }, entering);
+      let previous = entering ? 0 : 100;
+      for (const fraction of [0.04, 0.25, 0.65]) {
+        await transition.evaluate((animation, progress) => {
+          animation.currentTime =
+            Number(animation.effect?.getTiming().duration) * progress;
+        }, fraction);
+        const progress = await button.evaluate((element) =>
+          parseFloat(getComputedStyle(element).backgroundSize),
+        );
+        expect(progress).toBeGreaterThan(0);
+        expect(progress).toBeLessThan(100);
+        if (entering) expect(progress).toBeGreaterThan(previous);
+        else expect(progress).toBeLessThan(previous);
+        previous = progress;
+        await expect(button).toHaveCSS("opacity", "1");
+        const box = await button.boundingBox();
+        if (!box) throw new Error("Expected a visible contact pill.");
+        const clip = {
+          x: Math.floor(box.x - 6),
+          y: Math.floor(box.y - 6),
+          width: Math.ceil(box.width + 13),
+          height: Math.ceil(box.height + 13),
+        };
+        const screenshot = await page.screenshot({
+          path: testInfo.outputPath(
+            `contact-fill-${entering ? "entry" : "exit"}-${fraction}.png`,
+          ),
+          clip,
+          scale: "css",
+        });
+        const { data, info } = await sharp(screenshot)
+          .removeAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        const radius = box.height / 2;
+        let spilled = 0;
+        let filled = 0;
+        for (let y = 0; y < info.height; y++) {
+          for (let x = 0; x < info.width; x++) {
+            const offset = (y * info.width + x) * info.channels;
+            if (
+              Math.abs((data[offset] ?? 0) - 143) > 2 ||
+              Math.abs((data[offset + 1] ?? 0) - 216) > 2 ||
+              Math.abs((data[offset + 2] ?? 0) - 220) > 2
+            )
+              continue;
+            filled++;
+            const px = clip.x + x + 0.5;
+            const py = clip.y + y + 0.5;
+            const centerX = Math.max(
+              box.x + radius,
+              Math.min(px, box.x + box.width - radius),
+            );
+            if (Math.hypot(px - centerX, py - box.y - radius) > radius + 0.75)
+              spilled++;
+          }
+        }
+        if (entering) expect(filled).toBeGreaterThan(5);
+        expect(spilled).toBe(0);
+      }
+      await transition.evaluate((animation) => animation.finish());
+      await transition.dispose();
+      await expect(button).toHaveCSS(
+        "background-size",
+        entering ? "100% 100%" : "0% 100%",
+      );
+    }
+  });
+}
+
 test("contact motion is static with reduced motion and forced colors", async ({
   browserName,
   page,
@@ -139,6 +252,7 @@ test("contact motion is static with reduced motion and forced colors", async ({
   await button.focus();
   await expect(button).toHaveCSS("translate", "none");
   await expect(button).toHaveCSS("transition-duration", "0s");
+  await expect(button).toHaveCSS("background-size", "100% 100%");
   await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
     "scale",
     "none",
@@ -147,11 +261,6 @@ test("contact motion is static with reduced motion and forced colors", async ({
     "rotate",
     "none",
   );
-  expect(
-    await button.evaluate(
-      (element) => getComputedStyle(element, "::before").transitionDuration,
-    ),
-  ).toBe("0s");
   await expect(path).toHaveCSS("animation-name", "none");
   await expect(path).toHaveCSS("opacity", "1");
   if (browserName === "chromium") {
@@ -162,6 +271,7 @@ test("contact motion is static with reduced motion and forced colors", async ({
     await button.hover();
     await expect(path).toHaveCSS("animation-name", "none");
     await expect(button).toHaveCSS("box-shadow", "none");
+    await expect(button).toHaveCSS("background-image", "none");
     await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
       "scale",
       "none",
@@ -226,13 +336,7 @@ test("the contact pill presses and releases without changing its layout", async 
     "rotate",
     "none",
   );
-  await expect
-    .poll(() =>
-      button.evaluate((element) =>
-        parseFloat(getComputedStyle(element, "::before").scale),
-      ),
-    )
-    .toBe(0);
+  await expect(button).toHaveCSS("background-size", "0% 100%");
   await expect(page).not.toHaveURL(/#contact$/);
 });
 
@@ -309,13 +413,7 @@ test.describe("on touch screens", () => {
         "rotate",
         "none",
       );
-      await expect
-        .poll(() =>
-          button.evaluate((element) =>
-            parseFloat(getComputedStyle(element, "::before").scale),
-          ),
-        )
-        .toBe(0);
+      await expect(button).toHaveCSS("background-size", "0% 100%");
       await expect(button).not.toBeFocused();
       await button.tap();
       await expect(page).toHaveURL(/#contact$/);
