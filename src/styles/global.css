@@ -51,14 +51,16 @@
   --touch-target: 2.75rem;
 
   /* Motion explains a state or context change; it never introduces content. */
-  --motion-short: 120ms;
+  --motion-short: 100ms;
   --motion-standard: 180ms;
   --motion-deliberate: 220ms;
   --motion-route: 240ms;
-  --motion-arrival: 480ms;
-  --motion-stagger: 40ms;
-  --motion-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
-  --motion-ease-fluid: cubic-bezier(0.45, 0, 0.2, 1);
+  --motion-arrival: 560ms;
+  --motion-stagger: 45ms;
+  --motion-gesture: 760ms;
+  --motion-ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-fluid: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   font-family: var(--font-reading);
   font-synthesis: none;
@@ -68,11 +70,12 @@
 /* Touch feedback settles sooner, leaving more time for native scrolling. */
 @media screen and (pointer: coarse) {
   :root {
-    --motion-short: 100ms;
-    --motion-standard: 150ms;
+    --motion-short: 90ms;
+    --motion-standard: 140ms;
     --motion-route: 180ms;
-    --motion-arrival: 360ms;
+    --motion-arrival: 400ms;
     --motion-stagger: 24ms;
+    --motion-gesture: 620ms;
   }
 }
 
@@ -904,7 +907,7 @@ article ul {
   }
 
   .route-list li .route-link:is(:hover, :focus-visible) {
-    translate: -0.25rem -0.25rem;
+    translate: -0.125rem -0.125rem;
     rotate: 0deg;
   }
 
@@ -1037,19 +1040,6 @@ article > .project-evidence > h4 {
   position: absolute;
   inset-block-end: -0.75rem;
   inset-inline-end: -0.75rem;
-}
-
-/* touch-motion.ts sets these from how the phone is held. */
-@media screen and (prefers-reduced-motion: no-preference) {
-  .is-touch .hero-portrait {
-    translate: var(--tilt-x, 0) var(--tilt-y, 0);
-    transition: translate var(--motion-short) var(--motion-ease-settle);
-  }
-
-  .is-touch .hero-portrait .sticker {
-    translate: calc(var(--tilt-x, 0px) * -0.75) calc(var(--tilt-y, 0px) * -0.75);
-    transition: translate var(--motion-short) var(--motion-ease-settle);
-  }
 }
 
 .page > .exhibit-hero {

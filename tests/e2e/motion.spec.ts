@@ -79,7 +79,7 @@ test("the lifecycle traces its five steps once without moving the text", async (
   );
 
   expect(samples.map(({ delay }) => Math.round(delay))).toEqual([
-    650, 910, 1170, 1430, 1690,
+    200, 380, 560, 740, 920,
   ]);
   for (const [index, sample] of samples.entries()) {
     expect(sample).toMatchObject({
@@ -98,7 +98,7 @@ test("the lifecycle traces its five steps once without moving the text", async (
   await steps.evaluateAll((elements) => {
     for (const element of elements) {
       for (const animation of element.getAnimations({ subtree: true }))
-        animation.currentTime = 1350;
+        animation.currentTime = 650;
     }
   });
   await page.screenshot({ path: testInfo.outputPath("lifecycle-desktop.png") });
@@ -290,7 +290,7 @@ test("project cards stay level and release their press for focus and reduced mot
   await page.keyboard.press("Tab");
   await card.focus();
   await expect(card).toHaveCSS("outline-style", "solid");
-  await expect(card).toHaveCSS("translate", "-4px -4px");
+  await expect(card).toHaveCSS("translate", "-2px -2px");
 
   await page.mouse.move(0, 0);
   await card.hover({ position: { x: 60, y: 60 } });
@@ -332,7 +332,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
   const sample = async (selector: string, progress: number) => {
     const part = page.locator(selector).first();
 
-    // Sample the active 3 seconds of an 8-second cycle, independent of its offset.
+    // Sample the finite gesture, independent of its arrival or part offset.
     await part.locator("..").hover();
     return part.evaluate((element, fraction) => {
       const animation = element.getAnimations()[0];
@@ -342,7 +342,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
       animation.pause();
       const { delay, duration } = animation.effect.getTiming();
 
-      const phase = fraction * 0.375;
+      const phase = fraction;
       animation.currentTime =
         Number(delay ?? 0) +
         Number(duration) *
@@ -390,7 +390,7 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
 
       animation.pause();
       const timing = animation.effect.getTiming();
-      const phase = 0.72 * 0.375;
+      const phase = 0.72;
       animation.currentTime =
         Number(timing.delay ?? 0) +
         Number(timing.duration) *
@@ -401,6 +401,48 @@ test("icon gestures use attached hinges, separated layers, and one clockwise tur
     }),
   );
   expect(turns).toEqual([330, 330]);
+});
+
+test("moving inside a heading does not replay its completed icon gesture", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const heading = page.locator("#work .section-title");
+  await heading.scrollIntoViewIfNeeded();
+  await expect(heading.locator("..")).not.toHaveClass(/zoom-ready/);
+  const icon = heading.locator("svg");
+  await expect(icon).not.toHaveClass(/icon-active/);
+  const result = await heading.evaluate(async (owner) => {
+    const glyph = owner.querySelector("svg");
+    if (!glyph) throw new Error("Expected the heading icon.");
+    owner.dispatchEvent(
+      new PointerEvent("pointerover", { bubbles: true, pointerType: "mouse" }),
+    );
+    const animations = glyph.getAnimations({ subtree: true });
+    const finished = animations.map((animation) => animation.finished);
+    for (const animation of animations) animation.finish();
+    await Promise.all(finished);
+    await Promise.resolve();
+    const settled = !glyph.classList.contains("icon-active");
+    glyph.dispatchEvent(
+      new PointerEvent("pointerover", {
+        bubbles: true,
+        pointerType: "mouse",
+        relatedTarget: owner,
+      }),
+    );
+    return {
+      played: animations.length > 0,
+      settled,
+      replayed: glyph.classList.contains("icon-active"),
+    };
+  });
+  expect(result).toEqual({ played: true, settled: true, replayed: false });
+  const recovery = page.locator(".architecture-recovery");
+  await recovery.locator("a").focus();
+  await expect(recovery.locator("svg")).toHaveClass(/icon-active/);
+  await expect(recovery.locator("svg")).toHaveCSS("rotate", "12deg");
 });
 
 test("tactile icon surfaces stay static with reduced motion and simplify in forced colors", async ({

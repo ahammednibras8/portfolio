@@ -1,4 +1,32 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+// Pause new finite gestures before a slow assertion can outlive them.
+const freezeEntrancesAndIcons = (page: Page) =>
+  page.addInitScript(() => {
+    const pause = (element: Element) => {
+      for (const animation of element.getAnimations({ subtree: true })) {
+        if (
+          animation instanceof CSSAnimation &&
+          (animation.animationName === "zoom-in" ||
+            animation.animationName.startsWith("icon-")) &&
+          animation.playState !== "finished"
+        )
+          animation.pause();
+      }
+    };
+    new MutationObserver((records) => {
+      for (const { target } of records)
+        if (
+          target instanceof Element &&
+          target.matches(".is-zooming, .icon-active")
+        )
+          pause(target);
+    }).observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  });
 
 test("the hero settles around a solid, stationary name", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -55,12 +83,12 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
       };
     }),
   );
-  expect(samples.map(({ delay }) => delay)).toEqual([80, 160]);
-  expect(samples[0]?.frames[0]?.scale).toBeCloseTo(0.98);
+  expect(samples.map(({ delay }) => delay)).toEqual([60, 120]);
+  expect(samples[0]?.frames[0]?.scale).toBeCloseTo(0.96);
   expect(samples[0]?.frames[0]?.opacity).toBeCloseTo(0.92);
-  expect(samples[1]?.frames[0]?.scale).toBeCloseTo(0.99);
+  expect(samples[1]?.frames[0]?.scale).toBeCloseTo(0.985);
   for (const { duration, frames, iterations } of samples) {
-    expect(duration).toBe(480);
+    expect(duration).toBe(560);
     expect(iterations).toBe(1);
     const first = frames[0];
     const last = frames[2];
@@ -77,6 +105,8 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
     ).toBe(true);
   }
   await expect(page.locator("h1")).toHaveCSS("animation-name", "none");
+  await expect(page.locator("h1")).toHaveCSS("transform", "none");
+  expect(samples[1]?.frames.every(({ opacity }) => opacity === 1)).toBe(true);
   await expect(page.locator(".hero-name")).toHaveCSS("color", "rgb(1, 58, 99)");
   await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
     "opacity",
@@ -96,6 +126,44 @@ test("the hero settles around a solid, stationary name", async ({ page }) => {
           .some((animation) => animation.playState === "running"),
       ),
   ).toBe(false);
+});
+
+test("desktop motion uses one shared timing and easing vocabulary", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const tokens = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return {
+      durations: [
+        "short",
+        "standard",
+        "deliberate",
+        "route",
+        "arrival",
+        "stagger",
+        "gesture",
+      ].map((name) => {
+        const value = style.getPropertyValue(`--motion-${name}`).trim();
+        return parseFloat(value) * (value.endsWith("ms") ? 1 : 1000);
+      }),
+      easings: ["settle", "fluid", "spring"].map((name) =>
+        style
+          .getPropertyValue(`--motion-ease-${name}`)
+          .match(/[\d.]+/g)
+          ?.map(Number),
+      ),
+    };
+  });
+  expect(tokens).toEqual({
+    durations: [100, 180, 220, 240, 560, 45, 760],
+    easings: [
+      [0.16, 1, 0.3, 1],
+      [0.4, 0, 0.2, 1],
+      [0.34, 1.56, 0.64, 1],
+    ],
+  });
 });
 
 for (const viewport of [
@@ -171,31 +239,79 @@ test("project entrances have a short capped stagger in reading order", async ({
 }) => {
   await page.setViewportSize({ width: 1440, height: 1200 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await freezeEntrancesAndIcons(page);
   await page.goto("/");
   await expect(page.locator(".project-list > .zoom-ready")).toHaveCount(6);
   await page
     .locator("#work")
     .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
   await expect(page.locator(".project-list > .is-zooming")).toHaveCount(6);
-  const timings = await page
+  const samples = await page
     .locator(".project-list > li")
     .evaluateAll((pieces) =>
-      pieces.map((piece) => {
-        const animation = piece
-          .getAnimations()
-          .find((entry) => (entry as CSSAnimation).animationName === "zoom-in");
-        if (!animation?.effect) throw new Error("Expected a project entrance.");
-        animation.pause();
-        return animation.effect.getTiming();
-      }),
+      Promise.all(
+        pieces.map(async (piece) => {
+          const animation = piece
+            .getAnimations()
+            .find(
+              (entry) => (entry as CSSAnimation).animationName === "zoom-in",
+            );
+          if (!animation?.effect)
+            throw new Error("Expected a project entrance.");
+          animation.pause();
+          const timing = animation.effect.getTiming();
+          const frames = [0, 0.5, 1].map((progress) => {
+            animation.currentTime =
+              Number(timing.delay) + Number(timing.duration) * progress;
+            const style = getComputedStyle(piece);
+            const box = piece.getBoundingClientRect();
+            return {
+              scale: style.scale === "none" ? 1 : Number(style.scale),
+              opacity: style.opacity,
+              translate: style.translate,
+              transform: style.transform,
+              x: box.left + box.width / 2,
+              y: box.top + box.height / 2,
+            };
+          });
+          animation.finish();
+          await Promise.allSettled([animation.finished]);
+          return { timing, frames };
+        }),
+      ),
     );
-  expect(timings.map(({ delay }) => Math.round(delay ?? 0))).toEqual([
-    0, 40, 80, 120, 120, 120,
+  expect(samples.map(({ timing }) => Math.round(timing.delay ?? 0))).toEqual([
+    0, 45, 90, 135, 135, 135,
   ]);
   expect(
-    timings.every(
-      ({ duration, iterations }) => duration === 480 && iterations === 1,
+    samples.every(
+      ({ timing }) => timing.duration === 560 && timing.iterations === 1,
     ),
+  ).toBe(true);
+  for (const { frames } of samples) {
+    expect(frames[0]?.scale).toBeCloseTo(0.975);
+    expect(frames[2]?.scale).toBe(1);
+    for (const frame of frames) {
+      expect(frame.opacity).toBe("1");
+      expect(frame.translate).toBe("none");
+      expect(frame.transform).toBe("none");
+      expect(frame.x).toBeCloseTo(frames[0]?.x ?? NaN, 1);
+      expect(frame.y).toBeCloseTo(frames[0]?.y ?? NaN, 1);
+    }
+  }
+  await expect(
+    page.locator(".project-list > :is(.zoom-ready, .is-zooming)"),
+  ).toHaveCount(0);
+  expect(
+    await page
+      .locator(".project-list > li")
+      .evaluateAll((pieces) =>
+        pieces.every(
+          (piece) =>
+            (piece as HTMLElement).style.getPropertyValue("--zoom-order") ===
+            "",
+        ),
+      ),
   ).toBe(true);
 });
 
@@ -219,7 +335,7 @@ test("keyboard focus settles a waiting card synchronously", async ({
   await expect(card.locator("h3")).toHaveCSS("transform", "none");
 });
 
-test.describe("touch motion preferences", () => {
+test.describe("touch gesture lifecycle", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",
     "Touch-only pointer emulation uses Chromium.",
@@ -230,196 +346,121 @@ test.describe("touch motion preferences", () => {
     viewport: { width: 412, height: 915 },
   });
 
-  test("changing reduced motion clears sensor offsets and suppresses later haptics", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "vibrate", {
-        value: () => {
-          document.documentElement.dataset.buzzed = "true";
-          return true;
-        },
+  for (const preference of ["reduced", "hidden"] as const) {
+    test(`${preference} cancels a gesture until a fresh interaction`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await freezeEntrancesAndIcons(page);
+      await page.addInitScript(() => {
+        Object.defineProperty(document, "hidden", {
+          configurable: true,
+          get: () => document.documentElement.hasAttribute("data-test-hidden"),
+        });
       });
-    });
-    await page.goto("/");
-    const portrait = page.locator(".hero-portrait");
-    await expect(page.locator("html")).toHaveClass(/is-touch/);
-    await expect
-      .poll(async () => {
-        await page.evaluate(() =>
-          window.dispatchEvent(
-            new DeviceOrientationEvent("deviceorientation", {
-              beta: 75,
-              gamma: 30,
-            }),
-          ),
-        );
-        return portrait.evaluate((element) =>
-          element.style.getPropertyValue("--tilt-x"),
-        );
-      })
-      .toBe("6px");
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect
-      .poll(() =>
-        portrait.evaluate((element) =>
-          element.style.getPropertyValue("--tilt-x"),
+      await page.goto("/");
+      const button = page.getByRole("link", {
+        name: "See my work",
+        exact: true,
+      });
+      const icon = button.locator("svg");
+      await button.scrollIntoViewIfNeeded();
+      await expect(icon).not.toHaveClass(/icon-active/);
+      await button.dispatchEvent("pointerdown", {
+        pointerType: "touch",
+        button: 0,
+      });
+      await expect(icon).toHaveClass(/icon-active/);
+      expect(
+        await icon.evaluate((element) =>
+          element
+            .getAnimations({ subtree: true })
+            .some(
+              (animation) =>
+                animation instanceof CSSAnimation &&
+                animation.animationName.startsWith("icon-") &&
+                animation.playState === "paused",
+            ),
         ),
-      )
-      .toBe("");
-    await page.evaluate(() =>
-      window.dispatchEvent(
-        new DeviceOrientationEvent("deviceorientation", {
-          beta: 75,
-          gamma: 30,
-        }),
-      ),
-    );
-    expect(
-      await portrait.evaluate((element) =>
-        element.style.getPropertyValue("--tilt-x"),
-      ),
-    ).toBe("");
-    await page.getByRole("link", { name: "See my work" }).tap();
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-buzzed",
-      "true",
-    );
-    expect(
-      await page
-        .locator("main svg.lucide > *")
-        .evaluateAll((parts) =>
-          parts.every(
-            (part) => getComputedStyle(part).animationName === "none",
-          ),
+      ).toBe(true);
+
+      if (preference === "reduced")
+        await page.emulateMedia({ reducedMotion: "reduce" });
+      else
+        await page.evaluate(() => {
+          document.documentElement.setAttribute("data-test-hidden", "");
+          document.dispatchEvent(new Event("visibilitychange"));
+        });
+      await expect(page.locator(".icon-active, .is-pressed")).toHaveCount(0);
+      await button.dispatchEvent("pointerdown", {
+        pointerType: "touch",
+        button: 0,
+      });
+      await button.dispatchEvent("pointercancel", { pointerType: "touch" });
+      await expect(icon).not.toHaveClass(/icon-active/);
+      expect(
+        await icon.evaluate(
+          (element) =>
+            element
+              .getAnimations({ subtree: true })
+              .filter(
+                (animation) =>
+                  animation instanceof CSSAnimation &&
+                  animation.animationName.startsWith("icon-"),
+              ).length,
         ),
-    ).toBe(true);
-  });
+      ).toBe(0);
 
-  test("a late sensor permission cannot revive a retired visibility lifecycle", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.addInitScript(() => {
-      Object.assign(DeviceOrientationEvent, {
-        requestPermission: () =>
-          new Promise<string>((resolve) => {
-            document.documentElement.dataset.asked = "true";
-            addEventListener("grant-test-tilt", () => resolve("granted"), {
-              once: true,
-            });
-          }),
-      });
-    });
-    await page.goto("/");
-    const portrait = page.locator(".hero-portrait");
-    await portrait.locator("img").tap();
-    await expect(page.locator("html")).toHaveAttribute("data-asked", "true");
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(page.locator("#intro")).toHaveClass(/motion-settled/);
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.evaluate(async () => {
-      dispatchEvent(new Event("grant-test-tilt"));
-      await Promise.resolve();
-      dispatchEvent(
-        new DeviceOrientationEvent("deviceorientation", {
-          beta: 75,
-          gamma: 30,
-        }),
-      );
-    });
-    expect(
-      await portrait.evaluate((element) =>
-        element.style.getPropertyValue("--tilt-x"),
-      ),
-    ).toBe("");
-    await page
-      .locator("#work")
-      .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
-    await page.evaluate(() =>
-      dispatchEvent(
-        new DeviceOrientationEvent("deviceorientation", {
-          beta: 75,
-          gamma: 30,
-        }),
-      ),
-    );
-    expect(
-      await portrait.evaluate((element) =>
-        element.style.getPropertyValue("--tilt-x"),
-      ),
-    ).toBe("");
-  });
-});
-
-test.describe("background portrait sensor", () => {
-  test.skip(
-    ({ browserName }) => browserName !== "chromium",
-    "Phone sensors are exercised in Chromium.",
-  );
-  test.use({
-    hasTouch: true,
-    isMobile: true,
-    viewport: { width: 412, height: 915 },
-  });
-  test("sensor updates pause in hidden tabs and do not resume offscreen", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.addInitScript(() => {
-      Object.defineProperty(document, "hidden", {
-        configurable: true,
-        get: () => document.documentElement.hasAttribute("data-test-hidden"),
-      });
-    });
-    await page.goto("/");
-    const portrait = page.locator(".hero-portrait");
-    const lean = async (gamma: number) => {
+      if (preference === "reduced")
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+      else
+        await page.evaluate(() => {
+          document.documentElement.removeAttribute("data-test-hidden");
+          document.dispatchEvent(new Event("visibilitychange"));
+        });
       await page.evaluate(
-        (gamma) =>
-          dispatchEvent(
-            new DeviceOrientationEvent("deviceorientation", {
-              beta: 75,
-              gamma,
-            }),
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
           ),
-        gamma,
       );
-      return portrait.evaluate((element) =>
-        element.style.getPropertyValue("--tilt-x"),
-      );
-    };
-    await expect.poll(() => lean(30)).toBe("6px");
-    await page.evaluate(() => {
-      document.documentElement.setAttribute("data-test-hidden", "");
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
-    expect(await lean(-30)).toBe("6px");
-    await page.evaluate(() => {
-      document.documentElement.removeAttribute("data-test-hidden");
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
-    await expect.poll(() => lean(-30)).toBe("-6px");
-    await page
-      .locator("#contact")
-      .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
-    await expect(page.locator("#contact")).toBeInViewport();
-    await page.evaluate(
-      () =>
-        new Promise<void>((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      await expect(icon).not.toHaveClass(/icon-active/);
+      await button.dispatchEvent("pointerdown", {
+        pointerType: "touch",
+        button: 0,
+      });
+      await expect(icon).toHaveClass(/icon-active/);
+      await icon.evaluate(async (element) => {
+        const animations = element
+          .getAnimations({ subtree: true })
+          .filter(
+            (animation) =>
+              animation instanceof CSSAnimation &&
+              animation.animationName.startsWith("icon-"),
+          );
+        for (const animation of animations) animation.finish();
+        await Promise.allSettled(animations.map(({ finished }) => finished));
+      });
+      await expect(icon).not.toHaveClass(/icon-active/);
+      expect(
+        await icon.evaluate((element) =>
+          (element as SVGElement).style.getPropertyValue(
+            "--icon-arrival-delay",
+          ),
         ),
-    );
-    await page.evaluate(() =>
-      document.dispatchEvent(new Event("visibilitychange")),
-    );
-    expect(await lean(30)).toBe("-6px");
-  });
+      ).toBe("");
+      await button.dispatchEvent("pointercancel", { pointerType: "touch" });
+      await button.tap();
+      await expect(page).toHaveURL(/#work$/);
+      await expect(
+        page.getByRole("heading", { name: "Selected work", exact: true }),
+      ).toBeInViewport();
+    });
+  }
 });
 
 for (const preference of ["reduced", "forced", "print"] as const) {
-  test(`${preference} motion cleanup is terminal for this visit`, async ({
+  test(`${preference} leaves reading arrivals settled for this visit`, async ({
     browserName,
     page,
   }) => {
@@ -430,6 +471,7 @@ for (const preference of ["reduced", "forced", "print"] as const) {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
     await expect(page.locator(".toolbox > .zoom-ready")).toHaveCount(5);
+    await page.bringToFront();
     if (preference === "reduced")
       await page.emulateMedia({ reducedMotion: "reduce" });
     if (preference === "forced")

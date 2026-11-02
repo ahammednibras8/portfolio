@@ -10,8 +10,8 @@ const primaryLinks = ["/", "/#work", "/#about", "/#contact"];
 
 const underlineHidden = "inset(0px 100% 0px 0px)";
 const underlineDrawn = "inset(0px)";
-const settleEase = "cubic-bezier(0.22, 1, 0.36, 1)";
-const gestureEase = "cubic-bezier(0.45, 0, 0.2, 1)";
+const settleEase = "cubic-bezier(0.16, 1, 0.3, 1)";
+const gestureEase = "cubic-bezier(0.4, 0, 0.2, 1)";
 const underlineClip = (element: Locator) =>
   element.evaluate((node) => getComputedStyle(node, "::after").clipPath);
 
@@ -25,6 +25,60 @@ const settleScrolling = (page: Page) =>
       piece.classList.remove("zoom-ready");
     }
   });
+
+// Hold finite gestures before assertions can consume their lifetime. The
+// controller still owns activation and the finished-promise cleanup.
+const freezeGestures = (page: Page) =>
+  page.addInitScript(() => {
+    new MutationObserver((records) => {
+      for (const { target } of records) {
+        if (
+          !(target instanceof SVGElement) ||
+          !target.matches("svg.lucide.icon-active")
+        )
+          continue;
+
+        for (const animation of target.getAnimations({ subtree: true })) {
+          if (
+            animation instanceof CSSAnimation &&
+            animation.animationName.startsWith("icon-") &&
+            (animation.effect as KeyframeEffect | null)?.target?.parentNode ===
+              target
+          )
+            animation.pause();
+        }
+      }
+    }).observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  });
+
+const finishGesture = async (icon: Locator) => {
+  await icon.evaluate(async (element) => {
+    const animations = element
+      .getAnimations({ subtree: true })
+      .filter(
+        (animation) =>
+          animation instanceof CSSAnimation &&
+          animation.animationName.startsWith("icon-") &&
+          (animation.effect as KeyframeEffect | null)?.target?.parentNode ===
+            element,
+      );
+
+    if (!animations.length) throw new Error("Expected an active icon gesture.");
+    const finished = animations.map((animation) => animation.finished);
+    for (const animation of animations) animation.finish();
+    await Promise.all(finished);
+  });
+  await expect(icon).not.toHaveClass(/\bicon-active\b/);
+  expect(
+    await icon.evaluate((element: SVGElement) =>
+      element.style.getPropertyValue("--icon-arrival-delay"),
+    ),
+  ).toBe("");
+};
 
 test("the whole portfolio reads as one continuous page", async ({ page }) => {
   await page.goto("/");
@@ -294,19 +348,24 @@ test("every animation starts and ends cleanly", async ({ page }) => {
   await page.goto("/");
   await settleScrolling(page);
 
-  const keyframes = await page.evaluate(() =>
-    [...document.styleSheets]
-      .flatMap((sheet) => [...sheet.cssRules])
-      .flatMap((rule) =>
-        rule instanceof CSSMediaRule ? [...rule.cssRules] : [rule],
-      )
-      .filter((rule) => rule instanceof CSSKeyframesRule)
+  const keyframes = await page.evaluate(() => {
+    const collect = (rules: CSSRuleList): CSSKeyframesRule[] =>
+      [...rules].flatMap((rule) =>
+        rule instanceof CSSKeyframesRule
+          ? [rule]
+          : rule instanceof CSSGroupingRule
+            ? collect(rule.cssRules)
+            : [],
+      );
+
+    return [...document.styleSheets]
+      .flatMap((sheet) => collect(sheet.cssRules))
       .map((rule) =>
-        [...(rule as CSSKeyframesRule).cssRules].flatMap((frame) =>
+        [...rule.cssRules].flatMap((frame) =>
           (frame as CSSKeyframeRule).keyText.split(/,\s*/),
         ),
-      ),
-  );
+      );
+  });
 
   expect(keyframes.length).toBeGreaterThan(0);
 
@@ -354,6 +413,7 @@ test("every animation starts and ends cleanly", async ({ page }) => {
 
   await plate.hover();
   await expect.poll(() => underlineClip(title)).toBe(underlineDrawn);
+  await expect(plate).toHaveCSS("translate", "-2px -2px");
   expect((await plateTiming()).timing).toBe(
     Array(3).fill(settleEase).join(", "),
   );
@@ -489,17 +549,52 @@ test("the headline stays solid while its highlight draws once", async ({
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const holdHighlight = () => {
+      const animation = document
+        .querySelector(".hero-name")
+        ?.getAnimations()
+        .find(
+          (item) =>
+            item instanceof CSSAnimation &&
+            item.animationName === "ink-highlight",
+        );
+
+      if (animation) animation.pause();
+      else requestAnimationFrame(holdHighlight);
+    };
+    requestAnimationFrame(holdHighlight);
+  });
   await page.goto("/");
 
   const headline = page.getByRole("heading", { level: 1 });
   const highlight = headline.locator(".hero-name");
-  const keyframes = await highlight.evaluate((element) => {
-    const effect = element.getAnimations()[0]?.effect as KeyframeEffect;
+  const introduction = await highlight.evaluate((element) => {
+    const animation = element
+      .getAnimations()
+      .find(
+        (item) =>
+          item instanceof CSSAnimation &&
+          item.animationName === "ink-highlight",
+      );
+    if (!animation) throw new Error("Expected the highlight introduction.");
+    animation.pause();
+    const effect = animation.effect as KeyframeEffect;
 
-    return effect.getKeyframes().map((frame) => frame.backgroundSize);
+    return {
+      keyframes: effect.getKeyframes().map((frame) => frame.backgroundSize),
+      easing: getComputedStyle(element).animationTimingFunction,
+      timing: effect.getTiming(),
+    };
   });
 
-  expect(keyframes).toEqual(["0% 100%", "100% 100%"]);
+  expect(introduction.keyframes).toEqual(["0% 100%", "100% 100%"]);
+  expect(introduction.easing).toBe(settleEase);
+  expect(introduction.timing).toMatchObject({
+    delay: 120,
+    duration: 460,
+    iterations: 1,
+  });
 
   const style = () =>
     headline.evaluate((element) => {
@@ -509,6 +604,9 @@ test("the headline stays solid while its highlight draws once", async ({
         animation: computed.animationName,
         clip: computed.backgroundClip,
         color: computed.color,
+        scale: computed.scale,
+        rotate: computed.rotate,
+        translate: computed.translate,
       };
     });
   const ended = () =>
@@ -526,11 +624,27 @@ test("the headline stays solid while its highlight draws once", async ({
     animation: "none",
     clip: "border-box",
     color: "rgb(23, 25, 26)",
+    scale: "none",
+    rotate: "none",
+    translate: "none",
   };
 
   expect(await style()).toEqual(ordinaryText);
 
-  await expect.poll(ended, { timeout: 4000 }).toBe(true);
+  await highlight.evaluate(async (element) => {
+    const animation = element
+      .getAnimations()
+      .find(
+        (item) =>
+          item instanceof CSSAnimation &&
+          item.animationName === "ink-highlight",
+      );
+    if (!animation) throw new Error("Expected the held highlight animation.");
+    const finished = animation.finished;
+    animation.finish();
+    await finished;
+  });
+  expect(await ended()).toBe(true);
   await expect(highlight).toHaveCSS("background-size", "100% 100%");
 
   await headline.hover();
@@ -914,6 +1028,7 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await freezeGestures(page);
 
   await page.goto("/");
 
@@ -929,6 +1044,7 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   const hand = page.locator(".sticker-wave svg");
   const portrait = page.locator(".hero-portrait");
 
+  await expect(hand).toHaveClass(/\bicon-active\b/);
   await expect(hand).toHaveCSS("animation-name", "none");
   await expect(hand.locator("path").first()).toHaveCSS(
     "animation-name",
@@ -936,28 +1052,41 @@ test("cartoon details stay decorative and respect reduced motion", async ({
   );
   await expect(hand.locator("path").first()).toHaveCSS(
     "animation-iteration-count",
-    "infinite",
+    "1",
+  );
+  await expect(hand.locator("path").first()).toHaveCSS(
+    "animation-duration",
+    "0.76s",
+  );
+  await expect(hand.locator("path").first()).toHaveCSS(
+    "animation-delay",
+    "0.4s",
   );
   await settleScrolling(page);
   await portrait.hover();
   await expect(hand).toHaveCSS("animation-name", "none");
   await page.mouse.move(0, 0);
   await expect(hand.locator("path").first()).toHaveCSS(
-    "animation-play-state",
-    "running",
+    "animation-name",
+    "icon-hand-wave",
   );
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator(".sticker-wave svg")).toHaveCSS(
-    "animation-name",
-    "none",
-  );
+  await expect(hand).not.toHaveClass(/\bicon-active\b/);
+  expect(
+    await hand
+      .locator("*")
+      .evaluateAll((parts) =>
+        parts.every((part) => getComputedStyle(part).animationName === "none"),
+      ),
+  ).toBe(true);
 });
 
-test("icon details loop while the SVG and its outline stay still", async ({
+test("icon details make one gesture while the SVG and its outline stay still", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await freezeGestures(page);
   await page.goto("/");
   await settleScrolling(page);
 
@@ -975,29 +1104,69 @@ test("icon details loop while the SVG and its outline stay still", async ({
     if (!type) throw new Error("Expected a Lucide icon type.");
 
     const icon = page.locator(`main svg.${type}`).first();
+    await page.mouse.move(0, 0);
     await icon.hover();
-    const state = await icon.evaluate((element) => ({
-      animation: getComputedStyle(element).animationName,
-      transform: getComputedStyle(element).transform,
-      details: [...element.children].map((part) => ({
-        animation: getComputedStyle(part).animationName,
-        iterations: getComputedStyle(part).animationIterationCount,
-        timing: getComputedStyle(part).animationTimingFunction,
-      })),
-    }));
+    await expect(icon).toHaveClass(/\bicon-active\b/);
+    const state = await icon.evaluate((element) => {
+      const milliseconds = (value: string) =>
+        parseFloat(value) * (value.trim().endsWith("ms") ? 1 : 1000);
+      const gestures = element
+        .getAnimations({ subtree: true })
+        .filter(
+          (animation) =>
+            animation instanceof CSSAnimation &&
+            animation.animationName.startsWith("icon-") &&
+            (animation.effect as KeyframeEffect | null)?.target?.parentNode ===
+              element,
+        );
+
+      for (const animation of gestures) {
+        const timing = (animation.effect as KeyframeEffect).getTiming();
+        animation.pause();
+        animation.currentTime =
+          Number(timing.delay) + Number(timing.duration) / 2;
+      }
+
+      return {
+        count: gestures.length,
+        animation: getComputedStyle(element).animationName,
+        transform: getComputedStyle(element).transform,
+        arrivalDelay: milliseconds(
+          getComputedStyle(element).getPropertyValue("--icon-arrival-delay"),
+        ),
+        details: [...element.children].map((part) => {
+          const style = getComputedStyle(part);
+
+          return {
+            animation: style.animationName,
+            duration: style.animationDuration,
+            delay: Number.parseFloat(style.animationDelay) * 1000,
+            partDelay: milliseconds(
+              style.getPropertyValue("--icon-part-delay") || "0ms",
+            ),
+            iterations: style.animationIterationCount,
+            timing: style.animationTimingFunction,
+          };
+        }),
+      };
+    });
 
     expect(state.animation, type).toBe("none");
     expect(state.transform, type).toBe("none");
     const moving = state.details.filter((part) => part.animation !== "none");
     expect(moving.length, type).toBeGreaterThan(0);
-    expect(
-      moving.every((part) => part.iterations === "infinite"),
-      type,
-    ).toBe(true);
-    expect(
-      moving.every((part) => part.timing === gestureEase),
-      type,
-    ).toBe(true);
+    expect(state.count, type).toBe(moving.length);
+    for (const part of moving) {
+      expect(part, type).toMatchObject({
+        duration: "0.76s",
+        iterations: "1",
+        timing: gestureEase,
+      });
+      expect(part.partDelay, type).toBeGreaterThanOrEqual(0);
+      expect(part.partDelay, type).toBeLessThanOrEqual(180);
+      expect(part.delay, type).toBeCloseTo(state.arrivalDelay + part.partDelay);
+    }
+    await finishGesture(icon);
   }
 
   const fixedOutlines = [
@@ -1013,14 +1182,44 @@ test("icon details loop while the SVG and its outline stay still", async ({
 
   for (const selector of fixedOutlines) {
     const outline = page.locator(`main ${selector}`).first();
-    await outline.locator("..").hover();
-    await expect(outline, selector).toHaveCSS("animation-name", "none");
-    await expect(outline, selector).toHaveCSS("transform", "none");
+    const icon = outline.locator("..");
+    await page.mouse.move(0, 0);
+    await icon.hover();
+    await expect(icon).toHaveClass(/\bicon-active\b/);
+    expect(
+      await icon.evaluate((element) =>
+        element
+          .getAnimations({ subtree: true })
+          .some(
+            (animation) =>
+              animation instanceof CSSAnimation &&
+              animation.animationName.startsWith("icon-"),
+          ),
+      ),
+      selector,
+    ).toBe(true);
+    for (const property of [
+      "animation-name",
+      "transform",
+      "scale",
+      "rotate",
+      "translate",
+    ]) {
+      await expect(outline, selector).toHaveCSS(property, "none");
+    }
+    await finishGesture(icon);
   }
 
   // Keyboard focus triggers the same internal detail, keeping the card legible.
   await page.mouse.move(0, 0);
-  await page.locator('#contact a[href^="mailto:"]').focus();
+  const email = page.locator('#contact a[href^="mailto:"]');
+  const envelope = email.locator(".lucide-mail");
+  await email.scrollIntoViewIfNeeded();
+  await expect(envelope).not.toHaveClass(/\bicon-active\b/);
+  await page.keyboard.press("Tab");
+  await email.focus();
+  await expect(email).toHaveCSS("outline-style", "solid");
+  await expect(envelope).toHaveClass(/\bicon-active\b/);
   await expect(page.locator(".lucide-mail > path")).not.toHaveCSS(
     "animation-name",
     "none",
@@ -1078,34 +1277,68 @@ test.describe("on a touch screen", () => {
     viewport: { height: 915, width: 412 },
   });
 
-  test("phone icons loop without hover and pause outside the viewport", async ({
+  test("phone icons greet once and cancel when fully offscreen", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await freezeGestures(page);
     const blocked: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") blocked.push(message.text());
     });
     await page.goto("/");
     await settleScrolling(page);
-    await expect(page.locator("html")).toHaveClass(/is-touch/);
+    await expect(page.locator("html")).not.toHaveClass(/is-touch/);
     await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
       "animation-name",
       "none",
     );
-    const arrow = page.locator(".hero-contact .action-arrow path").first();
+    const arrow = page.locator(".hero-contact .action-arrow");
     const flap = page.locator("#contact .lucide-mail > path");
-    await expect(arrow).toHaveCSS("animation-iteration-count", "infinite");
-    await expect(arrow).toHaveCSS("animation-play-state", "running");
-    await expect(flap).toHaveCSS("animation-play-state", "paused");
+    const envelope = flap.locator("..");
+    await expect(arrow).not.toHaveClass(/\bicon-active\b/);
+    await expect(arrow.locator("path").first()).toHaveCSS(
+      "animation-name",
+      "none",
+    );
+    await expect(flap).toHaveCSS("animation-name", "none");
     await flap.scrollIntoViewIfNeeded();
+    await expect(envelope).toHaveClass(/\bicon-active\b/);
     await expect(flap).toHaveCSS("animation-name", "icon-mail-flap");
-    await expect(flap).toHaveCSS("animation-play-state", "running");
-    await expect(flap.locator("..")).toHaveCSS("animation-name", "none");
+    await expect(flap).toHaveCSS("animation-duration", "0.62s");
+    await expect(flap).toHaveCSS("animation-iteration-count", "1");
+    await expect(envelope).toHaveCSS("animation-name", "none");
+    await finishGesture(envelope);
+    await expect(flap).toHaveCSS("animation-name", "none");
     await page
       .locator("#intro")
       .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
-    await expect(flap).toHaveCSS("animation-play-state", "paused");
+    await expect(envelope).not.toBeInViewport();
+    await flap.scrollIntoViewIfNeeded();
+    await expect(envelope).toBeInViewport();
+    // Let the observer deliver reentry before checking that the greeting is spent.
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await expect(envelope).not.toHaveClass(/\bicon-active\b/);
+    await expect(flap).toHaveCSS("animation-name", "none");
+
+    await page
+      .locator('#contact a[href^="mailto:"]')
+      .dispatchEvent("pointerdown", {
+        pointerType: "touch",
+        button: 0,
+      });
+    await expect(envelope).toHaveClass(/\bicon-active\b/);
+    await page
+      .locator("#intro")
+      .evaluate((element) => element.scrollIntoView({ behavior: "instant" }));
+    await expect(envelope).not.toBeInViewport();
+    await expect(envelope).not.toHaveClass(/\bicon-active\b/);
+    await expect(flap).toHaveCSS("animation-name", "none");
     expect(blocked).toEqual([]);
   });
 
@@ -1113,20 +1346,50 @@ test.describe("on a touch screen", () => {
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await freezeGestures(page);
     await page.addInitScript(() => {
       const realMatchMedia = window.matchMedia.bind(window);
 
-      window.matchMedia = (query) =>
-        query === "(hover: hover)"
-          ? ({ matches: true } as MediaQueryList)
-          : realMatchMedia(query);
+      window.matchMedia = (query) => {
+        const result = realMatchMedia(query);
+        if (
+          query === "(hover: hover)" ||
+          query === "(hover: hover) and (pointer: fine)"
+        )
+          Object.defineProperty(result, "matches", { value: true });
+        return result;
+      };
+      // Observe the real tap after the document's handlers, before its native
+      // hash navigation moves the arrow offscreen and cancels the gesture.
+      window.addEventListener("pointerdown", (event) => {
+        if (!(event.target instanceof Element) || event.pointerType !== "touch")
+          return;
+        const link = event.target.closest(".hero-cta");
+        if (!link) return;
+        document.documentElement.dataset.touchGesture = String(
+          link.querySelector("svg")?.classList.contains("icon-active"),
+        );
+        document.documentElement.dataset.touchPrevented = String(
+          event.defaultPrevented,
+        );
+      });
     });
     await page.goto("/");
     await settleScrolling(page);
 
     await expect(page.locator("html")).not.toHaveClass(/is-touch/);
-    await page.touchscreen.tap(20, 300);
-    await expect(page.locator("html")).toHaveClass(/is-touch/);
+    await page.getByRole("link", { name: "See my work" }).tap();
+    await expect(page).toHaveURL(/#work$/);
+    await expect(page.locator("#work-heading")).toBeInViewport();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-touch-gesture",
+      "true",
+    );
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-touch-prevented",
+      "false",
+    );
+    await expect(page.locator("html")).not.toHaveClass(/is-touch/);
     await expect(page.locator(".exhibit-hero-portrait")).toHaveCSS(
       "animation-name",
       "none",
@@ -1147,9 +1410,7 @@ test.describe("on a touch screen", () => {
       .locator(".hero-portrait")
       .evaluate((portrait) => getComputedStyle(portrait).translate);
 
-  test("a tap buzzes and the portrait leans with the phone", async ({
-    page,
-  }) => {
+  test("taps navigate without vibration or portrait tilt", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "vibrate", {
@@ -1163,21 +1424,18 @@ test.describe("on a touch screen", () => {
     await page.goto("/");
     await settleScrolling(page);
 
-    await expect
-      .poll(async () => {
-        await tiltPhone(page);
-
-        return portraitLean(page);
-      })
-      .toBe("6px 6px");
+    await tiltPhone(page);
+    expect(await portraitLean(page)).toBe("none");
 
     await page.getByRole("link", { name: "See my work" }).tap();
-    await expect(page.locator("html")).toHaveAttribute("data-buzzed", "10");
+    await expect(page).toHaveURL(/#work$/);
+    await expect(page.locator("#work-heading")).toBeInViewport();
+    await expect(page.locator("html")).not.toHaveAttribute("data-buzzed");
+    await tiltPhone(page);
+    expect(await portraitLean(page)).toBe("none");
   });
 
-  test("the tilt sensor permission is only requested by a portrait tap", async ({
-    page,
-  }) => {
+  test("a portrait tap never requests sensor permission", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.addInitScript(() => {
       Object.assign(DeviceOrientationEvent, {
@@ -1197,14 +1455,9 @@ test.describe("on a touch screen", () => {
     );
 
     await page.locator(".hero-portrait img").tap();
-    await expect(page.locator("html")).toHaveAttribute("data-asked", "true");
-    await expect
-      .poll(async () => {
-        await tiltPhone(page);
-
-        return portraitLean(page);
-      })
-      .toBe("6px 6px");
+    await expect(page.locator("html")).not.toHaveAttribute("data-asked");
+    await tiltPhone(page);
+    expect(await portraitLean(page)).toBe("none");
   });
 
   test("reduced motion keeps the page still", async ({ page }) => {
@@ -1213,8 +1466,9 @@ test.describe("on a touch screen", () => {
     await settleScrolling(page);
     await tiltPhone(page);
     expect(await portraitLean(page)).toBe("none");
-    await page.locator("#contact").scrollIntoViewIfNeeded();
-    await page.locator("#introduction-heading").tap();
+    await page.getByRole("link", { name: "Get in touch" }).tap();
+    await expect(page).toHaveURL(/#contact$/);
+    await expect(page.locator("#contact-heading")).toBeInViewport();
 
     expect(
       await page
@@ -1766,13 +2020,32 @@ test("the infrastructure and contact sections expose their real content", async 
 });
 
 test("the complete page works without JavaScript", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    reducedMotion: "no-preference",
+  });
   const page = await context.newPage();
+  const iconsAreStill = () =>
+    page
+      .locator("main svg.lucide, main svg.lucide > *")
+      .evaluateAll(
+        (parts) =>
+          parts.length > 0 &&
+          parts.every(
+            (part) => getComputedStyle(part).animationName === "none",
+          ),
+      );
 
   await page.goto("/");
+  // Keep hover sampling independent of a long native anchor scroll.
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+  });
   await expect(page.locator("h1")).toBeVisible();
   // The security policy blocks inline scripts, so one would silently never run.
   await expect(page.locator("script:not([src])")).toHaveCount(0);
+  expect(await iconsAreStill()).toBe(true);
+  await expect(page.locator("main .icon-active")).toHaveCount(0);
 
   const navigation = page.getByRole("navigation", { name: "Primary" });
 
@@ -1782,6 +2055,20 @@ test("the complete page works without JavaScript", async ({ browser }) => {
   await expect(
     page.getByRole("navigation", { name: "Contact options" }),
   ).toBeVisible();
+
+  const email = page.locator('#contact a[href^="mailto:"]');
+  const envelope = email.locator(".lucide-mail");
+  await email.hover();
+  await expect(envelope).toHaveCSS("scale", "1.06");
+  await expect(envelope).toHaveCSS("rotate", "0deg");
+  expect(await iconsAreStill()).toBe(true);
+
+  await page.mouse.move(0, 0);
+  await page.keyboard.press("Tab");
+  await email.focus();
+  await expect(email).toHaveCSS("outline-style", "solid");
+  await expect(envelope).toHaveCSS("scale", "1.06");
+  expect(await iconsAreStill()).toBe(true);
 
   await context.close();
 });

@@ -55,6 +55,9 @@ test("the offline page lines up with the header", async ({ page }) => {
 
   const motion = await page.locator(".offline-signal").evaluate((signal) => {
     const icon = signal.querySelector("svg") as SVGElement;
+    icon.dispatchEvent(
+      new PointerEvent("pointerover", { bubbles: true, pointerType: "mouse" }),
+    );
     const detail = getComputedStyle(icon.children[1] as SVGElement);
     return {
       rings: ["::before", "::after"].map(
@@ -71,9 +74,12 @@ test("the offline page lines up with the header", async ({ page }) => {
     rings: ["none", "none"],
     outer: "none",
     detail: "icon-server-light",
-    timing: "cubic-bezier(0.45, 0, 0.2, 1)",
-    iterations: "infinite",
+    timing: "cubic-bezier(0.4, 0, 0.2, 1)",
+    iterations: "1",
   });
+  await expect(page.locator(".offline-signal svg")).not.toHaveClass(
+    /icon-active/,
+  );
 });
 
 test("live pages are never answered from the offline cache", async () => {
