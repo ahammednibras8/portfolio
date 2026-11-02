@@ -21,12 +21,12 @@ for (const trigger of ["hover", "focus"] as const) {
     const badge = button.locator(".hero-arrow-badge");
     const arrow = badge.locator("svg");
     await expect(button).toHaveAttribute("href", "#work");
-    await expect(button).toHaveCSS("background-color", "rgb(1, 58, 99)");
+    await expect(button).toHaveCSS("background-color", "rgb(245, 160, 128)");
     await expect(button).toHaveCSS("background-size", "0% 100%");
-    await expect(badge).toHaveCSS("background-color", "rgb(143, 216, 220)");
+    await expect(badge).toHaveCSS("background-color", "rgb(255, 255, 255)");
     if (trigger === "hover") await button.hover();
     else await button.focus();
-    // Check the real sweep mid-flight, while its white label stays readable.
+    // Check the real sweep mid-flight, while its navy label stays readable.
     await button.evaluate(async (element) => {
       const fill = element
         .getAnimations()
@@ -47,11 +47,36 @@ for (const trigger of ["hover", "focus"] as const) {
     expect(progress).toBeGreaterThan(0);
     expect(progress).toBeLessThan(100);
     await expect(button).toHaveCSS("background-clip", "padding-box");
-    await expect(button).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
     await expect(button).toHaveCSS(
       "background-image",
-      "linear-gradient(rgb(1, 42, 74) 0px, rgb(1, 42, 74) 0px)",
+      "linear-gradient(rgb(255, 193, 166) 0px, rgb(255, 193, 166) 0px)",
     );
+    const contrasts = await button.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const luminance = (color: string) => {
+        const channels =
+          color
+            .match(/[\d.]+/g)
+            ?.slice(0, 3)
+            .map(Number) ?? [];
+        return channels.reduce((sum, channel, index) => {
+          const value = channel / 255;
+          const linear =
+            value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          return sum + linear * ([0.2126, 0.7152, 0.0722][index] ?? 0);
+        }, 0);
+      };
+      const ink = luminance(style.color);
+      return [
+        style.backgroundColor,
+        ...(style.backgroundImage.match(/rgb\([^)]+\)/g) ?? []),
+      ].map((color) => {
+        const fill = luminance(color);
+        return (Math.max(ink, fill) + 0.05) / (Math.min(ink, fill) + 0.05);
+      });
+    });
+    expect(Math.min(...contrasts)).toBeGreaterThan(4.5);
     expect(
       await button.evaluate(
         (element) => getComputedStyle(element, "::before").content,
@@ -65,8 +90,8 @@ for (const trigger of ["hover", "focus"] as const) {
     });
     await expect(button).toHaveCSS("background-size", "100% 100%");
     await expect(button).toHaveCSS("translate", "-2px -2px");
-    await expect(badge).toHaveCSS("background-color", "rgb(255, 255, 255)");
-    await expect(badge).toHaveCSS("color", "rgb(1, 58, 99)");
+    await expect(badge).toHaveCSS("background-color", "rgb(1, 58, 99)");
+    await expect(badge).toHaveCSS("color", "rgb(255, 255, 255)");
     await expect(badge).toHaveCSS("scale", "1.12");
     await expect(badge).toHaveCSS("rotate", "-12deg");
     await expect(arrow).toHaveCSS("scale", "none");
@@ -81,6 +106,13 @@ for (const trigger of ["hover", "focus"] as const) {
       { duration: 8000, iterations: true },
       { duration: 8000, iterations: true },
     ]);
+    await arrow.evaluate((element) => {
+      for (const animation of element.getAnimations({ subtree: true })) {
+        animation.pause();
+        animation.currentTime =
+          Number(animation.effect?.getTiming().delay ?? 0) + 6000;
+      }
+    });
     await page.screenshot({ path: testInfo.outputPath("work-hover.png") });
     if (trigger === "hover") await page.mouse.move(0, 0);
     else await button.evaluate((element) => element.blur());
@@ -88,6 +120,7 @@ for (const trigger of ["hover", "focus"] as const) {
     await expect(button).toHaveCSS("translate", "none");
     await expect(badge).toHaveCSS("scale", "none");
     await expect(badge).toHaveCSS("rotate", "none");
+    await page.screenshot({ path: testInfo.outputPath("work-rest.png") });
     await button.click();
     await expect(page).toHaveURL(/#work$/);
     await expect(
