@@ -1,26 +1,29 @@
-/* A delegated press keeps card feedback finite, including on touch screens. */
+/* A delegated press keeps card and contact feedback finite on touch screens. */
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const forcedColors = matchMedia("(forced-colors: active)");
-const projects = document.querySelector(".project-list");
-let pressedCard: HTMLElement | null = null;
+const surfaces = document.querySelectorAll(".project-list, .hero-contact");
+let pressedLink: HTMLElement | null = null;
 
 const release = () => {
-  pressedCard?.classList.remove("is-pressed");
-  pressedCard = null;
+  pressedLink?.classList.remove("is-pressed");
+  pressedLink = null;
 };
 
-projects?.addEventListener("pointerdown", (event) => {
-  release();
-  if (reducedMotion.matches || forcedColors.matches) return;
-  if ((event as PointerEvent).button !== 0) return;
+for (const surface of surfaces) {
+  surface.addEventListener("pointerdown", (event) => {
+    release();
+    if (forcedColors.matches || (event as PointerEvent).button !== 0) return;
 
-  pressedCard =
-    event.target instanceof Element
-      ? event.target.closest<HTMLElement>(".route-link")
-      : null;
-  pressedCard?.classList.add("is-pressed");
-});
-projects?.addEventListener("pointerleave", release);
+    const link =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>(".route-link, .hero-contact")
+        : null;
+    if (reducedMotion.matches && !link?.matches(".hero-contact")) return;
+    pressedLink = link;
+    pressedLink?.classList.add("is-pressed");
+  });
+  surface.addEventListener("pointerleave", release);
+}
 addEventListener("pointerup", release, { capture: true });
 addEventListener("pointercancel", release, { capture: true });
 addEventListener("blur", release);

@@ -840,11 +840,6 @@ article ul {
     background: var(--color-action-active);
   }
 
-  .hero-actions .hero-contact:hover {
-    background: var(--color-surface-recessed);
-    border-color: var(--color-action);
-  }
-
   .architecture-node-link:hover {
     background: var(--color-surface-recessed);
     border-color: var(--color-action);
@@ -925,7 +920,6 @@ article ul {
   }
 
   .page .hero-actions .hero-action,
-  .page .hero-actions .hero-contact,
   .page .architecture-node-link {
     transition:
       background-color var(--motion-standard) var(--motion-ease-settle),
@@ -935,7 +929,6 @@ article ul {
   }
 
   .page .hero-actions .hero-action:hover,
-  .page .hero-actions .hero-contact:is(:hover, :focus-visible),
   .page .architecture-node-link:is(:hover, :focus-visible) {
     translate: -0.125rem -0.125rem;
   }
@@ -1155,6 +1148,15 @@ article > .project-evidence > h4 {
   border-radius: 999px;
   font-weight: 700;
   text-decoration: none;
+}
+
+.contact-arrow-badge {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border-radius: 50%;
 }
 
 .introduction {

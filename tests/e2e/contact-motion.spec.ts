@@ -20,6 +20,28 @@ for (const trigger of ["hover", "focus"] as const) {
     );
     if (trigger === "hover") await button.hover();
     else await button.focus();
+    await expect(button).toHaveCSS("translate", "-2px -2px");
+    await expect(button).toHaveCSS("color", "rgb(1, 58, 99)");
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "background-color",
+      "rgb(1, 58, 99)",
+    );
+    await expect(button.locator(".contact-arrow-badge")).toHaveCSS(
+      "color",
+      "rgb(255, 255, 255)",
+    );
+    await expect
+      .poll(() =>
+        button.evaluate((element) =>
+          parseFloat(getComputedStyle(element, "::before").scale),
+        ),
+      )
+      .toBe(1);
+    expect(
+      await button.evaluate(
+        (element) => getComputedStyle(element, "::before").pointerEvents,
+      ),
+    ).toBe("none");
     await expect(arrow).toHaveClass(/is-in-view/);
     await expect(arrow.locator("path").first()).toHaveCSS(
       "animation-name",
@@ -45,8 +67,9 @@ for (const trigger of ["hover", "focus"] as const) {
       return {
         frames,
         timing: animations.map((animation) => animation.effect?.getTiming()),
-        labelOpacity: getComputedStyle(element.parentElement as Element)
-          .opacity,
+        labelOpacity: getComputedStyle(
+          element.closest(".hero-contact") as Element,
+        ).opacity,
         outerAnimation: getComputedStyle(element).animationName,
       };
     });
@@ -98,6 +121,13 @@ test("contact motion is static with reduced motion and forced colors", async ({
   const button = page.getByRole("link", { name: "Get in touch", exact: true });
   const path = button.locator(".action-arrow path").first();
   await button.focus();
+  await expect(button).toHaveCSS("translate", "none");
+  await expect(button).toHaveCSS("transition-duration", "0s");
+  expect(
+    await button.evaluate(
+      (element) => getComputedStyle(element, "::before").transitionDuration,
+    ),
+  ).toBe("0s");
   await expect(path).toHaveCSS("animation-name", "none");
   await expect(path).toHaveCSS("opacity", "1");
   if (browserName === "chromium") {
@@ -107,9 +137,55 @@ test("contact motion is static with reduced motion and forced colors", async ({
     });
     await button.hover();
     await expect(path).toHaveCSS("animation-name", "none");
+    await expect(button).toHaveCSS("box-shadow", "none");
+    expect(
+      await button.evaluate(
+        (element) => getComputedStyle(element, "::before").content,
+      ),
+    ).toBe("none");
   }
   await button.click();
   await expect(page).toHaveURL(/#contact$/);
+});
+
+test("the contact pill presses and releases without changing its layout", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const button = page.getByRole("link", { name: "Get in touch", exact: true });
+  await expect(page.locator("#intro > .speech-bubble")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  const before = await button.boundingBox();
+  const neighbor = await page.locator(".hero-action").boundingBox();
+  await button.hover();
+  await page.mouse.down();
+  try {
+    await expect(button).toHaveClass(/is-pressed/);
+    await expect(button).toHaveCSS("box-shadow", "none");
+    await expect(button).toHaveCSS("translate", "2px 2px");
+    await expect(button).toHaveCSS("opacity", "1");
+    const pressed = await button.boundingBox();
+    expect(pressed?.width).toBe(before?.width);
+    expect(pressed?.height).toBe(before?.height);
+    expect(await page.locator(".hero-action").boundingBox()).toEqual(neighbor);
+    await page.mouse.move(0, 0);
+  } finally {
+    await page.mouse.up();
+  }
+  await button.evaluate((element) => element.blur());
+  await expect(button).not.toHaveClass(/is-pressed/);
+  await expect(button).toHaveCSS("translate", "none");
+  await expect
+    .poll(() =>
+      button.evaluate((element) =>
+        parseFloat(getComputedStyle(element, "::before").scale),
+      ),
+    )
+    .toBe(0);
+  await expect(page).not.toHaveURL(/#contact$/);
 });
 
 test.describe("on touch screens", () => {
@@ -145,4 +221,41 @@ test.describe("on touch screens", () => {
       page.getByRole("heading", { name: "Contact", exact: true }),
     ).toBeInViewport();
   });
+
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    test(`contact touch feedback releases after cancellation with ${reducedMotion}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion });
+      await page.goto("/");
+      const button = page.getByRole("link", {
+        name: "Get in touch",
+        exact: true,
+      });
+      await button.dispatchEvent("pointerdown", {
+        button: 0,
+        pointerType: "touch",
+      });
+      await expect(button).toHaveClass(/is-pressed/);
+      await expect(button).toHaveCSS("box-shadow", "none");
+      await expect(button).toHaveCSS(
+        "translate",
+        reducedMotion === "reduce" ? "none" : "2px 2px",
+      );
+      await button.dispatchEvent("pointercancel", { pointerType: "touch" });
+      await expect(button).not.toHaveClass(/is-pressed/);
+      await expect(button).toHaveCSS("translate", "none");
+      await expect
+        .poll(() =>
+          button.evaluate((element) =>
+            parseFloat(getComputedStyle(element, "::before").scale),
+          ),
+        )
+        .toBe(0);
+      await expect(button).not.toBeFocused();
+      await button.tap();
+      await expect(page).toHaveURL(/#contact$/);
+      await expect(button).not.toHaveClass(/is-pressed/);
+    });
+  }
 });
