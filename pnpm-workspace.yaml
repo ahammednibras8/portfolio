@@ -5,7 +5,17 @@ strictDepBuilds: true
 overrides:
   "@lhci/cli>proxy-agent": 8.0.1
   "@puppeteer/browsers": 3.2.3
+  "basic-ftp@<=6.2.0": 6.2.3
+  "http-cache-semantics@<=4.2.0": 4.3.0
+  "sharp@<0.35.5": 0.35.5
+  "source-map-js@>=1.0.0 <1.2.2": 1.2.2
   tmp: 0.2.7
+audit:
+  ignore:
+    # No patched release exists. This is only reached by build-time linters
+    # using repository-controlled glob patterns. Remove this exception when
+    # braces publishes a patched release.
+    - GHSA-vfj7-8cjw-p6xm
 allowBuilds:
   esbuild: true
   workerd: true
