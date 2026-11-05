@@ -36,11 +36,11 @@ Every major visual choice must continue to combine three references:
 - IBM's _[System/360 Principles of Operation](https://www.bitsavers.org/pdf/ibm/360/princOps/A22-6821-6_360PrincOpsJan67.pdf)_ for information hierarchy; and
 - [Nibras's public work](https://github.com/ahammednibras8) for plain language, visible boundaries, and proof beside claims.
 
-The color system has a personal starting point. [Arsenal's off-white and dark red](https://www.arsenal.com/photos/the-inspiration-and-details-on-our-2526-third-kit-a4tcK6e5bV0Y) inform the canvas and action color. [Mercedes-AMG's black, silver, and PETRONAS green](https://www.mercedesamgf1.com/news/mercedes-amg-f1-2026-challenger-w17-revealed) inform the neutral structure and keyboard focus color. These are references, not copied brand palettes.
+The color system has a personal starting point. [Arsenal's off-white and dark red](https://www.standard.co.uk/sport/football/arsenal-fc-new-third-kit-unveiled-b1241341.html) inform the canvas and action color. [Mercedes-AMG's black, silver, and PETRONAS green](https://www.mercedesamgf1.com/news/mercedes-amg-f1-2026-challenger-w17-revealed) inform the neutral structure and keyboard focus color. These are references, not copied brand palettes.
 
 The released site uses a raised white band between two dark-red rules to mark identity, proof, and contact. Its favicon uses an outlined uppercase N from IBM Plex Sans Bold. Both treatments established continuity without inventing a separate logo system.
 
-A 2024 study of short-story writing found that access to generative AI ideas improved how individual stories were evaluated while making AI-assisted stories more similar to one another. The study does not establish the same effect in web design. It does support using AI to critique an authored direction instead of asking it to invent the personality. See [“Generative AI enhances individual creativity but reduces the collective diversity of novel content”](https://doi.org/10.1126/sciadv.adn5290).
+A 2024 study of short-story writing found that access to generative AI ideas improved how individual stories were evaluated while making AI-assisted stories more similar to one another. The study does not establish the same effect in web design. It does support using AI to critique an authored direction instead of asking it to invent the personality. See [“Generative AI enhances individual creativity but reduces the collective diversity of novel content”](https://pmc.ncbi.nlm.nih.gov/articles/PMC11244532/).
 
 ## What must remain
 
