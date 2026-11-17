@@ -10,6 +10,8 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 
 - [Astro](https://docs.astro.build/) builds the site as static HTML.
 - A typed document layout owns shared metadata, fonts, navigation, and the footer.
+- Shared profile data keeps the published name, role, location, and public links consistent.
+- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, without browser scripts.
 - Important content and navigation work without JavaScript.
 - There is no application server, database, or client framework.
 - Images are optimized during the build.
@@ -18,6 +20,12 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - Cloudflare serves static files only. The site has no Pages Functions, Worker, database, or storage service.
 
 The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), and [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md).
+
+## Finding the work
+
+- The [homepage](https://ahammednibras.com/) contains the Cascade case study, its evidence, and contact details.
+- [About](https://ahammednibras.com/about/) connects the full name, location, and public profile identifiers.
+- Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
 ## Deployment
 
