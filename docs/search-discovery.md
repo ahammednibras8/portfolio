@@ -13,6 +13,7 @@ Track completion and dated observations in [issue #63](https://github.com/ahamme
 3. Inspect the built microdata with a structured-data validator. Check the homepage's WebSite and Person, and the About page's ProfilePage with that same Person as its main entity. The Person identifier ends in `/#person` on both pages.
 4. Confirm page-specific canonical URLs, real HTML links, and sitemap membership. Do not put 404 or preview URLs in the sitemap.
 5. Run `pnpm run verify` with the pinned toolchain. Shared layout changes also need the full cross-browser checks in [CONTRIBUTING.md](../CONTRIBUTING.md).
+6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy keeps scripts disabled while allowing same-origin connections.
 
 The site retains its existing authored Cascade study at `/#work`. The About page links there. Move the study to `src/content/projects/` and a dedicated route only when implementing the approved route structure in [ADR 0002](decisions/0002-personal-design-direction.md); preserve the evidence and old anchor paths rather than publishing a duplicate to increase page count. Add writing only when an article is ready.
 
