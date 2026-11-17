@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-23
-- Updated: 2026-10-01
+- Updated: 2026-11-17
 
 ## Decision
 
@@ -82,6 +82,8 @@ A 2024 study of short-story writing found that access to generative AI ideas imp
 The decision applies to typography, color, layout, components, routes, diagrams, interaction states, motion, and case-study presentation.
 
 The current `src/pages/index.astro` and `src/styles/global.css` remain the `v0.1.0` baseline. Future `v0.2` changes must deliberately evolve that baseline and prove the living-system-map direction through working routes and evidence. Do not add decorative map elements before the connected content exists.
+
+On 2026-11-17, Nibras removed the released homepage case study because the project no longer met the standard he wants the portfolio to represent. Until reviewed work is ready, the homepage keeps its identity and contact paths without placeholder project content. Future project claims still require evidence and Nibras's approval.
 
 ## Reconsider when
 

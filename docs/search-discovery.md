@@ -15,7 +15,7 @@ Track completion and dated observations in [issue #63](https://github.com/ahamme
 5. Run `pnpm run verify` with the pinned toolchain. Shared layout changes also need the full cross-browser checks in [CONTRIBUTING.md](../CONTRIBUTING.md).
 6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy keeps scripts disabled while allowing same-origin connections.
 
-The site retains its existing authored Cascade study at `/#work`. The About page links there. Move the study to `src/content/projects/` and a dedicated route only when implementing the approved route structure in [ADR 0002](decisions/0002-personal-design-direction.md); preserve the evidence and old anchor paths rather than publishing a duplicate to increase page count. Add writing only when an article is ready.
+Add a project route only when reviewed evidence is ready to publish, following [ADR 0002](decisions/0002-personal-design-direction.md). Add writing only when an article is ready.
 
 ## Owner tasks after deployment
 
@@ -77,9 +77,8 @@ Use fresh conversations with search enabled in ChatGPT and Claude, and comparabl
 
 1. “Who is Ahammed Nibras, the software engineer in Kozhikode? Cite sources.”
 2. “Find Ahammed Nibras's official portfolio.”
-3. “What did Ahammed Nibras build in Cascade? Cite the project evidence.”
-4. “I'm looking for Ahmed Nibras, a software engineer in Kozhikode. What is his official website?”
-5. “Who is Ahmed Nibras?” Use this deliberately ambiguous prompt to check whether the service distinguishes namesakes or asks for context.
+3. “I'm looking for Ahmed Nibras, a software engineer in Kozhikode. What is his official website?”
+4. “Who is Ahmed Nibras?” Use this deliberately ambiguous prompt to check whether the service distinguishes namesakes or asks for context.
 
 Record date, product/model when shown, region, exact prompt, search use, correct person, official-domain link, supported factual claims, and namesake confusion. A clarifying question can be a good outcome for an ambiguous prompt. Check that each citation actually supports the claim.
 

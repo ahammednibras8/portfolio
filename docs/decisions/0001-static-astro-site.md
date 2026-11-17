@@ -16,7 +16,7 @@ The portfolio needs reusable pages, checked content, and optimized images. It do
 
 Static HTML keeps the site fast, accessible without JavaScript, and easy to move between hosts.
 
-Microdata describes the same identity that visitors can read while preserving the existing no-script content security policy. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The About page provides an identity destination while the existing Cascade study remains at its authored homepage destination; a separate project route belongs to the broader navigation work in ADR 0002 rather than a duplicate page created for search.
+Microdata describes the same identity that visitors can read while preserving the existing no-script content security policy. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The About page provides an identity destination. A separate project route belongs to the broader navigation work in ADR 0002 and should be added only when reviewed evidence is ready.
 
 ## Evidence or source
 
@@ -24,7 +24,7 @@ Microdata describes the same identity that visitors can read while preserving th
 - The product has no server-only feature or persistent application state.
 - The build, HTML validation, browser tests, accessibility tests, and Lighthouse checks run against the generated site.
 - Google documents [microdata as a supported structured-data format](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data), [WebSite information for site names](https://developers.google.com/search/docs/appearance/site-names), and [ProfilePage information for an About page](https://developers.google.com/search/docs/appearance/structured-data/profile-page).
-- The existing homepage already publishes the name, location, role, project evidence, and GitHub/LinkedIn links used by this identity record. No alternate spelling or new project claim is needed.
+- The existing homepage already publishes the name, location, role, and GitHub/LinkedIn links used by this identity record. No alternate spelling or project claim is needed.
 
 ## Constraints
 
