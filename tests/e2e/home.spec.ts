@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pressTab } from "../helpers/keyboard";
 
 const homepageTitle = "Ahammed Nibras — Software engineer";
 const homepageDescription =
@@ -140,6 +141,7 @@ test("the primary navigation points to real destinations", async ({ page }) => {
 });
 
 test("the 320px layout keeps navigation and contact paths usable", async ({
+  browserName,
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -175,7 +177,7 @@ test("the 320px layout keeps navigation and contact paths usable", async ({
     expect(bounds.right).toBeLessThanOrEqual(viewport.clientWidth);
   }
 
-  await page.keyboard.press("Tab");
+  await pressTab(page, browserName);
 
   const skipLink = page.getByRole("link", { name: "Skip to content" });
   await expect(skipLink).toBeFocused();
@@ -195,7 +197,10 @@ test("the 320px layout keeps navigation and contact paths usable", async ({
   await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
 });
 
-test("the homepage exposes a complete keyboard path", async ({ page }) => {
+test("the homepage exposes a complete keyboard path", async ({
+  browserName,
+  page,
+}) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/");
 
@@ -214,7 +219,7 @@ test("the homepage exposes a complete keyboard path", async ({ page }) => {
   ];
 
   for (const link of focusOrder) {
-    await page.keyboard.press("Tab");
+    await pressTab(page, browserName);
     await expect(link).toBeFocused();
   }
 

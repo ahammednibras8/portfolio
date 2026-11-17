@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pressTab } from "../helpers/keyboard";
 
 const origin = "https://ahammednibras.com";
 const expectedPerson = {
@@ -106,6 +107,7 @@ for (const path of ["/", "/about/"]) {
 
 test("the About route and profile links work at 320px without JavaScript", async ({
   browser,
+  browserName,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -133,7 +135,7 @@ test("the About route and profile links work at 320px without JavaScript", async
   }));
   expect(viewport.scrollWidth).toBe(viewport.width);
 
-  await page.keyboard.press("Tab");
+  await pressTab(page, browserName);
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
