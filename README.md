@@ -2,7 +2,7 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-Current version: `v0.1.0`. This is the first public release. The portfolio is live and currently contains one case study.
+Current version: `v0.1.0`. This is the first public release.
 
 Production: [ahammednibras.com](https://ahammednibras.com/)
 
@@ -23,7 +23,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 
 ## Finding the work
 
-- The [homepage](https://ahammednibras.com/) contains the Cascade case study, its evidence, and contact details.
+- The [homepage](https://ahammednibras.com/) introduces Nibras and provides contact details.
 - [About](https://ahammednibras.com/about/) connects the full name, location, and public profile identifiers.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
