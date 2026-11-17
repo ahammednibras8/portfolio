@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 const expectedHeaders = {
   "content-security-policy":
-    "default-src 'none'; base-uri 'none'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'none'; style-src 'self'",
+    "default-src 'none'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'none'; style-src 'self'",
   "permissions-policy":
     "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
   "referrer-policy": "strict-origin-when-cross-origin",

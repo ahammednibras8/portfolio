@@ -22,17 +22,23 @@ words:
   - emnapi
   - esbuild
   - fontsource
+  - Googlebot
   - GHSA
   - htmlvalidate
   - inspectable
+  - itemprop
+  - itemscope
+  - itemtype
   - lhci
   - lighthouseci
   - lighthouserc
   - lycheeverse
+  - microdata
   - Nibras
   - nosniff
   - nums
   - Qwik
+  - recrawl
   - résumé
   - undici
   - WCAG

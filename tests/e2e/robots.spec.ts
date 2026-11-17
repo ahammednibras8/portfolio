@@ -25,4 +25,15 @@ test("robots allows production crawling and advertises the generated sitemap", a
   expect(sitemapResponse.headers()["content-type"]).toMatch(
     /^(?:application|text)\/xml(?:;|$)/,
   );
+
+  const sitemap = await request.get("/sitemap-0.xml");
+  expect(sitemap.ok()).toBe(true);
+  const entries = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map(([, url]) => url)
+    .sort();
+
+  expect(entries).toEqual([
+    new URL("/", siteUrl).href,
+    new URL("/about/", siteUrl).href,
+  ]);
 });
