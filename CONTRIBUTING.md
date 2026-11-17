@@ -65,6 +65,13 @@ pnpm run test:e2e
 pnpm run test:a11y
 ```
 
+Keyboard-navigation tests use Option+Tab for WebKit on macOS, where the
+browser's default Tab behavior skips links. Other browser/platform combinations
+use Tab. The shared `tests/helpers/keyboard.ts` helper sends the native shortcut;
+the tests still assert the complete focus order and skip-link behavior.
+See [Apple's Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)
+and [the Playwright maintainer's guidance](https://github.com/microsoft/playwright/issues/5609).
+
 HTML and Lighthouse checks skip with a clear message until the first page exists.
 
 ## Open a pull request
