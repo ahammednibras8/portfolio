@@ -6,7 +6,7 @@ Security fixes are made on the current `main` branch.
 
 Do not open a public issue for a private security problem.
 
-Email `ahammednibras@proton.me` with the subject `Portfolio security report`.
+Email `ahammednibras737@gmail.com` with the subject `Portfolio security report`.
 
 Please include:
 
