@@ -19,9 +19,11 @@ words:
   - ahammednibras
   - autorun
   - crawlable
+  - emnapi
   - esbuild
   - fontsource
   - Googlebot
+  - GHSA
   - htmlvalidate
   - inspectable
   - itemprop
@@ -38,5 +40,6 @@ words:
   - Qwik
   - recrawl
   - résumé
+  - undici
   - WCAG
   - workerd
