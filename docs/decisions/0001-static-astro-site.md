@@ -2,13 +2,13 @@
 
 - Status: Accepted
 - Date: 2026-09-22
-- Updated: 2026-10-23
+- Updated: 2026-11-17
 
 ## Decision
 
 Use Astro with static output and strict TypeScript.
 
-Describe the public identity with HTML microdata in the generated documents. Use a shared profile record for the name, role, location, account identifier, and public links. Keep the WebSite, Person, and ProfilePage scopes distinct, with stable identifiers derived from the configured canonical origin.
+Describe the public identity with HTML microdata in the generated documents. Use a shared profile record for the name, role, location, and public links. Keep the WebSite, Person, and ProfilePage scopes distinct, with stable identifiers derived from the configured canonical origin.
 
 ## Reason
 
@@ -16,7 +16,11 @@ The portfolio needs reusable pages, checked content, and optimized images. It do
 
 Static HTML keeps the site fast, accessible without JavaScript, and easy to move between hosts.
 
-Microdata describes the same identity that visitors can read while preserving the existing no-script content security policy. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The About page provides an identity destination. A separate project route belongs to the broader navigation work in ADR 0002 and should be added only when reviewed evidence is ready.
+Microdata describes the same identity that visitors can read without requiring JavaScript. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The About page provides an identity destination. A separate project route belongs to the broader navigation work in ADR 0002 and should be added only when reviewed evidence is ready.
+
+On 2026-11-17, Nibras requested a contact path that does not depend on a configured mail application. The shared email component progressively enhances a selectable address with a Clipboard API button. The static build remains complete without it. Permit only same-origin external scripts through `script-src 'self'`; keep inline and third-party scripts blocked, and keep all other CSP directives unchanged. This adds no framework or server. Reconsider the enhancement if it stops providing a useful fallback or needs broader script permissions.
+
+Set Vite's `assetsInlineLimit` to zero so Astro's small processed contact script stays external and can execute under that policy. Browser tests use the built site with Cloudflare's headers, including a real clipboard write and an assertion that no inline scripts are emitted.
 
 ## Evidence or source
 
@@ -38,7 +42,7 @@ Microdata describes the same identity that visitors can read while preserving th
 - `astro.config.mjs` keeps Astro in static-output mode.
 - `src/layouts/DocumentLayout.astro` owns the shared document shell and metadata used by route pages.
 - `src/pages/` contains the route entry points.
-- `src/data/profile.ts` and `src/data/navigation.ts` hold shared identity and navigation data.
+- `src/data/profile.ts` and `src/data/experience.ts` hold shared identity, public links, and verified role facts.
 - `src/pages/about.astro` describes the same Person as the homepage, using a ProfilePage relationship.
 - CI tests the generated `dist/` output that will be deployed.
 

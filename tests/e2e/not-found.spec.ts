@@ -31,7 +31,7 @@ test("the built 404 artifact exists with meaningful recovery links", async ({
   );
   await expect(contact.locator("strong")).toHaveText("Get in touch");
   await expect(contact.locator("span").last()).toHaveText(
-    "Email, GitHub, and LinkedIn.",
+    "Email address and contact options.",
   );
 });
 

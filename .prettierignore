@@ -5,3 +5,9 @@ node_modules/
 playwright-report/
 test-results/
 pnpm-lock.yaml
+
+# Installed third-party tooling and machine-local/generated Impeccable artifacts.
+.agents/skills/impeccable/
+.codex/hooks.json
+.impeccable/config.local.json
+.impeccable/critique/

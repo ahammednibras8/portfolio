@@ -3,7 +3,6 @@ import "@fontsource/ibm-plex-sans/latin-400.css";
 import "@fontsource/ibm-plex-sans/latin-700.css";
 import "@fontsource/ibm-plex-mono/latin-600.css";
 import "../styles/global.css";
-import { navigation } from "../data/navigation";
 import { profile } from "../data/profile";
 
 interface Props {
@@ -73,29 +72,6 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
     itemid={pageType ? pageId : undefined}
   >
     {pageType && canonicalUrl && <link itemprop="url" href={canonicalUrl} />}
-    <a class="skip-link" href="#main-content">
-      Skip to content
-    </a>
-
-    <header class="site-header">
-      <nav class="primary-navigation" aria-label="Primary">
-        <ul>
-          {navigation.map(({ label, href }) => (
-            <li>
-              <a
-                href={
-                  isHomepage && href.startsWith("/#") ? href.slice(1) : href
-                }
-                aria-current={canonical?.pathname === href ? "page" : undefined}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </header>
-
     <main
       id="main-content"
       class="page"
@@ -113,7 +89,27 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
       <p class="site-footer-location">
         {profile.name} · {profile.location}
       </p>
-      <a href="#main-content">Back to top</a>
+      <ul class="footer-links">
+        <li>
+          <a href="/" aria-current={isHomepage ? "page" : undefined}>
+            Home
+          </a>
+        </li>
+        <li>
+          <a
+            href="/about/"
+            aria-current={pageType === "ProfilePage" ? "page" : undefined}
+          >
+            About
+          </a>
+        </li>
+        <li>
+          <a href={isHomepage ? "#contact" : "/#contact"}>Contact</a>
+        </li>
+        <li>
+          <a href="#main-content">Back to top</a>
+        </li>
+      </ul>
     </footer>
   </body>
 </html>

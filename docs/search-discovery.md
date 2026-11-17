@@ -13,7 +13,7 @@ Track completion and dated observations in [issue #63](https://github.com/ahamme
 3. Inspect the built microdata with a structured-data validator. Check the homepage's WebSite and Person, and the About page's ProfilePage with that same Person as its main entity. The Person identifier ends in `/#person` on both pages.
 4. Confirm page-specific canonical URLs, real HTML links, and sitemap membership. Do not put 404 or preview URLs in the sitemap.
 5. Run `pnpm run verify` with the pinned toolchain. Shared layout changes also need the full cross-browser checks in [CONTRIBUTING.md](../CONTRIBUTING.md).
-6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy keeps scripts disabled while allowing same-origin connections.
+6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy allows only same-origin scripts and connections.
 
 Add a project route only when reviewed evidence is ready to publish, following [ADR 0002](decisions/0002-personal-design-direction.md). Add writing only when an article is ready.
 
@@ -61,7 +61,7 @@ Maintain a baseline for the following distinct query groups:
 - The exact name: `Ahammed Nibras`.
 - The joined name: `ahammednibras`.
 - Observed variations: `Ahmed Nibras`, `Ahamed Nibras`, and `Ahamad Nibras`.
-- Contextual forms: add `software engineer` or `Kozhikode` to distinguish namesakes.
+- Contextual forms: add `software developer` or `Kozhikode` to distinguish namesakes.
 
 Test additional spellings before prioritizing them. An ambiguous query can legitimately identify someone else. A short visible clarification is appropriate only when actual visitors or contacts use that spelling for Nibras; do not create hidden keyword lists or near-identical spelling pages.
 
@@ -75,9 +75,9 @@ Check the [Generative AI performance report](https://support.google.com/webmaste
 
 Use fresh conversations with search enabled in ChatGPT and Claude, and comparable Google AI experiences. Use the same prompts and region, repeat a few times, and record whether search actually ran.
 
-1. “Who is Ahammed Nibras, the software engineer in Kozhikode? Cite sources.”
+1. “Who is Ahammed Nibras, the software developer in Kozhikode? Cite sources.”
 2. “Find Ahammed Nibras's official portfolio.”
-3. “I'm looking for Ahmed Nibras, a software engineer in Kozhikode. What is his official website?”
+3. “I'm looking for Ahmed Nibras, a software developer in Kozhikode. What is his official website?”
 4. “Who is Ahmed Nibras?” Use this deliberately ambiguous prompt to check whether the service distinguishes namesakes or asks for context.
 
 Record date, product/model when shown, region, exact prompt, search use, correct person, official-domain link, supported factual claims, and namesake confusion. A clarifying question can be a good outcome for an ambiguous prompt. Check that each citation actually supports the claim.

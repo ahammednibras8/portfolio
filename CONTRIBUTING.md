@@ -68,9 +68,17 @@ pnpm run test:a11y
 Keyboard-navigation tests use Option+Tab for WebKit on macOS, where the
 browser's default Tab behavior skips links. Other browser/platform combinations
 use Tab. The shared `tests/helpers/keyboard.ts` helper sends the native shortcut;
-the tests still assert the complete focus order and skip-link behavior.
+the tests still assert the complete focus order and the Back to top link.
 See [Apple's Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)
 and [the Playwright maintainer's guidance](https://github.com/microsoft/playwright/issues/5609).
+
+Repository checks cover first-party source and shared design context, including
+`PRODUCT.md`, `DESIGN.md`, and `.impeccable/config.json` and `design.json`.
+The separately installed `.agents/skills/impeccable/` distribution is vendor
+tooling, so formatting, JavaScript lint, spelling, and link checks exclude it.
+Generated critique archives and machine-local hook/settings files are also
+outside the first-party checks. Do not reformat or commit that installed tooling
+as part of an application change.
 
 HTML and Lighthouse checks skip with a clear message until the first page exists.
 

@@ -1,0 +1,61 @@
+---
+interface Props {
+  email: string;
+}
+
+const { email } = Astro.props;
+---
+
+<div class="email-contact" data-email-contact>
+  <p>
+    <span itemprop="email" data-email-address>
+      {email}
+    </span>
+  </p>
+  <div class="email-actions">
+    <button type="button" data-copy-email hidden>
+      Copy email address
+    </button>
+    <a href={`mailto:${email}`}>Open email app</a>
+  </div>
+  <p class="email-status" role="status"></p>
+</div>
+
+<script>
+  for (const contact of document.querySelectorAll<HTMLElement>(
+    "[data-email-contact]",
+  )) {
+    const address = contact
+      .querySelector<HTMLElement>("[data-email-address]")
+      ?.textContent?.trim();
+    const button =
+      contact.querySelector<HTMLButtonElement>("[data-copy-email]");
+    const status = contact.querySelector<HTMLElement>('[role="status"]');
+
+    if (
+      !address ||
+      !button ||
+      !status ||
+      !window.isSecureContext ||
+      typeof navigator.clipboard?.writeText !== "function"
+    ) {
+      continue;
+    }
+
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      status.textContent = "";
+
+      try {
+        await navigator.clipboard.writeText(address);
+        status.textContent = "Email address copied.";
+      } catch {
+        status.textContent =
+          "Couldn’t copy. Select and copy the email address above.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>

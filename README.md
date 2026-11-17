@@ -9,11 +9,12 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 ## How the site works
 
 - [Astro](https://docs.astro.build/) builds the site as static HTML.
-- A typed document layout owns shared metadata, fonts, navigation, and the footer.
-- Shared profile data keeps the published name, role, location, and public links consistent.
-- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, without browser scripts.
-- Important content and navigation work without JavaScript.
+- A typed document layout owns shared metadata, fonts, and footer route links.
+- Shared profile and experience data keep the published name, role, location, and public links consistent.
+- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, using static HTML.
+- Important content and navigation work without JavaScript. A small same-origin script adds an email copy button where supported; the address remains selectable without it.
 - There is no application server, database, or client framework.
+- GitHub and LinkedIn marks use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs/brands) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
 - Images are optimized during the build.
 - GitHub Actions builds and tests the site after a change reaches `main`.
 - The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.
@@ -24,7 +25,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 ## Finding the work
 
 - The [homepage](https://ahammednibras.com/) introduces Nibras and provides contact details.
-- [About](https://ahammednibras.com/about/) connects the full name, location, and public profile identifiers.
+- [About](https://ahammednibras.com/about/) adds the approach to work alongside the same public profiles, experience, and contact options.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
 ## Deployment

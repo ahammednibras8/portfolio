@@ -12,6 +12,8 @@ dist/
 .eslintcache
 .stylelintcache
 *.tsbuildinfo
+.impeccable/config.local.json
+.impeccable/critique/
 
 # Test and browser reports
 coverage/

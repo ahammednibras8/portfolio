@@ -188,7 +188,7 @@ jobs:
 
             test -s "$preview_body"
             grep -Fq \
-              "<title>Ahammed Nibras — Software engineer</title>" \
+              "<title>Ahammed Nibras — Software developer</title>" \
               "$preview_body"
             grep -Eiq \
               '^x-robots-tag:[[:space:]]*noindex([[:space:]]|$)' \
@@ -262,6 +262,6 @@ jobs:
             "$PRODUCTION_URL"
 
           test -s "$production_body"
-          grep -Fq "<title>Ahammed Nibras — Software engineer</title>" "$production_body"
+          grep -Fq "<title>Ahammed Nibras — Software developer</title>" "$production_body"
         env:
           PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}

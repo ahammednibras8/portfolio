@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T16:30:44.560Z",
+  "title": "Design System: Ahammed Nibras Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "action": {
+        "role": "primary",
+        "displayName": "Dark red action",
+        "tonalRamp": [
+          "oklch(from var(--color-action) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-action) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-action) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-action) 45% calc(c * 1) h)",
+          "oklch(from var(--color-action) 60% calc(c * 1) h)",
+          "oklch(from var(--color-action) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-action) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-action) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "action-visited": {
+        "role": "primary",
+        "displayName": "Muted visited link",
+        "tonalRamp": [
+          "oklch(from var(--color-action-visited) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-action-visited) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-action-visited) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-action-visited) 45% calc(c * 1) h)",
+          "oklch(from var(--color-action-visited) 60% calc(c * 1) h)",
+          "oklch(from var(--color-action-visited) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-action-visited) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-action-visited) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "action-active": {
+        "role": "primary",
+        "displayName": "Deep red active link",
+        "tonalRamp": [
+          "oklch(from var(--color-action-active) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-action-active) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-action-active) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-action-active) 45% calc(c * 1) h)",
+          "oklch(from var(--color-action-active) 60% calc(c * 1) h)",
+          "oklch(from var(--color-action-active) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-action-active) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-action-active) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Teal keyboard focus",
+        "tonalRamp": [
+          "oklch(from var(--color-focus) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-focus) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-focus) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-focus) 45% calc(c * 1) h)",
+          "oklch(from var(--color-focus) 60% calc(c * 1) h)",
+          "oklch(from var(--color-focus) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-focus) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-focus) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Warm off-white canvas",
+        "tonalRamp": [
+          "oklch(from var(--color-canvas) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-canvas) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-canvas) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-canvas) 45% calc(c * 1) h)",
+          "oklch(from var(--color-canvas) 60% calc(c * 1) h)",
+          "oklch(from var(--color-canvas) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-canvas) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-canvas) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "White raised surface",
+        "tonalRamp": [
+          "oklch(from var(--color-surface-raised) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-surface-raised) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-surface-raised) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-surface-raised) 45% calc(c * 1) h)",
+          "oklch(from var(--color-surface-raised) 60% calc(c * 1) h)",
+          "oklch(from var(--color-surface-raised) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-surface-raised) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-surface-raised) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "ink-primary": {
+        "role": "neutral",
+        "displayName": "Primary ink",
+        "tonalRamp": [
+          "oklch(from var(--color-ink-primary) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-ink-primary) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-ink-primary) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-ink-primary) 45% calc(c * 1) h)",
+          "oklch(from var(--color-ink-primary) 60% calc(c * 1) h)",
+          "oklch(from var(--color-ink-primary) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-ink-primary) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-ink-primary) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary ink",
+        "tonalRamp": [
+          "oklch(from var(--color-ink-secondary) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-ink-secondary) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-ink-secondary) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-ink-secondary) 45% calc(c * 1) h)",
+          "oklch(from var(--color-ink-secondary) 60% calc(c * 1) h)",
+          "oklch(from var(--color-ink-secondary) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-ink-secondary) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-ink-secondary) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "rule-quiet": {
+        "role": "neutral",
+        "displayName": "Quiet structural rule",
+        "tonalRamp": [
+          "oklch(from var(--color-rule-quiet) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-rule-quiet) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-rule-quiet) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-rule-quiet) 45% calc(c * 1) h)",
+          "oklch(from var(--color-rule-quiet) 60% calc(c * 1) h)",
+          "oklch(from var(--color-rule-quiet) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-rule-quiet) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-rule-quiet) 95% calc(c * 0.15) h)"
+        ]
+      },
+      "rule-structural": {
+        "role": "neutral",
+        "displayName": "Structural rule",
+        "tonalRamp": [
+          "oklch(from var(--color-rule-structural) 15% calc(c * 0.2) h)",
+          "oklch(from var(--color-rule-structural) 25% calc(c * 0.45) h)",
+          "oklch(from var(--color-rule-structural) 35% calc(c * 0.75) h)",
+          "oklch(from var(--color-rule-structural) 45% calc(c * 1) h)",
+          "oklch(from var(--color-rule-structural) 60% calc(c * 1) h)",
+          "oklch(from var(--color-rule-structural) 75% calc(c * 0.75) h)",
+          "oklch(from var(--color-rule-structural) 85% calc(c * 0.45) h)",
+          "oklch(from var(--color-rule-structural) 95% calc(c * 0.15) h)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Main heading",
+        "purpose": "Fluid main heading: clamp(2.25rem, 12vw, 3rem)."
+      },
+      "headline": {
+        "displayName": "Section heading",
+        "purpose": "Headings within the responsive section grid."
+      },
+      "title": {
+        "displayName": "Experience heading",
+        "purpose": "Role and organization on one wrapping line."
+      },
+      "introduction": {
+        "displayName": "Introduction details",
+        "purpose": "Paragraph immediately following the main heading."
+      },
+      "body": {
+        "displayName": "Reading text",
+        "purpose": "Paragraphs and controls, with a 68ch maximum reading measure."
+      },
+      "footer": {
+        "displayName": "Footer location",
+        "purpose": "Smaller secondary location and identity text."
+      },
+      "label": {
+        "displayName": "Exact label",
+        "purpose": "Uppercase recovery labels; the 404 status uses the same mono family."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "short",
+        "value": "120ms",
+        "purpose": "Shortened active-link transition."
+      },
+      {
+        "name": "standard",
+        "value": "180ms",
+        "purpose": "Link color and underline transitions on pointer devices without reduced motion."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Easing for existing link state transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "medium",
+        "value": "48rem"
+      },
+      {
+        "name": "wide",
+        "value": "72rem"
+      }
+    ],
+    "borders": [
+      {
+        "name": "default",
+        "value": "1px",
+        "purpose": "Frame, control outline, list divider, and section boundary."
+      },
+      {
+        "name": "emphasis",
+        "value": "0.25rem",
+        "purpose": "Top and bottom rules on signature bands."
+      },
+      {
+        "name": "focus",
+        "value": "0.1875rem solid var(--color-focus)",
+        "purpose": "Keyboard outline with an equal offset."
+      }
+    ],
+    "layout": [
+      {
+        "name": "page-measure",
+        "value": "76rem",
+        "purpose": "Shared maximum width of the page and footer."
+      },
+      {
+        "name": "text-measure",
+        "value": "68ch",
+        "purpose": "Maximum paragraph and list-entry width."
+      },
+      {
+        "name": "grid",
+        "value": "1 / 6 / 12 columns",
+        "purpose": "Column counts below medium, at medium, and at wide widths."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Copy email",
+      "kind": "button",
+      "refersTo": "copy-email",
+      "description": "Square outlined control; the real component exposes it only when copying is supported.",
+      "html": "<div class=\"ds-email\"><p>ahammednibras737@gmail.com</p><button type=\"button\" class=\"ds-copy\">Copy email address</button><p class=\"ds-status\" role=\"status\"></p></div>",
+      "css": ".ds-email { font-family: var(--font-reading); color: var(--color-ink-primary); } .ds-copy { min-block-size: var(--touch-target); padding: var(--space-interface) var(--space-component); border: var(--border-width-default) solid currentcolor; border-radius: 0; background: var(--color-surface-raised); color: var(--color-action); font: inherit; cursor: pointer; } .ds-copy:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } .ds-copy:disabled { cursor: wait; } .ds-status { min-block-size: 1.55em; margin-block-start: var(--space-interface); color: var(--color-ink-secondary); } @media (forced-colors: active) { .ds-copy:focus-visible { outline-color: Highlight; } }"
+    },
+    {
+      "name": "Text link",
+      "kind": "custom",
+      "refersTo": "text-link",
+      "description": "Visible label, underline, visited and pressed colors, and keyboard focus.",
+      "html": "<a class=\"ds-link\" href=\"https://github.com/ahammednibras8\">GitHub</a>",
+      "css": ".ds-link { display: inline-block; min-block-size: 1.5rem; color: var(--color-action); font-family: var(--font-reading); text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .2em; } .ds-link:visited { color: var(--color-action-visited); } .ds-link:active { color: var(--color-action-active); text-decoration-thickness: .13em; } .ds-link:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } @media (hover: hover) and (prefers-reduced-motion: no-preference) { .ds-link { transition: color var(--motion-standard) var(--motion-ease-out), text-decoration-thickness var(--motion-standard) var(--motion-ease-out); } .ds-link:active { transition-duration: var(--motion-short); } } @media (hover: hover) { .ds-link:hover { text-decoration-thickness: .13em; } } @media (forced-colors: active) { .ds-link { color: LinkText; } .ds-link:visited { color: VisitedText; } .ds-link:active { color: ActiveText; } .ds-link:focus-visible { outline-color: Highlight; } }"
+    },
+    {
+      "name": "Signature band",
+      "kind": "custom",
+      "refersTo": "signature-band",
+      "description": "Raised white surface with dark red rules; no shadow or rounded card.",
+      "html": "<section class=\"ds-band\"><h2 class=\"ds-band-heading\">Contact</h2><p>If you want to discuss a role or project, email me.</p></section>",
+      "css": ".ds-band { padding: var(--space-section) var(--space-component); background: var(--color-surface-raised); color: var(--color-ink-primary); border-block: var(--border-width-emphasis) solid var(--color-action); font-family: var(--font-reading); } .ds-band-heading { font-size: 1.5rem; line-height: 1.15; letter-spacing: -.025em; margin: 0 0 var(--space-editorial); } @media (width >= 48rem) { .ds-band { padding-inline: var(--space-editorial); } }"
+    },
+    {
+      "name": "Experience entry",
+      "kind": "custom",
+      "refersTo": "experience-entry",
+      "description": "Plain ordered list with quiet metadata and structural separators.",
+      "html": "<ol class=\"ds-experience\"><li><h3>Developer \u00b7 Insource Data</h3><p><time datetime=\"2026-01\">Jan 2026</time> \u2014 Present</p><p>Contract \u00b7 Remote</p></li><li><h3>Intern \u00b7 NysaClan</h3><p><time datetime=\"2025-06\">Jun 2025</time> \u2014 <time datetime=\"2025-09\">Sep 2025</time></p><p>Remote</p></li></ol>",
+      "css": ".ds-experience { margin: 0; padding: 0; list-style: none; font-family: var(--font-reading); color: var(--color-ink-primary); } .ds-experience li { max-width: var(--text-measure); } .ds-experience li + li { margin-block-start: var(--space-editorial); padding-block-start: var(--space-editorial); border-block-start: var(--border-width-default) solid var(--color-rule-structural); } .ds-experience h3 { margin: 0; font-size: 1.125rem; line-height: 1.5; } .ds-experience p { margin: 0; color: var(--color-ink-secondary); line-height: 1.55; }"
+    },
+    {
+      "name": "Footer links",
+      "kind": "nav",
+      "refersTo": "footer-links",
+      "description": "Ordinary route links that wrap and retain touch targets.",
+      "html": "<ul class=\"ds-footer-links\"><li><a class=\"ds-link\" href=\"/\" aria-current=\"page\">Home</a></li><li><a class=\"ds-link\" href=\"/about/\">About</a></li><li><a class=\"ds-link\" href=\"/#contact\">Contact</a></li><li><a class=\"ds-link\" href=\"#main-content\">Back to top</a></li></ul>",
+      "css": ".ds-link { display: inline-block; min-block-size: 1.5rem; color: var(--color-action); font-family: var(--font-reading); text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .2em; } .ds-link:visited { color: var(--color-action-visited); } .ds-link:active { color: var(--color-action-active); text-decoration-thickness: .13em; } .ds-link:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } @media (hover: hover) and (prefers-reduced-motion: no-preference) { .ds-link { transition: color var(--motion-standard) var(--motion-ease-out), text-decoration-thickness var(--motion-standard) var(--motion-ease-out); } .ds-link:active { transition-duration: var(--motion-short); } } @media (hover: hover) { .ds-link:hover { text-decoration-thickness: .13em; } } @media (forced-colors: active) { .ds-link { color: LinkText; } .ds-link:visited { color: VisitedText; } .ds-link:active { color: ActiveText; } .ds-link:focus-visible { outline-color: Highlight; } } .ds-footer-links { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-interface) var(--space-component); margin: 0; padding: 0; list-style: none; } .ds-footer-links .ds-link { min-block-size: var(--touch-target); padding-block: var(--space-interface); }"
+    },
+    {
+      "name": "Recovery destination",
+      "kind": "custom",
+      "refersTo": "recovery-link",
+      "description": "Whole-link recovery destination with a mono label and a readable explanation.",
+      "html": "<a class=\"ds-recovery\" href=\"/\"><span class=\"ds-recovery-label\">Overview</span><strong>Homepage</strong><span class=\"ds-recovery-detail\">A short introduction to what I build.</span></a>",
+      "css": ".ds-recovery { display: grid; gap: var(--space-interface); padding: var(--space-component); color: var(--color-ink-primary); text-decoration: none; font-family: var(--font-reading); line-height: 1.55; } .ds-recovery-label { color: var(--color-action); font-family: var(--font-technical); font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; } .ds-recovery-detail { color: var(--color-ink-secondary); } .ds-recovery:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } @media (hover: hover) { .ds-recovery:hover strong { text-decoration: underline; text-decoration-thickness: .13em; text-underline-offset: .2em; } } .ds-recovery:visited { color: var(--color-action-visited); } .ds-recovery:active { color: var(--color-action-active); } @media (forced-colors: active) { .ds-recovery, .ds-recovery-label { color: LinkText; } .ds-recovery:visited { color: VisitedText; } .ds-recovery:active { color: ActiveText; } .ds-recovery:focus-visible { outline-color: Highlight; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A clear conversation about the work.",
+    "overview": "The established direction is technical without resembling a terminal, precise without being cold, and quiet without being empty. Typography carries the reading hierarchy. White surfaces, dark red rules, and faint structural borders organize the page without shadows or ornamental containers. These descriptions come from [ADR 0002](docs/decisions/0002-personal-design-direction.md); no replacement identity or new visual metaphor is introduced here.",
+    "keyCharacteristics": [
+      "Readable technical content with a limited type and color vocabulary.",
+      "Clear hierarchy through weight, spacing, and restrained rules.",
+      "Responsive alignment that preserves the HTML reading order.",
+      "Visible links and focus feedback, with motion limited to interaction states.",
+      "Inline labelled brand links keep profiles beside identity; experience starts with verified roles."
+    ],
+    "rules": [],
+    "dos": [
+      "Do preserve the semantic color roles, IBM Plex families, and existing spacing rhythm.",
+      "Do make hierarchy through reading order, clear headings, spacing, and meaningful boundaries.",
+      "Do retain visible link labels and focus outlines across pointer, keyboard, touch, and forced-color use.",
+      "Do keep complete content visible without JavaScript or animation.",
+      "Do distinguish implemented patterns from pending changes and the future direction in ADR 0002.",
+      "Do use real assets and evidence for diagrams, marks, and project presentation."
+    ],
+    "donts": [
+      "Don't substitute a new palette, font pairing, or visual identity during a scoped refinement.",
+      "Don't add generic cards, shadows, pills, or ornamental diagrams without a real content or behavior boundary.",
+      "Don't imitate a terminal, code editor, dashboard, or another site's branding.",
+      "Don't use transparent reading text, hover-only meaning, hidden entrance states, or motion as a prerequisite for access.",
+      "Don't create components, UI states, assets, or project claims merely to make this document look complete."
+    ]
+  }
+}
