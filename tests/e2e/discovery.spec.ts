@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pressTab } from "../helpers/keyboard";
 
 const origin = "https://ahammednibras.com";
 const expectedPerson = {
@@ -104,8 +105,9 @@ for (const path of ["/", "/about/"]) {
   });
 }
 
-test("the About route and case-study path work at 320px without JavaScript", async ({
+test("the About route and profile links work at 320px without JavaScript", async ({
   browser,
+  browserName,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -133,18 +135,25 @@ test("the About route and case-study path work at 320px without JavaScript", asy
   }));
   expect(viewport.scrollWidth).toBe(viewport.width);
 
-  await page.keyboard.press("Tab");
+  await pressTab(page, browserName);
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("main")).toBeFocused();
 
-  await page.getByRole("link", { name: "Read the Cascade case study" }).click();
-  await expect(page).toHaveURL(/\/#work$/);
+  await expect(page.getByRole("heading", { name: "How I work" })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Cascade", exact: true }),
+    page.getByRole("heading", { name: "Public profiles" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+    "href",
+    "https://github.com/ahammednibras8",
+  );
+  await expect(page.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+    "href",
+    "https://linkedin.com/in/ahammednibras8",
+  );
   await context.close();
 });
 

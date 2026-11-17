@@ -1,40 +1,22 @@
 import { expect, test } from "@playwright/test";
+import { pressTab } from "../helpers/keyboard";
 
 const homepageTitle = "Ahammed Nibras — Software engineer";
 const homepageDescription =
   "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
-const homepageSocialImageAlt =
-  "The portfolio homepage with the heading “Hi, I’m Nibras.” and the selected Cascade project.";
 const productionOrigin = "https://ahammednibras.com";
 
-test("the homepage explains the work in document order", async ({ page }) => {
+test("the homepage introduces Nibras and contact options in document order", async ({
+  page,
+}) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(homepageTitle);
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed Nibras." }),
   ).toBeVisible();
-
-  await expect(page.locator("main > section > h2")).toHaveText([
-    "Selected work",
-    "Contact",
-  ]);
-
-  await expect(
-    page.getByRole("heading", { level: 3, name: "Cascade" }),
-  ).toBeVisible();
-  await expect(page.locator("article > header")).toContainText(
-    "Cascade runs background tasks and keeps a durable record of each run. I started the project and maintain it.",
-  );
-  await expect(
-    page.getByRole("heading", { level: 4, name: "My role" }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByText("Most of my work for employers cannot be shown publicly."),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 4, name: "Run lifecycle" }),
-  ).toBeVisible();
+  await expect(page.locator("main > section > h2")).toHaveText(["Contact"]);
+  await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.locator("footer")).toContainText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
@@ -94,36 +76,11 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
     "content",
     canonical.href,
   );
-
-  const socialImageContent = await page
-    .locator('meta[property="og:image"]')
-    .getAttribute("content");
-  if (!socialImageContent) {
-    throw new Error("Expected the homepage to publish a social image URL.");
-  }
-
-  const socialImageUrl = new URL(socialImageContent);
-  expect(socialImageUrl.protocol).toBe("https:");
-  expect(socialImageUrl.pathname).toBe("/social/home.png");
-  await expect(page.locator('meta[property="og:image:type"]')).toHaveAttribute(
-    "content",
-    "image/png",
-  );
-  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
-    "content",
-    "1200",
-  );
-  await expect(
-    page.locator('meta[property="og:image:height"]'),
-  ).toHaveAttribute("content", "630");
-  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
-    "content",
-    homepageSocialImageAlt,
-  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveCount(0);
 
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
-    "summary_large_image",
+    "summary",
   );
   await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
     "content",
@@ -132,25 +89,9 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   await expect(
     page.locator('meta[name="twitter:description"]'),
   ).toHaveAttribute("content", homepageDescription);
-  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
-    "content",
-    socialImageUrl.href,
-  );
-  await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute(
-    "content",
-    homepageSocialImageAlt,
-  );
-
-  const socialImageResponse = await request.get("/social/home.png");
-  expect(socialImageResponse.ok()).toBe(true);
-  expect(socialImageResponse.headers()["content-type"]).toContain("image/png");
-
-  const socialImageBody = await socialImageResponse.body();
-  expect(socialImageBody.readUInt32BE(16)).toBe(1200);
-  expect(socialImageBody.readUInt32BE(20)).toBe(630);
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveCount(0);
 
   const icons = page.locator('link[rel="icon"]');
-
   await expect(icons).toHaveCount(2);
   expect(
     await icons.evaluateAll((items) =>
@@ -181,27 +122,26 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("the primary navigation points to real homepage sections", async ({
-  page,
-}) => {
+test("the primary navigation points to real destinations", async ({ page }) => {
   await page.goto("/");
 
   const navigation = page.getByRole("navigation", { name: "Primary" });
   const links = navigation.getByRole("link");
 
-  await expect(links).toHaveCount(4);
+  await expect(links).toHaveCount(2);
   expect(
     await links.evaluateAll((items) =>
       items.map((item) => item.getAttribute("href")),
     ),
-  ).toEqual(["#work", "#evidence", "#contact", "/about/"]);
+  ).toEqual(["#contact", "/about/"]);
 
-  await navigation.getByRole("link", { name: "Work", exact: true }).click();
-  await expect(page).toHaveURL(/#work$/);
-  await expect(page.locator("#work")).toBeVisible();
+  await navigation.getByRole("link", { name: "Contact", exact: true }).click();
+  await expect(page).toHaveURL(/#contact$/);
+  await expect(page.locator("#contact")).toBeVisible();
 });
 
-test("the 320px layout keeps navigation and recovery paths usable", async ({
+test("the 320px layout keeps navigation and contact paths usable", async ({
+  browserName,
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -229,7 +169,7 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
     }),
   );
 
-  expect(linkBounds).toHaveLength(4);
+  expect(linkBounds).toHaveLength(2);
   expect(new Set(linkBounds.map(({ top }) => top)).size).toBe(1);
 
   for (const bounds of linkBounds) {
@@ -237,7 +177,7 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
     expect(bounds.right).toBeLessThanOrEqual(viewport.clientWidth);
   }
 
-  await page.keyboard.press("Tab");
+  await pressTab(page, browserName);
 
   const skipLink = page.getByRole("link", { name: "Skip to content" });
   await expect(skipLink).toBeFocused();
@@ -257,42 +197,21 @@ test("the 320px layout keeps navigation and recovery paths usable", async ({
   await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
 });
 
-test("the vertical slice exposes one artifact and a complete keyboard path", async ({
+test("the homepage exposes a complete keyboard path", async ({
+  browserName,
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/");
 
-  await expect(page.getByRole("article")).toHaveCount(1);
-
-  const lifecycle = page.getByRole("list", {
-    name: "Cascade task run lifecycle",
-  });
-  await expect(lifecycle.getByRole("listitem")).toHaveCount(5);
-  await expect(lifecycle.locator("strong")).toHaveText([
-    "TypeScript SDK",
-    "API + PostgreSQL",
-    "Redis",
-    "Worker",
-    "Dashboard",
-  ]);
-  await expect(lifecycle).toHaveCSS("grid-template-columns", /\d+(\.\d+)?px/);
-
   const focusOrder = [
     page.getByRole("link", { name: "Skip to content" }),
-    page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Work", exact: true }),
-    page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Evidence", exact: true }),
     page
       .getByRole("navigation", { name: "Primary" })
       .getByRole("link", { name: "Contact", exact: true }),
     page
       .getByRole("navigation", { name: "Primary" })
       .getByRole("link", { name: "About", exact: true }),
-    page.getByRole("link", { name: "Read the source documentation" }),
     page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
     page.getByRole("link", { name: "GitHub" }),
     page.getByRole("link", { name: "LinkedIn" }),
@@ -300,16 +219,9 @@ test("the vertical slice exposes one artifact and a complete keyboard path", asy
   ];
 
   for (const link of focusOrder) {
-    await page.keyboard.press("Tab");
+    await pressTab(page, browserName);
     await expect(link).toBeFocused();
   }
-
-  await page.setViewportSize({ width: 1152, height: 900 });
-  expect(
-    await lifecycle.evaluate(
-      (list) => getComputedStyle(list).gridTemplateColumns.split(" ").length,
-    ),
-  ).toBe(5);
 
   const backToTop = page.getByRole("link", { name: "Back to top" });
   await backToTop.click();
@@ -317,144 +229,47 @@ test("the vertical slice exposes one artifact and a complete keyboard path", asy
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("the responsive grid keeps a deliberate rule hierarchy", async ({
+test("the responsive grid preserves section and navigation alignment", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto("/");
 
-  const mediumLayout = await page.evaluate(() => {
-    const pageSection = document.querySelector<HTMLElement>(".page > section");
-    const article = document.querySelector<HTMLElement>("article");
-    const evidence = document.querySelector<HTMLElement>(".project-evidence");
-
-    if (!pageSection || !article || !evidence) {
-      throw new Error("Expected homepage grid elements were not found.");
-    }
-
-    const pageBounds = pageSection.getBoundingClientRect();
-    const articleBounds = article.getBoundingClientRect();
-    const evidenceBounds = evidence.getBoundingClientRect();
-
-    return {
-      pageColumns:
-        getComputedStyle(pageSection).gridTemplateColumns.split(" ").length,
-      articleColumns:
-        getComputedStyle(article).gridTemplateColumns.split(" ").length,
-      pageBounds: {
-        left: Math.round(pageBounds.left),
-        right: Math.round(pageBounds.right),
-      },
-      articleBounds: {
-        left: Math.round(articleBounds.left),
-        right: Math.round(articleBounds.right),
-      },
-      evidenceBounds: {
-        left: Math.round(evidenceBounds.left),
-        right: Math.round(evidenceBounds.right),
-      },
-    };
-  });
-
-  expect(mediumLayout.pageColumns).toBe(6);
-  expect(mediumLayout.articleColumns).toBe(6);
-  expect(mediumLayout.evidenceBounds).toEqual(mediumLayout.pageBounds);
-  expect(mediumLayout.articleBounds.left).toBeGreaterThan(
-    mediumLayout.pageBounds.left,
-  );
-  expect(mediumLayout.articleBounds.right).toBeLessThan(
-    mediumLayout.pageBounds.right,
-  );
+  const mediumColumns = await page
+    .locator(".page > section")
+    .first()
+    .evaluate(
+      (section) =>
+        getComputedStyle(section).gridTemplateColumns.split(" ").length,
+    );
+  expect(mediumColumns).toBe(6);
 
   await page.setViewportSize({ width: 1152, height: 900 });
 
-  const largeLayout = await page.evaluate(() => {
-    const pageSection = document.querySelector<HTMLElement>(".page > section");
-    const article = document.querySelector<HTMLElement>("article");
-    const evidence = document.querySelector<HTMLElement>(".project-evidence");
-    const internalSections = [
-      ...document.querySelectorAll<HTMLElement>(
-        "article > section:not(.project-evidence)",
-      ),
-    ];
-    const firstInternalSection = internalSections[0];
-    const sectionHeadings = [
-      ...document.querySelectorAll<HTMLElement>(
-        ".page > section:not(.introduction) > h2",
-      ),
-    ];
-    const firstSectionHeading = sectionHeadings[0];
+  const layout = await page.evaluate(() => {
+    const section = document.querySelector<HTMLElement>(".page > section");
+    const sectionHeading = document.querySelector<HTMLElement>(
+      ".page > section:not(.introduction) > h2",
+    );
     const navigationList = document.querySelector<HTMLElement>(
       ".primary-navigation ul",
     );
 
-    if (
-      !pageSection ||
-      !article ||
-      !evidence ||
-      !firstInternalSection ||
-      !firstSectionHeading ||
-      !navigationList
-    ) {
+    if (!section || !sectionHeading || !navigationList) {
       throw new Error("Expected homepage grid elements were not found.");
     }
 
-    const pageBounds = pageSection.getBoundingClientRect();
-    const articleBounds = article.getBoundingClientRect();
-    const evidenceBounds = evidence.getBoundingClientRect();
-    const internalBounds = internalSections.map((section) => {
-      const bounds = section.getBoundingClientRect();
-
-      return {
-        left: Math.round(bounds.left),
-        right: Math.round(bounds.right),
-      };
-    });
-    const headingLeftEdges = sectionHeadings.map((heading) =>
-      Math.round(heading.getBoundingClientRect().left),
-    );
-
     return {
-      pageColumns:
-        getComputedStyle(pageSection).gridTemplateColumns.split(" ").length,
-      articleColumns:
-        getComputedStyle(article).gridTemplateColumns.split(" ").length,
-      internalColumns:
-        getComputedStyle(firstInternalSection).gridTemplateColumns.split(" ")
-          .length,
-      pageBounds: {
-        left: Math.round(pageBounds.left),
-        right: Math.round(pageBounds.right),
-      },
-      articleBounds: {
-        left: Math.round(articleBounds.left),
-        right: Math.round(articleBounds.right),
-      },
-      evidenceBounds: {
-        left: Math.round(evidenceBounds.left),
-        right: Math.round(evidenceBounds.right),
-      },
-      internalBounds,
-      headingLeftEdges,
-      headingAnchor: firstSectionHeading.getBoundingClientRect().left,
+      columns: getComputedStyle(section).gridTemplateColumns.split(" ").length,
+      headingLeft: Math.round(sectionHeading.getBoundingClientRect().left),
       navigationLeft: Math.round(navigationList.getBoundingClientRect().left),
     };
   });
 
-  expect(largeLayout.pageColumns).toBe(12);
-  expect(largeLayout.articleColumns).toBe(12);
-  expect(largeLayout.internalColumns).toBe(9);
-  expect(largeLayout.evidenceBounds).toEqual(largeLayout.pageBounds);
-  expect(new Set(largeLayout.headingLeftEdges).size).toBe(1);
+  expect(layout.columns).toBe(12);
   expect(
-    Math.abs(largeLayout.navigationLeft - largeLayout.headingAnchor),
+    Math.abs(layout.navigationLeft - layout.headingLeft),
   ).toBeLessThanOrEqual(1);
-
-  for (const bounds of largeLayout.internalBounds) {
-    expect(bounds).toEqual(largeLayout.internalBounds[0]);
-    expect(bounds.left).toBeGreaterThan(largeLayout.articleBounds.left);
-    expect(bounds.right).toBeLessThan(largeLayout.articleBounds.right);
-  }
 });
 
 test("the page uses the named interface and editorial spacing rhythm", async ({
@@ -469,19 +284,10 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
       Number.parseFloat(rootStyles.getPropertyValue(name));
     const introduction = document.querySelector<HTMLElement>(".introduction");
     const introductionCopy = introduction?.querySelector<HTMLElement>("p");
-    const article = document.querySelector<HTMLElement>("article");
-    const articleSummary = article?.querySelector<HTMLElement>("header p");
-    const articleList = article?.querySelector<HTMLElement>("ul");
-    const articleSection = article?.querySelector<HTMLElement>("section");
+    const contact = document.querySelector<HTMLElement>("#contact");
+    const contactCopy = contact?.querySelector<HTMLElement>("p");
 
-    if (
-      !introduction ||
-      !introductionCopy ||
-      !article ||
-      !articleSummary ||
-      !articleList ||
-      !articleSection
-    ) {
+    if (!introduction || !introductionCopy || !contact || !contactCopy) {
       throw new Error("Expected homepage spacing targets were not found.");
     }
 
@@ -495,10 +301,8 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
       introductionPadding: getComputedStyle(introduction).paddingBlockStart,
       introductionCopyMargin:
         getComputedStyle(introductionCopy).marginBlockStart,
-      articleMargin: getComputedStyle(article).marginBlockStart,
-      articleSummaryMargin: getComputedStyle(articleSummary).marginBlockStart,
-      articleListMargin: getComputedStyle(articleList).marginBlockStart,
-      articleSectionPadding: getComputedStyle(articleSection).paddingBlockStart,
+      contactPadding: getComputedStyle(contact).paddingBlockStart,
+      contactCopyMargin: getComputedStyle(contactCopy).marginBlockStart,
     };
   });
 
@@ -511,91 +315,65 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
     },
     introductionPadding: "48px",
     introductionCopyMargin: "24px",
-    articleMargin: "24px",
-    articleSummaryMargin: "8px",
-    articleListMargin: "16px",
-    articleSectionPadding: "24px",
+    contactPadding: "48px",
+    contactCopyMargin: "24px",
   });
 });
 
-test("typography keeps reading and technical roles distinct", async ({
+test("typography keeps reading and navigation roles consistent", async ({
   page,
 }) => {
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
 
   const typography = await page.evaluate(() => {
-    const body = document.body;
-    const label = document.querySelector<HTMLElement>("h4");
     const navigationLink = document.querySelector<HTMLElement>(
       ".primary-navigation a",
     );
 
-    if (!label || !navigationLink) {
-      throw new Error("Expected homepage typography targets were not found.");
+    if (!navigationLink) {
+      throw new Error("Expected a homepage navigation link.");
     }
 
-    const fontResources = performance
-      .getEntriesByType("resource")
-      .map(({ name }) => name)
-      .filter((name) => name.endsWith(".woff2"));
-
     return {
-      bodyFamily: getComputedStyle(body).fontFamily,
-      bodySize: getComputedStyle(body).fontSize,
-      labelFamily: getComputedStyle(label).fontFamily,
-      labelWeight: getComputedStyle(label).fontWeight,
+      bodyFamily: getComputedStyle(document.body).fontFamily,
+      bodySize: getComputedStyle(document.body).fontSize,
       navigationFamily: getComputedStyle(navigationLink).fontFamily,
-      fontResources,
       origin: location.origin,
+      fontResources: performance
+        .getEntriesByType("resource")
+        .map(({ name }) => name)
+        .filter((name) => name.endsWith(".woff2")),
     };
   });
 
   expect(typography.bodyFamily).toContain("IBM Plex Sans");
   expect(typography.bodySize).toBe("16px");
-  expect(typography.labelFamily).toContain("IBM Plex Mono");
-  expect(typography.labelWeight).toBe("600");
   expect(typography.navigationFamily).toContain("IBM Plex Sans");
-  expect(typography.fontResources).toHaveLength(3);
+  expect(typography.fontResources).toHaveLength(2);
 
   for (const resource of typography.fontResources) {
     expect(new URL(resource).origin).toBe(typography.origin);
   }
 });
 
-test("the personal color and depth systems keep their roles distinct", async ({
+test("the personal color system keeps content roles distinct", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/");
 
   const colors = await page.evaluate(() => {
     const rootStyles = getComputedStyle(document.documentElement);
-    const siteHeader = document.querySelector<HTMLElement>(".site-header");
-    const navigationLink = document.querySelector<HTMLElement>(
-      ".primary-navigation a",
-    );
     const pageFrame = document.querySelector<HTMLElement>(".page");
-    const article = document.querySelector<HTMLElement>("article");
-    const articleSection = document.querySelector<HTMLElement>(
-      "article > section:not(.project-evidence)",
+    const signatureBand = document.querySelector<HTMLElement>(
+      ".page > .signature-band",
     );
-    const evidence = document.querySelector<HTMLElement>(".project-evidence");
-    const evidenceLink = evidence?.querySelector<HTMLElement>("a");
-    const secondaryText = document.querySelector<HTMLElement>(
-      ".run-path li > span:last-child",
+    const contactLink = document.querySelector<HTMLElement>("#contact a");
+    const footerLocation = document.querySelector<HTMLElement>(
+      ".site-footer-location",
     );
 
-    if (
-      !navigationLink ||
-      !siteHeader ||
-      !pageFrame ||
-      !article ||
-      !articleSection ||
-      !evidence ||
-      !evidenceLink ||
-      !secondaryText
-    ) {
+    if (!pageFrame || !signatureBand || !contactLink || !footerLocation) {
       throw new Error("Expected homepage color targets were not found.");
     }
 
@@ -618,40 +396,15 @@ test("the personal color and depth systems keep their roles distinct", async ({
           .getPropertyValue("--color-ink-secondary")
           .trim(),
         action: rootStyles.getPropertyValue("--color-action").trim(),
-        actionVisited: rootStyles
-          .getPropertyValue("--color-action-visited")
-          .trim(),
-        actionActive: rootStyles
-          .getPropertyValue("--color-action-active")
-          .trim(),
         focus: rootStyles.getPropertyValue("--color-focus").trim(),
-        atmosphereAlpha: rootStyles
-          .getPropertyValue("--alpha-atmosphere")
-          .trim(),
-        gridAlpha: rootStyles.getPropertyValue("--alpha-grid").trim(),
-        structureAlpha: rootStyles.getPropertyValue("--alpha-structure").trim(),
-        emphasisAlpha: rootStyles.getPropertyValue("--alpha-emphasis").trim(),
       },
       canvas: getComputedStyle(document.body).backgroundColor,
-      headerSurface: getComputedStyle(siteHeader).backgroundColor,
-      recessedSurfaceAlpha: alphaFrom(
-        getComputedStyle(article).backgroundColor,
-      ),
       primaryInk: getComputedStyle(document.body).color,
-      bodyOpacity: getComputedStyle(document.body).opacity,
-      secondaryInk: getComputedStyle(secondaryText).color,
-      secondaryOpacity: getComputedStyle(secondaryText).opacity,
-      navigationInk: getComputedStyle(navigationLink).color,
-      ruleAlphas: {
-        grid: alphaFrom(getComputedStyle(pageFrame).borderInlineStartColor),
-        structure: alphaFrom(
-          getComputedStyle(articleSection).borderBlockStartColor,
-        ),
-        emphasis: alphaFrom(getComputedStyle(article).borderBlockStartColor),
-      },
-      evidenceSurface: getComputedStyle(evidence).backgroundColor,
-      evidenceRule: getComputedStyle(evidence).borderBlockStartColor,
-      action: getComputedStyle(evidenceLink).color,
+      secondaryInk: getComputedStyle(footerLocation).color,
+      action: getComputedStyle(contactLink).color,
+      frameAlpha: alphaFrom(getComputedStyle(pageFrame).borderInlineStartColor),
+      signatureSurface: getComputedStyle(signatureBand).backgroundColor,
+      signatureRule: getComputedStyle(signatureBand).borderBlockStartColor,
     };
   });
 
@@ -662,36 +415,16 @@ test("the personal color and depth systems keep their roles distinct", async ({
       primaryInk: "#17191a",
       secondaryInk: "#51565a",
       action: "#a11f35",
-      actionVisited: "#6f4350",
-      actionActive: "#641426",
       focus: "#007a73",
-      atmosphereAlpha: "4%",
-      gridAlpha: "8%",
-      structureAlpha: "12%",
-      emphasisAlpha: "20%",
     },
     canvas: "rgb(243, 241, 237)",
-    headerSurface: "rgb(243, 241, 237)",
-    recessedSurfaceAlpha: 0.04,
     primaryInk: "rgb(23, 25, 26)",
-    bodyOpacity: "1",
     secondaryInk: "rgb(81, 86, 90)",
-    secondaryOpacity: "1",
-    navigationInk: "rgb(23, 25, 26)",
-    ruleAlphas: {
-      grid: 0.08,
-      structure: 0.12,
-      emphasis: 0.2,
-    },
-    evidenceSurface: "rgb(255, 255, 255)",
-    evidenceRule: "rgb(161, 31, 53)",
     action: "rgb(161, 31, 53)",
+    frameAlpha: 0.08,
+    signatureSurface: "rgb(255, 255, 255)",
+    signatureRule: "rgb(161, 31, 53)",
   });
-
-  const skipLink = page.getByRole("link", { name: "Skip to content" });
-  await skipLink.focus();
-  await expect(skipLink).toHaveCSS("outline-color", "rgb(0, 122, 115)");
-  await expect(skipLink).toHaveCSS("outline-style", "solid");
 });
 
 test("links expose deliberate pointer and reduced-motion states", async ({
@@ -700,42 +433,24 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
 
-  const evidenceLink = page.getByRole("link", {
-    name: "Read the source documentation",
+  const contactLink = page.getByRole("link", {
+    name: "ahammednibras737@gmail.com",
   });
   const navigationLink = page
     .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "Work", exact: true });
+    .getByRole("link", { name: "Contact", exact: true });
   const skipLink = page.getByRole("link", { name: "Skip to content" });
 
-  const motionGrammar = await page.evaluate(() => {
-    const rootStyles = getComputedStyle(document.documentElement);
-
-    return {
-      short: rootStyles.getPropertyValue("--motion-short").trim(),
-      standard: rootStyles.getPropertyValue("--motion-standard").trim(),
-      deliberate: rootStyles.getPropertyValue("--motion-deliberate").trim(),
-    };
-  });
-
-  expect(motionGrammar).toEqual({
-    short: ".12s",
-    standard: ".18s",
-    deliberate: ".22s",
-  });
-  await expect(evidenceLink).toHaveCSS(
+  await expect(contactLink).toHaveCSS(
     "transition-property",
     "color, text-decoration-thickness",
   );
-  await expect(evidenceLink).toHaveCSS("transition-duration", "0.18s, 0.18s");
+  await expect(contactLink).toHaveCSS("transition-duration", "0.18s, 0.18s");
   await expect(skipLink).toHaveCSS("transition-property", "transform");
   await expect(skipLink).toHaveCSS("transition-duration", "0.22s");
 
-  await expect(evidenceLink).toHaveCSS("color", "rgb(161, 31, 53)");
-  await expect(evidenceLink).toHaveCSS("text-decoration-thickness", "1.28px");
-
-  await evidenceLink.hover();
-  await expect(evidenceLink).toHaveCSS("text-decoration-thickness", "2.08px");
+  await contactLink.hover();
+  await expect(contactLink).toHaveCSS("text-decoration-thickness", "2.08px");
 
   await navigationLink.hover();
   await expect(navigationLink).toHaveCSS("color", "rgb(161, 31, 53)");
@@ -750,14 +465,10 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
 
   const reducedMotion = await page.locator("a").evaluateAll((links) =>
-    links.map((link) => {
-      const styles = getComputedStyle(link);
-
-      return {
-        animationName: styles.animationName,
-        transitionDuration: styles.transitionDuration,
-      };
-    }),
+    links.map((link) => ({
+      animationName: getComputedStyle(link).animationName,
+      transitionDuration: getComputedStyle(link).transitionDuration,
+    })),
   );
 
   expect(
@@ -782,24 +493,21 @@ test("forced colors preserve link and keyboard-focus visibility", async ({
   await page.keyboard.press("Tab");
 
   const skipLink = page.getByRole("link", { name: "Skip to content" });
-  const evidenceLink = page.getByRole("link", {
-    name: "Read the source documentation",
+  const contactLink = page.getByRole("link", {
+    name: "ahammednibras737@gmail.com",
   });
 
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toHaveCSS("outline-style", "solid");
   await expect(skipLink).toHaveCSS("outline-width", "3px");
 
-  const forcedColors = await page.evaluate(() => ({
-    active: matchMedia("(forced-colors: active)").matches,
-    body: getComputedStyle(document.body).color,
-  }));
-
-  expect(forcedColors.active).toBe(true);
-  await expect(evidenceLink).not.toHaveCSS("color", forcedColors.body);
+  const bodyColor = await page.evaluate(
+    () => getComputedStyle(document.body).color,
+  );
+  await expect(contactLink).not.toHaveCSS("color", bodyColor);
 });
 
-test("three surfaces and two border widths create depth without shadows", async ({
+test("two surfaces and two border widths create depth without shadows", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -811,17 +519,14 @@ test("three surfaces and two border widths create depth without shadows", async 
       Number.parseFloat(rootStyles.getPropertyValue(name));
     const siteHeader = document.querySelector<HTMLElement>(".site-header");
     const pageFrame = document.querySelector<HTMLElement>(".page");
-    const article = document.querySelector<HTMLElement>("article");
-    const evidence = document.querySelector<HTMLElement>(".project-evidence");
+    const signatureBand = document.querySelector<HTMLElement>(
+      ".page > .signature-band",
+    );
 
-    if (!siteHeader || !pageFrame || !article || !evidence) {
+    if (!siteHeader || !pageFrame || !signatureBand) {
       throw new Error("Expected homepage depth targets were not found.");
     }
 
-    const bodyStyles = getComputedStyle(document.body);
-    const headerStyles = getComputedStyle(siteHeader);
-    const articleStyles = getComputedStyle(article);
-    const evidenceStyles = getComputedStyle(evidence);
     const renderedBorderWidths = new Set<string>();
 
     for (const element of document.querySelectorAll<HTMLElement>("*")) {
@@ -839,28 +544,26 @@ test("three surfaces and two border widths create depth without shadows", async 
       }
     }
 
+    const bodyStyles = getComputedStyle(document.body);
+    const headerStyles = getComputedStyle(siteHeader);
+    const signatureStyles = getComputedStyle(signatureBand);
+
     return {
       borderWidths: {
         default: tokenValue("--border-width-default"),
         emphasis: tokenValue("--border-width-emphasis"),
         frame: getComputedStyle(pageFrame).borderInlineStartWidth,
-        article: articleStyles.borderBlockStartWidth,
-        evidence: evidenceStyles.borderBlockStartWidth,
+        signature: signatureStyles.borderBlockStartWidth,
         rendered: [...renderedBorderWidths].sort(),
       },
       surfaces: new Set([
         bodyStyles.backgroundColor,
         headerStyles.backgroundColor,
-        articleStyles.backgroundColor,
-        evidenceStyles.backgroundColor,
+        signatureStyles.backgroundColor,
       ]).size,
       headerPosition: headerStyles.position,
       headerTop: siteHeader.getBoundingClientRect().top,
-      shadows: [
-        headerStyles.boxShadow,
-        articleStyles.boxShadow,
-        evidenceStyles.boxShadow,
-      ],
+      shadows: [headerStyles.boxShadow, signatureStyles.boxShadow],
     };
   });
 
@@ -869,25 +572,24 @@ test("three surfaces and two border widths create depth without shadows", async 
       default: 1,
       emphasis: 0.25,
       frame: "1px",
-      article: "4px",
-      evidence: "4px",
+      signature: "4px",
       rendered: ["1px", "4px"],
     },
-    surfaces: 3,
+    surfaces: 2,
     headerPosition: "sticky",
     headerTop: 0,
-    shadows: ["none", "none", "none"],
+    shadows: ["none", "none"],
   });
 
   await page
     .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "Evidence", exact: true })
+    .getByRole("link", { name: "Contact", exact: true })
     .click();
-  await expect(page).toHaveURL(/#evidence$/);
+  await expect(page).toHaveURL(/#contact$/);
 
   const anchoredPosition = await page.evaluate(() => {
     const siteHeader = document.querySelector<HTMLElement>(".site-header");
-    const target = document.querySelector<HTMLElement>("#evidence");
+    const target = document.querySelector<HTMLElement>("#contact");
 
     if (!siteHeader || !target) {
       throw new Error("Expected sticky navigation targets were not found.");
@@ -904,15 +606,14 @@ test("three surfaces and two border widths create depth without shadows", async 
   );
 });
 
-test("signature bands mark identity, proof, and contact", async ({ page }) => {
+test("signature bands mark identity and contact", async ({ page }) => {
   await page.goto("/");
 
   const bands = page.locator(".signature-band");
 
-  await expect(bands).toHaveCount(3);
+  await expect(bands).toHaveCount(2);
   await expect(bands.nth(0)).toHaveClass(/\bintroduction\b/);
-  await expect(bands.nth(1)).toHaveClass(/\bproject-evidence\b/);
-  await expect(bands.nth(2)).toHaveAttribute("id", "contact");
+  await expect(bands.nth(1)).toHaveAttribute("id", "contact");
 
   const presentation = await bands.evaluateAll((elements) =>
     elements.map((element) => {
@@ -928,10 +629,6 @@ test("signature bands mark identity, proof, and contact", async ({ page }) => {
     }),
   );
 
-  expect(new Set(presentation.map(({ background }) => background))).toEqual(
-    new Set(["rgb(255, 255, 255)"]),
-  );
-
   for (const band of presentation) {
     expect(band).toEqual({
       background: "rgb(255, 255, 255)",
@@ -943,20 +640,20 @@ test("signature bands mark identity, proof, and contact", async ({ page }) => {
   }
 });
 
-test("the evidence and contact links expose their real destinations", async ({
-  page,
-}) => {
+test("the contact links expose their real destinations", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByRole("link", { name: "Read the source documentation" }),
-  ).toHaveAttribute(
-    "href",
-    "https://github.com/ahammednibras8/cascade/blob/main/docs/concepts/architecture.mdx",
-  );
-  await expect(
     page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
   ).toHaveAttribute("href", "mailto:ahammednibras737@gmail.com");
+  await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+    "href",
+    "https://github.com/ahammednibras8",
+  );
+  await expect(page.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+    "href",
+    "https://linkedin.com/in/ahammednibras8",
+  );
   await expect(page.getByRole("link", { name: "Back to top" })).toHaveAttribute(
     "href",
     "#main-content",
@@ -973,12 +670,6 @@ test("the complete homepage remains available without JavaScript", async ({
 
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed Nibras." }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 3, name: "Cascade" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("list", { name: "Cascade task run lifecycle" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 2, name: "Contact" }),
