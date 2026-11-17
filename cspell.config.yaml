@@ -19,6 +19,7 @@ words:
   - ahammednibras
   - autorun
   - crawlable
+  - emnapi
   - esbuild
   - fontsource
   - GHSA
@@ -33,5 +34,6 @@ words:
   - nums
   - Qwik
   - résumé
+  - undici
   - WCAG
   - workerd
