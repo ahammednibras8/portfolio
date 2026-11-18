@@ -186,7 +186,7 @@ The existing white band between strong dark red rules marks identity and the hom
 
 ### Experience list
 
-The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
+The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Each organization name links to its company website in the same tab using the existing underlined text-link states. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
 
 ### Footer identity and route access
 

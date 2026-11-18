@@ -104,6 +104,15 @@ for (const path of ["/", "/about/"]) {
       "Developer · Insource Data",
       "Intern · NysaClan",
     ]);
+    for (const [name, url] of [
+      ["Insource Data", "https://insourcedata.io/"],
+      ["NysaClan", "https://nysaclan.com/"],
+    ] as const) {
+      const company = page.getByRole("link", { name, exact: true });
+      await expect(company).toBeVisible();
+      await expect(company).toHaveAttribute("href", url);
+      await expect(company).not.toHaveAttribute("target", "_blank");
+    }
     await expect(page.locator("[itemprop='email']")).toHaveText(email);
     await expect(
       page.getByRole("button", { name: "Copy email address" }),

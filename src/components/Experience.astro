@@ -6,7 +6,7 @@ import { experience } from "../data/experience";
   {experience.map((entry) => (
     <li>
       <h3>
-        {entry.role} · {entry.organization}
+        {entry.role} · <a href={entry.organizationUrl}>{entry.organization}</a>
       </h3>
       <p class="experience-dates">
         <time datetime={entry.start}>{entry.startLabel}</time> —{" "}

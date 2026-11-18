@@ -196,6 +196,8 @@ for (const path of ["/", "/about/"]) {
         : []),
       page.getByRole("link", { name: "GitHub", exact: true }),
       page.getByRole("link", { name: "LinkedIn", exact: true }),
+      page.getByRole("link", { name: "Insource Data", exact: true }),
+      page.getByRole("link", { name: "NysaClan", exact: true }),
       page.getByRole("button", { name: "Copy email address" }),
       page.getByRole("link", { name: "Open email app" }),
     ];

@@ -1,5 +1,6 @@
 interface Experience {
   organization: string;
+  organizationUrl: `https://${string}`;
   role: string;
   start: string;
   startLabel: string;
@@ -13,6 +14,7 @@ interface Experience {
 export const experience = [
   {
     organization: "Insource Data",
+    organizationUrl: "https://insourcedata.io/",
     role: "Developer",
     start: "2026-01",
     startLabel: "Jan 2026",
@@ -22,6 +24,7 @@ export const experience = [
   },
   {
     organization: "NysaClan",
+    organizationUrl: "https://nysaclan.com/",
     role: "Intern",
     start: "2025-06",
     startLabel: "Jun 2025",
