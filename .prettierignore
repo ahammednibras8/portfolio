@@ -10,4 +10,5 @@ pnpm-lock.yaml
 .agents/skills/impeccable/
 .codex/hooks.json
 .impeccable/config.local.json
+.impeccable/audit/
 .impeccable/critique/

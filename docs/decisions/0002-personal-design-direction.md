@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-23
-- Updated: 2026-11-17
+- Updated: 2026-11-18
 
 ## Decision
 
@@ -89,7 +89,9 @@ On 2026-11-17, Nibras removed the released homepage case study because the proje
 
 Nibras's feedback in [issue 76](https://github.com/ahammednibras8/portfolio/issues/76) sets the next focused change: public profiles belong immediately after identity, experience needs to be visible, the role is Software developer, and the navbar and focus-revealed skip link should go. Remove the sentence explaining that the same username is used on GitHub and LinkedIn; the links already communicate their destinations.
 
-Keep the existing palette, typography, and section grid. Put GitHub and LinkedIn inline in the introduction with small static brand icons and visible labels, before experience in both HTML and visual order. Remove the separate Public profiles section: two supporting links should not delay the employment record. Use the sourced Font Awesome Free marks with their attribution and no icon runtime. Keep the detailed screen-to-worker approach on About and remove repeated positioning before the roles. Align headings and their first content on desktop while retaining stacked spacing on mobile. The main landmark starts the visible document, so there is no repeated header to bypass. Ordinary footer links retain Home, About, and Contact routes.
+Keep the existing palette, typography, and section grid. Put GitHub and LinkedIn inline in the introduction with small static brand icons and visible labels, before experience in both HTML and visual order. Remove the separate Public profiles section: two supporting links should not delay the employment record. Use the sourced Font Awesome Free marks with their attribution and no icon runtime. Keep the detailed screen-to-worker approach on About and remove repeated positioning before the roles. Align headings and their first content on desktop while retaining stacked spacing on mobile. The main landmark starts the visible document, so there is no repeated header to bypass.
+
+On 2026-11-18, Nibras requested removal of the footer navigation and clarified that his name and location must remain. Keep that identity line as plain text; remove only the Home/About/Contact/Back to top list and its unused styling. Remove the main landmark’s programmatic focus stop, which served Back to top. Nibras also rejected the added “About my approach” CTA and requested no replacement Home-to-About link. About retains its contextual Back to home link, both pages retain email contact options, and 404 retains dedicated Home and contact recovery actions. About remains available at its existing URL but is no longer discoverable through a link on Home. Reconsider that limitation only when Nibras wants a different route. This preserves complete built HTML and no-JavaScript access without adding replacement navigation.
 
 Present experience in reverse chronological order with company, role, dates, and concise employment context. Omit duplicated labels and elapsed-month counters. Nibras supplied the Insource Data and NysaClan roles and dates, and his [public profile README](https://github.com/ahammednibras8/ahammednibras8) supplies the general professional scope. Do not assign that general scope, other contributors' commits, or an organization-wide project to a particular role without evidence. This follows [Harvard's guidance](https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/) on factual, specific writing that is easy to scan. Company-specific achievements remain subject to Nibras's review.
 

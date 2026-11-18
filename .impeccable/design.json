@@ -272,14 +272,6 @@
       "css": ".ds-experience { margin: 0; padding: 0; list-style: none; font-family: var(--font-reading); color: var(--color-ink-primary); } .ds-experience li { max-width: var(--text-measure); } .ds-experience li + li { margin-block-start: var(--space-editorial); padding-block-start: var(--space-editorial); border-block-start: var(--border-width-default) solid var(--color-rule-structural); } .ds-experience h3 { margin: 0; font-size: 1.125rem; line-height: 1.5; } .ds-experience p { margin: 0; color: var(--color-ink-secondary); line-height: 1.55; }"
     },
     {
-      "name": "Footer links",
-      "kind": "nav",
-      "refersTo": "footer-links",
-      "description": "Ordinary route links that wrap and retain touch targets.",
-      "html": "<ul class=\"ds-footer-links\"><li><a class=\"ds-link\" href=\"/\" aria-current=\"page\">Home</a></li><li><a class=\"ds-link\" href=\"/about/\">About</a></li><li><a class=\"ds-link\" href=\"/#contact\">Contact</a></li><li><a class=\"ds-link\" href=\"#main-content\">Back to top</a></li></ul>",
-      "css": ".ds-link { display: inline-block; min-block-size: 1.5rem; color: var(--color-action); font-family: var(--font-reading); text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .2em; } .ds-link:visited { color: var(--color-action-visited); } .ds-link:active { color: var(--color-action-active); text-decoration-thickness: .13em; } .ds-link:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } @media (hover: hover) and (prefers-reduced-motion: no-preference) { .ds-link { transition: color var(--motion-standard) var(--motion-ease-out), text-decoration-thickness var(--motion-standard) var(--motion-ease-out); } .ds-link:active { transition-duration: var(--motion-short); } } @media (hover: hover) { .ds-link:hover { text-decoration-thickness: .13em; } } @media (forced-colors: active) { .ds-link { color: LinkText; } .ds-link:visited { color: VisitedText; } .ds-link:active { color: ActiveText; } .ds-link:focus-visible { outline-color: Highlight; } } .ds-footer-links { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-interface) var(--space-component); margin: 0; padding: 0; list-style: none; } .ds-footer-links .ds-link { min-block-size: var(--touch-target); padding-block: var(--space-interface); }"
-    },
-    {
       "name": "Recovery destination",
       "kind": "custom",
       "refersTo": "recovery-link",
@@ -296,7 +288,8 @@
       "Clear hierarchy through weight, spacing, and restrained rules.",
       "Responsive alignment that preserves the HTML reading order.",
       "Visible links and focus feedback, with motion limited to interaction states.",
-      "Inline labelled brand links keep profiles beside identity; experience starts with verified roles."
+      "Inline labelled brand links keep profiles beside identity; experience starts with verified roles.",
+      "The footer keeps plain name/location text without navigation links. About links home; Home has no About CTA."
     ],
     "rules": [],
     "dos": [

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { pressTab } from "../helpers/keyboard";
 
 const missingPath = "/route-that-does-not-exist";
 const notFoundArtifact = resolve("dist/404.html");
@@ -20,6 +21,10 @@ test("the built 404 artifact exists with meaningful recovery links", async ({
     }),
   ).toBeVisible();
 
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   const recovery = page.getByRole("navigation", { name: "Page recovery" });
 
   const homepage = recovery.locator('a[href="/"]');
@@ -50,6 +55,10 @@ test("unknown routes return the authored 404 with recovery paths", async ({
     }),
   ).toBeVisible();
 
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   const recovery = page.getByRole("navigation", { name: "Page recovery" });
   const links = recovery.getByRole("link");
 
@@ -61,8 +70,9 @@ test("unknown routes return the authored 404 with recovery paths", async ({
   ).toEqual(["/", "/#contact"]);
 });
 
-test("the 320px recovery path works without JavaScript", async ({
+test("the 320px recovery actions work without JavaScript", async ({
   browser,
+  browserName,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -83,8 +93,21 @@ test("the 320px recovery path works without JavaScript", async ({
     name: /Homepage A short introduction/,
   });
   await expect(homepageLink).toBeVisible();
-  await homepageLink.click();
+  await pressTab(page, browserName);
+  await expect(homepageLink).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/$/);
+
+  await page.goto(missingPath);
+  const contactLink = page.getByRole("link", {
+    name: /Get in touch Email address/,
+  });
+  await pressTab(page, browserName);
+  await pressTab(page, browserName);
+  await expect(contactLink).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/#contact$/);
+  await expect(page.locator("#contact")).toBeInViewport();
 
   await context.close();
 });

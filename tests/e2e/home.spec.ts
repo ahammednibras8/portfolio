@@ -29,7 +29,7 @@ test("the homepage introduces Nibras, profiles, experience, and contact in docum
     "Jan 2026 — Present",
     "Jun 2025 — Sep 2025",
   ]);
-  await expect(page.locator("footer")).toContainText(
+  await expect(page.getByRole("contentinfo")).toHaveText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
 });
@@ -134,26 +134,26 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("footer links keep routes reachable without a navbar", async ({
+test("the footer retains identity without navigation links", async ({
   page,
 }) => {
-  await page.goto("/");
-  await expect(page.getByRole("banner")).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(
-    0,
-  );
-  await expect(page.getByRole("link", { name: /Skip to/ })).toHaveCount(0);
-  const footer = page.getByRole("contentinfo");
-  await footer.getByRole("link", { name: "About", exact: true }).click();
-  await expect(page).toHaveURL(/\/about\/$/);
-  await expect(
-    footer.getByRole("link", { name: "About", exact: true }),
-  ).toHaveAttribute("aria-current", "page");
-  await footer.getByRole("link", { name: "Contact", exact: true }).click();
-  await expect(page).toHaveURL(/\/#contact$/);
-  await expect(page.locator("#contact")).toBeInViewport();
-  await footer.getByRole("link", { name: "Home", exact: true }).click();
-  await expect(page).toHaveURL(/\/$/);
+  for (const route of ["/", "/about/", "/404.html"]) {
+    await page.goto(route);
+    const footer = page.getByRole("contentinfo");
+    await expect(footer).toHaveText(
+      "Ahammed Nibras · Kozhikode, Kerala, India",
+    );
+    await expect(footer.getByRole("link")).toHaveCount(0);
+    await expect(footer.locator("ul, nav")).toHaveCount(0);
+    await expect(page.getByRole("banner")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(
+      0,
+    );
+    await expect(page.locator("main[tabindex]")).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /Skip to|Back to top|About my approach/ }),
+    ).toHaveCount(0);
+  }
 });
 
 test("the 320px layout keeps profile and contact paths usable", async ({
@@ -180,34 +180,34 @@ test("the 320px layout keeps profile and contact paths usable", async ({
   ).toBeVisible();
 });
 
-test("the homepage exposes a complete keyboard path", async ({
-  browserName,
-  page,
-}) => {
-  await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto("/");
-  await expect(
-    page.getByRole("button", { name: "Copy email address" }),
-  ).toBeVisible();
-  const footer = page.getByRole("contentinfo");
-  const focusOrder = [
-    page.getByRole("link", { name: "GitHub", exact: true }),
-    page.getByRole("link", { name: "LinkedIn", exact: true }),
-    page.getByRole("button", { name: "Copy email address" }),
-    page.getByRole("link", { name: "Open email app" }),
-    footer.getByRole("link", { name: "Home", exact: true }),
-    footer.getByRole("link", { name: "About", exact: true }),
-    footer.getByRole("link", { name: "Contact", exact: true }),
-    footer.getByRole("link", { name: "Back to top" }),
-  ];
-  for (const control of focusOrder) {
-    await pressTab(page, browserName);
-    await expect(control).toBeFocused();
-  }
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/#main-content$/);
-  await expect(page.locator("main")).toBeFocused();
-});
+for (const path of ["/", "/about/"]) {
+  test(`${path} exposes a complete keyboard path without footer stops`, async ({
+    browserName,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(path);
+    await expect(
+      page.getByRole("button", { name: "Copy email address" }),
+    ).toBeVisible();
+    const focusOrder = [
+      ...(path === "/about/"
+        ? [page.getByRole("link", { name: "Back to home", exact: true })]
+        : []),
+      page.getByRole("link", { name: "GitHub", exact: true }),
+      page.getByRole("link", { name: "LinkedIn", exact: true }),
+      page.getByRole("button", { name: "Copy email address" }),
+      page.getByRole("link", { name: "Open email app" }),
+    ];
+    await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
+      focusOrder.length,
+    );
+    for (const control of focusOrder) {
+      await pressTab(page, browserName);
+      await expect(control).toBeFocused();
+    }
+  });
+}
 
 test("the responsive grid preserves section alignment", async ({ page }) => {
   for (const [width, columns] of [
@@ -580,10 +580,9 @@ test("the contact links expose their real destinations", async ({ page }) => {
     "href",
     "https://linkedin.com/in/ahammednibras8",
   );
-  await expect(page.getByRole("link", { name: "Back to top" })).toHaveAttribute(
-    "href",
-    "#main-content",
-  );
+  await expect(
+    page.getByRole("link", { name: "About my approach" }),
+  ).toHaveCount(0);
 });
 
 test("the complete homepage remains available without JavaScript", async ({
@@ -600,7 +599,12 @@ test("the complete homepage remains available without JavaScript", async ({
   await expect(
     page.getByRole("heading", { level: 2, name: "Contact" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "About my approach" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
   await expect(page.locator("[itemprop='email']")).toHaveText(
     "ahammednibras737@gmail.com",
   );

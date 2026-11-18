@@ -111,7 +111,7 @@ for (const path of ["/", "/about/"]) {
   });
 }
 
-test("the About route and profile links work at 320px without JavaScript", async ({
+test("the direct About route links home at 320px without JavaScript", async ({
   browser,
   browserName,
 }) => {
@@ -120,31 +120,23 @@ test("the About route and profile links work at 320px without JavaScript", async
     viewport: { width: 320, height: 800 },
   });
   const page = await context.newPage();
-  await page.goto("/");
-
-  await page
-    .getByRole("contentinfo")
-    .getByRole("link", { name: "About", exact: true })
-    .click();
+  await page.goto("/about/");
   await expect(page).toHaveURL(/\/about\/$/);
   await expect(page).toHaveTitle("About Ahammed Nibras — Software developer");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "About Ahammed Nibras",
   );
-  await expect(
-    page.getByRole("link", { name: "About", exact: true }),
-  ).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("navigation")).toHaveCount(0);
 
   const viewport = await page.evaluate(() => ({
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBe(viewport.width);
-
-  await pressTab(page, browserName);
-  await expect(
-    page.getByRole("link", { name: "GitHub", exact: true }),
-  ).toBeFocused();
 
   await expect(page.getByRole("heading", { name: "How I work" })).toBeVisible();
   await expect(
@@ -158,6 +150,12 @@ test("the About route and profile links work at 320px without JavaScript", async
     "href",
     "https://linkedin.com/in/ahammednibras8",
   );
+  await pressTab(page, browserName);
+  await expect(page.getByRole("link", { name: "Back to home" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("#contact [itemprop='email']")).toBeVisible();
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   await context.close();
 });
 

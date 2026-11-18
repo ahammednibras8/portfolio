@@ -75,7 +75,6 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
     <main
       id="main-content"
       class="page"
-      tabindex="-1"
       itemscope={isPersonPage}
       itemtype={isPersonPage ? "https://schema.org/Person" : undefined}
       itemid={isPersonPage ? personId : undefined}
@@ -89,27 +88,6 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
       <p class="site-footer-location">
         {profile.name} · {profile.location}
       </p>
-      <ul class="footer-links">
-        <li>
-          <a href="/" aria-current={isHomepage ? "page" : undefined}>
-            Home
-          </a>
-        </li>
-        <li>
-          <a
-            href="/about/"
-            aria-current={pageType === "ProfilePage" ? "page" : undefined}
-          >
-            About
-          </a>
-        </li>
-        <li>
-          <a href={isHomepage ? "#contact" : "/#contact"}>Contact</a>
-        </li>
-        <li>
-          <a href="#main-content">Back to top</a>
-        </li>
-      </ul>
     </footer>
   </body>
 </html>

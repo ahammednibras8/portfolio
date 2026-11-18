@@ -78,9 +78,6 @@ components:
   experience-entry:
     textColor: "{colors.ink-primary}"
     typography: "{typography.title}"
-  footer-links:
-    textColor: "{colors.action}"
-    typography: "{typography.body}"
   recovery-link:
     textColor: "{colors.ink-primary}"
     typography: "{typography.body}"
@@ -140,7 +137,7 @@ The hierarchy is explicit rather than based on one fixed size ratio:
 - **Title:** experience-entry headings use the title role. Their weight follows the native heading default; there is no separate title font file.
 - **Introduction:** the paragraph immediately after the main heading uses the introduction role.
 - **Body:** reading text uses the body role with a maximum measure of 68 characters (`68ch`). Links and list entries remain part of that reading system.
-- **Footer:** the location line uses the smaller footer role and secondary ink. Footer links retain the body role.
+- **Footer:** the name/location line uses the smaller footer role and secondary ink.
 - **Label:** recovery labels use the mono label role in uppercase. The 404 status uses the same font family and weight, with `clamp(5rem, 20vw, 9rem)`, leading of `0.8`, and tracking of `-0.08em`.
 
 Do not use mono for sustained paragraphs. Keep names, role labels, dates, and technical facts readable without relying on a decorative type treatment.
@@ -151,7 +148,7 @@ The centered document and footer share a maximum width of 76rem. The page uses a
 
 The frontmatter spacing names match the stylesheet. Interface spacing belongs inside controls and close groups; component spacing separates related content; editorial spacing separates reading units; section spacing defines the major vertical rhythm. Section padding is the section step vertically and the component step horizontally, increasing to the editorial step horizontally at 48rem. Grid gaps similarly increase from component to editorial spacing.
 
-At medium widths, introduction content spans the first five columns. In ordinary sections, headings span the first two columns and content occupies the remaining four. At wide widths, the introduction heading occupies columns two through five, while its supporting content occupies columns seven through eleven. Other section headings occupy columns two and three, with content beginning at column four. The footer follows the same wide grid and allows its links to wrap.
+At medium widths, introduction content spans the first five columns. In ordinary sections, headings span the first two columns and content occupies the remaining four. At wide widths, the introduction heading occupies columns two through five, while its supporting content occupies columns seven through eleven. Other section headings occupy columns two and three, with content beginning at column four. The footer identity follows the same wide grid.
 
 GitHub and LinkedIn sit inline in the introduction after the role and concise scope, with small static Font Awesome brand marks and visible labels. Each link retains a 44px minimum touch target. There is no separate Public profiles section. Experience begins with the verified employment record; the detailed approach appears on About. From the medium breakpoint, section headings and their first content align at the top; stacked mobile sections retain the editorial gap.
 
@@ -191,9 +188,9 @@ The existing white band between strong dark red rules marks identity and the hom
 
 The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
 
-### Footer links
+### Footer identity and route access
 
-Home, About, Contact, and Back to top are ordinary links in a wrapping list. Home and About expose the current route through semantic markup; the stylesheet does not add a separate selected-tab treatment. The footer sits after the main content and shares its width and border vocabulary. There is no header navbar or skip control in the working layout.
+The footer retains Nibras's name and location as plain text. Its Home/About/Contact/Back to top list is removed, along with the unused main focus stop. There is no navbar or skip control. About retains “Back to home” in its introduction, and the dedicated 404 recovery actions retain Home and contact destinations. The rejected “About my approach” CTA is removed without a replacement; About remains directly addressable at `/about/`, with no link from Home under the approved scope.
 
 ### Recovery links
 
@@ -201,7 +198,7 @@ The 404 recovery area uses a bordered semantic list. Each whole link contains a 
 
 ### Shared focus behavior
 
-Keyboard focus uses a solid outline (0.1875rem) with an equal offset. Preserve the outline and system-color override rather than replacing them with a color change alone. Footer and email actions use the touch-target minimum; profile links use the same touch-target minimum.
+Keyboard focus uses a solid outline (0.1875rem) with an equal offset. Preserve the outline and system-color override rather than replacing them with a color change alone. Email actions and profile links use the touch-target minimum. Contextual links stay within the reading text.
 
 ## Do's and Don'ts
 
