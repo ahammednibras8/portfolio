@@ -14,6 +14,7 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, using static HTML.
 - Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
 - Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
+- Copy success uses a brief tooltip and color flash, with a polite live announcement; failure keeps visible manual-copy guidance. A single optional touch vibration is requested on supporting browsers, never relied on for feedback.
 - There is no application server, database, or client framework.
 - GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
 - Images are optimized during the build.

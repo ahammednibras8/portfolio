@@ -461,8 +461,16 @@ h2 + * {
   min-inline-size: 0;
 }
 
-.copy-email {
+.copy-control {
+  position: relative;
   flex: 0 0 var(--touch-target);
+}
+
+.copy-control:not([hidden]) {
+  display: flex;
+}
+
+.copy-email {
   inline-size: var(--touch-target);
   min-block-size: var(--touch-target);
   padding: var(--space-interface);
@@ -503,9 +511,48 @@ h2 + * {
   cursor: wait;
 }
 
+.copy-email[data-copied] {
+  background: var(--color-action);
+  color: var(--color-surface-raised);
+}
+
+.copy-tooltip {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: calc(100% + var(--space-interface));
+  inset-inline-end: 0;
+  padding: calc(var(--space-interface) / 2) var(--space-interface);
+  border: var(--border-width-default) solid var(--color-ink-primary);
+  background: var(--color-ink-primary);
+  color: var(--color-surface-raised);
+  font-size: 0.875em;
+  line-height: 1.55;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .copy-email {
+    transition:
+      color 120ms var(--motion-ease-out),
+      background-color 120ms var(--motion-ease-out);
+  }
+}
+
 @media (forced-colors: active) {
   .copy-email {
     color: ButtonText;
+  }
+
+  .copy-email[data-copied] {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .copy-tooltip {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
   }
 }
 
@@ -515,8 +562,18 @@ h2 + * {
   background: var(--color-surface-raised);
 }
 
-.email-status {
-  min-block-size: 1.55em;
+.email-status:not([data-error]) {
+  position: absolute;
+  overflow: hidden;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.email-status[data-error] {
   margin-block-start: var(--space-interface);
   color: var(--color-ink-secondary);
 }

@@ -25,6 +25,8 @@ for (const path of ["/", "/about/"]) {
     await page.keyboard.press("Enter");
     await expect(button).toBeDisabled();
     await expect(page.getByRole("status")).toBeEmpty();
+    await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
+    await expect(button).not.toHaveAttribute("data-copied");
     await expect(page.locator("html")).toHaveAttribute(
       "data-copied-text",
       email,
@@ -53,6 +55,10 @@ for (const path of ["/", "/about/"]) {
     await expect(page.getByRole("status")).toHaveText(
       "Couldn’t copy. Select and copy the email address above.",
     );
+    await expect(page.getByRole("status")).toHaveAttribute("data-error", "");
+    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
+    await expect(button).not.toHaveAttribute("data-copied");
     await expect(page.locator("[itemprop='email']")).toHaveText(email);
     await expect(button).toBeEnabled();
     await expect(
@@ -79,6 +85,11 @@ for (const path of ["/", "/about/"]) {
   test(`${path} keeps an icon-only copy action beside the address at narrow and enlarged text sizes`, async ({
     page,
   }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: () => Promise.resolve() },
+      });
+    });
     await page.goto(path);
     await page.evaluate(() => document.fonts.ready);
     const button = page.getByRole("button", {
@@ -123,6 +134,13 @@ for (const path of ["/", "/about/"]) {
         expect(geometry.height).toBeGreaterThanOrEqual(44);
         expect(geometry.right).toBeLessThanOrEqual(geometry.viewport);
         expect(geometry.overflow).toBe(0);
+        await button.click();
+        const tooltip = page.locator("[data-copy-tooltip]");
+        await expect(tooltip).toBeVisible();
+        const tip = await tooltip.boundingBox();
+        expect(tip?.x).toBeGreaterThanOrEqual(0);
+        expect((tip?.x ?? 0) + (tip?.width ?? 0)).toBeLessThanOrEqual(width);
+        await page.keyboard.press("Escape");
       }
     }
   });
