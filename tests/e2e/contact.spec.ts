@@ -76,6 +76,57 @@ for (const path of ["/", "/about/"]) {
     ).toBeVisible();
   });
 
+  test(`${path} keeps an icon-only copy action beside the address at narrow and enlarged text sizes`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    const button = page.getByRole("button", {
+      name: "Copy email address",
+      exact: true,
+    });
+    await expect(button).toBeVisible();
+    await expect(button).toHaveText("");
+    await expect(button).toHaveAttribute("title", "Copy email address");
+    await expect(button.locator("svg[aria-hidden='true']")).toHaveCount(1);
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const fontSize of ["100%", "200%"]) {
+        await page.locator(".email-contact").evaluate((contact, size) => {
+          contact.style.fontSize = size;
+        }, fontSize);
+        const geometry = await page
+          .locator(".email-address-row")
+          .evaluate((row) => {
+            const address = row
+              .querySelector("[data-email-address]")
+              ?.getBoundingClientRect();
+            const copy = row.querySelector("button")?.getBoundingClientRect();
+            if (!address || !copy) throw new Error("Missing email actions.");
+            return {
+              afterAddress: copy.left >= address.right - 1,
+              centerOffset: Math.abs(
+                copy.top + copy.height / 2 - address.top - address.height / 2,
+              ),
+              width: copy.width,
+              height: copy.height,
+              right: copy.right,
+              viewport: document.documentElement.clientWidth,
+              overflow:
+                document.documentElement.scrollWidth -
+                document.documentElement.clientWidth,
+            };
+          });
+        expect(geometry.afterAddress).toBe(true);
+        expect(geometry.centerOffset).toBeLessThan(1);
+        expect(geometry.width).toBeGreaterThanOrEqual(44);
+        expect(geometry.height).toBeGreaterThanOrEqual(44);
+        expect(geometry.right).toBeLessThanOrEqual(geometry.viewport);
+        expect(geometry.overflow).toBe(0);
+      }
+    }
+  });
+
   test(`${path} keeps profiles, experience, and contact usable without JavaScript`, async ({
     browser,
   }, testInfo) => {
@@ -111,7 +162,7 @@ for (const path of ["/", "/about/"]) {
       const company = page.getByRole("link", { name, exact: true });
       await expect(company).toBeVisible();
       await expect(company).toHaveAttribute("href", url);
-      await expect(company).not.toHaveAttribute("target", "_blank");
+      await expect(company).toHaveAttribute("target", "_blank");
     }
     await expect(page.locator("[itemprop='email']")).toHaveText(email);
     await expect(

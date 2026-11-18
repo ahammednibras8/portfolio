@@ -70,7 +70,7 @@ test("unknown routes return the authored 404 with recovery paths", async ({
   ).toEqual(["/", "/#contact"]);
 });
 
-test("the 320px recovery actions work without JavaScript", async ({
+test("the 320px recovery actions open separate pages without JavaScript", async ({
   browser,
   browserName,
 }) => {
@@ -95,8 +95,15 @@ test("the 320px recovery actions work without JavaScript", async ({
   await expect(homepageLink).toBeVisible();
   await pressTab(page, browserName);
   await expect(homepageLink).toBeFocused();
+  const homePromise = context.waitForEvent("page");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/$/);
+  const home = await homePromise;
+  await expect(home).toHaveURL(new URL("/", page.url()).href);
+  await expect(home.getByRole("heading", { level: 1 })).toBeVisible();
+  expect(await home.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(new RegExp(`${missingPath}$`));
+  await home.close();
+  await page.bringToFront();
 
   await page.goto(missingPath);
   const contactLink = page.getByRole("link", {
@@ -105,9 +112,14 @@ test("the 320px recovery actions work without JavaScript", async ({
   await pressTab(page, browserName);
   await pressTab(page, browserName);
   await expect(contactLink).toBeFocused();
+  const contactPromise = context.waitForEvent("page");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/#contact$/);
-  await expect(page.locator("#contact")).toBeInViewport();
+  const contact = await contactPromise;
+  await expect(contact).toHaveURL(new URL("/#contact", page.url()).href);
+  await expect(contact.locator("#contact")).toBeInViewport();
+  expect(await contact.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(new RegExp(`${missingPath}$`));
+  await contact.close();
 
   await context.close();
 });

@@ -199,6 +199,7 @@ for (const path of ["/", "/about/"]) {
       page.getByRole("link", { name: "Insource Data", exact: true }),
       page.getByRole("link", { name: "NysaClan", exact: true }),
       page.getByRole("button", { name: "Copy email address" }),
+      page.getByRole("link", { name: "Write in Gmail" }),
       page.getByRole("link", { name: "Open email app" }),
     ];
     await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
@@ -422,6 +423,7 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await page.mouse.down();
   await expect(contactLink).toHaveCSS("transition-duration", "0.12s");
   await expect(contactLink).toHaveCSS("color", "rgb(100, 20, 38)");
+  await page.mouse.move(0, 0);
   await page.mouse.up();
 
   await page.emulateMedia({ reducedMotion: "reduce" });

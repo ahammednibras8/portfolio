@@ -450,19 +450,69 @@ h2 + * {
   }
 }
 
-.email-actions button {
+.email-address-row {
+  display: flex;
   min-block-size: var(--touch-target);
-  padding: var(--space-interface) var(--space-component);
-  border: var(--border-width-default) solid currentcolor;
+  align-items: center;
+  gap: calc(var(--space-interface) / 2);
+}
+
+.email-address-row > [data-email-address] {
+  min-inline-size: 0;
+}
+
+.copy-email {
+  flex: 0 0 var(--touch-target);
+  inline-size: var(--touch-target);
+  min-block-size: var(--touch-target);
+  padding: var(--space-interface);
+  border: 0;
   border-radius: 0;
-  background: var(--color-surface-raised);
+  background: transparent;
   color: var(--color-action);
   font: inherit;
   cursor: pointer;
 }
 
-.email-actions button:disabled {
+.copy-email:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-email svg {
+  fill: currentcolor;
+}
+
+.copy-email:focus-visible {
+  outline-offset: var(--border-width-default);
+}
+
+@media (hover: hover) {
+  .copy-email:hover {
+    color: var(--color-action-active);
+  }
+}
+
+.copy-email:active {
+  color: var(--color-action-active);
+}
+
+.copy-email:disabled {
+  color: var(--color-ink-secondary);
   cursor: wait;
+}
+
+@media (forced-colors: active) {
+  .copy-email {
+    color: ButtonText;
+  }
+}
+
+.email-actions .gmail-compose {
+  padding: var(--space-interface) var(--space-component);
+  border: var(--border-width-default) solid currentcolor;
+  background: var(--color-surface-raised);
 }
 
 .email-status {

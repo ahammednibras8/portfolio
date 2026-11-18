@@ -6,7 +6,16 @@ import { experience } from "../data/experience";
   {experience.map((entry) => (
     <li>
       <h3>
-        {entry.role} · <a href={entry.organizationUrl}>{entry.organization}</a>
+        {entry.role} ·{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          href={entry.organizationUrl}
+        >
+          {entry.organization}
+        </a>
       </h3>
       <p class="experience-dates">
         <time datetime={entry.start}>{entry.startLabel}</time> —{" "}

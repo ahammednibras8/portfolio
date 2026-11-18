@@ -1,23 +1,54 @@
 ---
+import CopyIcon from "../assets/copy.svg";
+
 interface Props {
   email: string;
 }
 
 const { email } = Astro.props;
+const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
 ---
 
 <div class="email-contact" data-email-contact>
-  <p>
+  <p class="email-address-row">
     <span itemprop="email" data-email-address>
       {email}
     </span>
+    <button
+      class="copy-email"
+      type="button"
+      data-copy-email
+      aria-label="Copy email address"
+      title="Copy email address"
+      hidden
+    >
+      <CopyIcon width="18" height="18" aria-hidden="true" focusable="false" />
+    </button>
   </p>
   <div class="email-actions">
-    <button type="button" data-copy-email hidden>
-      Copy email address
-    </button>
-    <a href={`mailto:${email}`}>Open email app</a>
+    <a
+      class="gmail-compose"
+      href={gmailUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Opens in a new tab"
+      aria-describedby="new-tab-hint"
+    >
+      Write in Gmail
+    </a>
+    <a
+      href={`mailto:${email}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Opens a new tab or your email app"
+      aria-describedby="email-app-hint"
+    >
+      Open email app
+    </a>
   </div>
+  <span id="email-app-hint" hidden>
+    Opens a new tab or your email app.
+  </span>
   <p class="email-status" role="status"></p>
 </div>
 

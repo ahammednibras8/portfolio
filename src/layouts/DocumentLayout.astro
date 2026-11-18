@@ -81,6 +81,9 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
       itemprop={pageType ? "mainEntity" : undefined}
     >
       {isPersonPage && <link itemprop="url" href={homepage.href} />}
+      <span id="new-tab-hint" hidden>
+        Opens in a new tab.
+      </span>
       <slot />
     </main>
 

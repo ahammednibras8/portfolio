@@ -34,11 +34,27 @@ const canonical = new URL("/about/", Astro.site ?? Astro.url);
 
     <p>
       I build AI products and the backend systems they depend on.{" "}
-      <a href="/">Back to home</a>.
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Opens in a new tab"
+        aria-describedby="new-tab-hint"
+        href="/"
+      >
+        Back to home
+      </a>
+      .
     </p>
     <ul class="profile-links">
       <li>
-        <a itemprop="sameAs" href={profile.github}>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.github}
+        >
           <GitHubIcon
             width="16"
             height="16"
@@ -49,7 +65,14 @@ const canonical = new URL("/about/", Astro.site ?? Astro.url);
         </a>
       </li>
       <li>
-        <a itemprop="sameAs" href={profile.linkedin}>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.linkedin}
+        >
           <LinkedInIcon
             width="16"
             height="16"

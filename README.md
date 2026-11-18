@@ -12,9 +12,10 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - A typed document layout owns shared metadata, local fonts, and the name/location footer.
 - Shared profile and experience data keep the published name, role, location, and public links consistent.
 - The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, using static HTML.
-- Important content and navigation work without JavaScript. A small same-origin script adds an email copy button where supported; the address remains selectable without it.
+- Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
+- Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
 - There is no application server, database, or client framework.
-- GitHub and LinkedIn marks use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs/brands) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
+- GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
 - Images are optimized during the build.
 - GitHub Actions builds and tests the site after a change reaches `main`.
 - The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.

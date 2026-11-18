@@ -19,6 +19,10 @@ ignorePaths:
   - "test-results/**"
 
 words:
+  - authuser
+  - describedby
+  - noopener
+  - noreferrer
   - contentinfo
   - consolas
   - currentcolor

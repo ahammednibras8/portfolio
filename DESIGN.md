@@ -60,6 +60,12 @@ spacing:
   touch-target: "2.75rem"
 components:
   copy-email:
+    backgroundColor: "transparent"
+    textColor: "{colors.action}"
+    typography: "{typography.body}"
+    rounded: "{rounded.control}"
+    padding: "0.5rem"
+  gmail-compose:
     backgroundColor: "{colors.surface-raised}"
     textColor: "{colors.action}"
     typography: "{typography.body}"
@@ -108,7 +114,7 @@ The palette combines a warm off-white canvas, white surfaces, dark ink, dark red
 
 ### Primary
 
-- **Action:** dark red for ordinary links, the copy-button label and border, emphasis rules, and recovery labels.
+- **Action:** dark red for ordinary links, the copy icon and Gmail action, emphasis rules, and recovery labels.
 - **Action visited:** muted red-purple for links already visited.
 - **Action active:** deeper red while a link is pressed.
 - **Focus:** teal for keyboard focus outlines. This is an interaction signal, not a second decorative accent.
@@ -116,7 +122,7 @@ The palette combines a warm off-white canvas, white surfaces, dark ink, dark red
 ### Neutral
 
 - **Canvas:** warm off-white behind the document and footer.
-- **Raised surface:** white for signature bands and the copy-email button.
+- **Raised surface:** white for signature bands and the Gmail action.
 - **Primary ink:** near-black for headings and reading text.
 - **Secondary ink:** muted gray for location, experience metadata, recovery explanations, and email status feedback.
 - **Quiet rule:** primary ink at the grid opacity (8%) for the page frame and section separators.
@@ -160,7 +166,7 @@ Keep boundaries meaningful. Do not add generic cards or shadows merely to fill s
 
 ## Shapes
 
-The implemented form language is rectangular. The copy-email button explicitly has square corners; sections, lists, and recovery links have no rounded-card treatment. There is no pill, chip, avatar, or dialog system to extend.
+The implemented form language is rectangular. The Gmail action has square corners; the copy icon has no border or surface box; sections, lists, and recovery links have no rounded-card treatment. There is no pill, chip, avatar, or dialog system to extend.
 
 The favicon is the existing uppercase N derived from IBM Plex Sans Bold on the canvas color. Preserve that asset rather than inventing a separate logo system during refinement.
 
@@ -168,17 +174,19 @@ The favicon is the existing uppercase N derived from IBM Plex Sans Bold on the c
 
 ### Text links
 
+All authored links request a new tab with explicit `target="_blank"` and `rel="noopener noreferrer"`. Title and `aria-describedby` hints announce that behavior without changing visible labels. The native email link explains that the browser may instead open an email application. No global base target or script interception is used.
+
 Links remain visibly underlined. Their default underline thickness is `0.08em`, with an offset of `0.2em`; hover increases thickness to `0.13em` on devices that support hover. Active links use the active action role, and visited links use the visited role.
 
 For pointer devices without a reduced-motion preference, color and underline thickness transition over the standard duration (180ms); pressing a link shortens the transition to 120ms. Both use the existing easing curve, `cubic-bezier(0.2, 0, 0, 1)`. There are no entrance animations. With reduced motion enabled, these transitions are absent.
 
 ### Copy-email control
 
-The [shared email component](src/components/EmailContact.astro) keeps the full address as selectable text. The copy button uses the raised surface, action text, current-color border, square shape, and padding in the frontmatter. Its minimum height is the touch-target step.
+The [shared email component](src/components/EmailContact.astro) keeps the address selectable and places an icon-only copy button immediately to its right. The sourced Font Awesome copy mark inherits the action color, with no border or decorative box. Its native button has a 44px hit target, an accessible Copy email address label, a title, and the shared focus outline with a compact 1px offset. The address can wrap while the icon remains inside the row.
 
-The button appears only when JavaScript and a secure Clipboard API are available. A pending write disables it and changes the pointer to a waiting cursor. Success and failure appear in a polite status paragraph with secondary ink. The status paragraph reserves one body line; longer messages wrap. A separate Open email app link makes native-handler behavior explicit. Controls wrap rather than overflow.
+The button appears only when JavaScript and a secure Clipboard API are available. A pending write disables it and uses secondary ink and a waiting cursor. Success and failure appear in a polite status paragraph after the awaited write; longer messages wrap. Hover and active states use the existing active action color. No new motion is introduced, including with reduced motion. In forced colors, the icon uses system button text and focus uses the system highlight.
 
-There is no distinct button hover fill, error color, disabled opacity, or loading spinner in the source. Do not invent those states while documenting it. The shared focus outline applies to the button.
+Below the address, Write in Gmail is an underlined link action with the existing square border, raised surface, and control padding. Its compose URL encodes the recipient and does not force a sender account. Open email app remains a separate native-handler option. Both links and the selectable address work without JavaScript; the copy button stays hidden when unavailable. Actions wrap at narrow widths.
 
 ### Signature band
 
@@ -186,7 +194,7 @@ The existing white band between strong dark red rules marks identity and the hom
 
 ### Experience list
 
-The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Each organization name links to its company website in the same tab using the existing underlined text-link states. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
+The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Each organization name links to its company website in a new tab using the existing underlined text-link states. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
 
 ### Footer identity and route access
 

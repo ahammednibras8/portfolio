@@ -68,8 +68,11 @@ pnpm run test:a11y
 Keyboard-navigation tests use Option+Tab for WebKit on macOS, where the
 browser's default Tab behavior skips links. Other browser/platform combinations
 use Tab. The shared `tests/helpers/keyboard.ts` helper sends the native shortcut;
-the tests still assert the complete focus order and the About-to-Home link
-without JavaScript, plus the dedicated 404 recovery actions.
+the tests assert the complete focus order and real new-tab navigation for the
+About-to-Home link and both 404 recovery actions without JavaScript. Popup tests
+close their pages and check that the original remains available. Gmail navigation
+is intercepted before any login or mail action; native email-app launching is
+left to browser configuration.
 See [Apple's Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)
 and [the Playwright maintainer's guidance](https://github.com/microsoft/playwright/issues/5609).
 

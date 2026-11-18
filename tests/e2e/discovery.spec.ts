@@ -111,7 +111,7 @@ for (const path of ["/", "/about/"]) {
   });
 }
 
-test("the direct About route links home at 320px without JavaScript", async ({
+test("the direct About route opens Home separately at 320px without JavaScript", async ({
   browser,
   browserName,
 }) => {
@@ -152,9 +152,14 @@ test("the direct About route links home at 320px without JavaScript", async ({
   );
   await pressTab(page, browserName);
   await expect(page.getByRole("link", { name: "Back to home" })).toBeFocused();
+  const popupPromise = context.waitForEvent("page");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.locator("#contact [itemprop='email']")).toBeVisible();
+  const home = await popupPromise;
+  await expect(home).toHaveURL(new URL("/", page.url()).href);
+  await expect(home.locator("#contact [itemprop='email']")).toBeVisible();
+  expect(await home.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(/\/about\/$/);
+  await home.close();
   await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   await context.close();
 });
