@@ -6,6 +6,10 @@ files:
   - "**/*.{astro,css,html,js,json,md,mjs,ts,tsx,yaml,yml}"
 
 ignorePaths:
+  - ".agents/skills/impeccable/**"
+  - ".codex/hooks.json"
+  - ".impeccable/config.local.json"
+  - ".impeccable/critique/**"
   - ".astro/**"
   - "coverage/**"
   - "dist/**"
@@ -15,6 +19,17 @@ ignorePaths:
   - "test-results/**"
 
 words:
+  - authuser
+  - describedby
+  - noopener
+  - noreferrer
+  - contentinfo
+  - consolas
+  - currentcolor
+  - donts
+  - frontmatter
+  - Neue
+  - oklch
   - Ahammed
   - ahammednibras
   - autorun
@@ -35,6 +50,8 @@ words:
   - lycheeverse
   - microdata
   - Nibras
+  - Insource
+  - NysaClan
   - nosniff
   - nums
   - Qwik
@@ -42,4 +59,5 @@ words:
   - résumé
   - undici
   - WCAG
+  - webmail
   - workerd

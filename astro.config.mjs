@@ -39,4 +39,9 @@ export default defineConfig({
   output: "static",
   site: siteUrl.href,
   integrations: [sitemap()],
+  vite: {
+    build: {
+      assetsInlineLimit: 0,
+    },
+  },
 });

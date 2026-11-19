@@ -1,0 +1,161 @@
+---
+import CopyIcon from "../assets/copy.svg";
+
+interface Props {
+  email: string;
+}
+
+const { email } = Astro.props;
+const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+---
+
+<div class="email-contact" data-email-contact>
+  <p class="email-address-row">
+    <span itemprop="email" data-email-address>
+      {email}
+    </span>
+    <span class="copy-control" hidden>
+      <button
+        class="copy-email"
+        type="button"
+        data-copy-email
+        aria-label="Copy email address"
+        title="Copy email address"
+        hidden
+      >
+        <CopyIcon width="18" height="18" aria-hidden="true" focusable="false" />
+      </button>
+      <span class="copy-tooltip" data-copy-tooltip aria-hidden="true" hidden>
+        Copied
+      </span>
+    </span>
+  </p>
+  <div class="email-actions">
+    <a
+      href={gmailUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Opens in a new tab"
+      aria-describedby="new-tab-hint"
+    >
+      Write in Gmail
+    </a>
+    <a
+      href={`mailto:${email}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Opens a new tab or your email app"
+      aria-describedby="email-app-hint"
+    >
+      Open email app
+    </a>
+  </div>
+  <span id="email-app-hint" hidden>
+    Opens a new tab or your email app.
+  </span>
+  <p class="email-status" role="status"></p>
+</div>
+
+<script>
+  for (const contact of document.querySelectorAll<HTMLElement>(
+    "[data-email-contact]",
+  )) {
+    const address = contact
+      .querySelector<HTMLElement>("[data-email-address]")
+      ?.textContent?.trim();
+    const button =
+      contact.querySelector<HTMLButtonElement>("[data-copy-email]");
+    const status = contact.querySelector<HTMLElement>('[role="status"]');
+    const control = contact.querySelector<HTMLElement>(".copy-control");
+    const tooltip = contact.querySelector<HTMLElement>("[data-copy-tooltip]");
+
+    if (
+      !address ||
+      !button ||
+      !status ||
+      !tooltip ||
+      !control ||
+      !window.isSecureContext ||
+      typeof navigator.clipboard?.writeText !== "function"
+    ) {
+      continue;
+    }
+
+    let tooltipTimer: ReturnType<typeof setTimeout>;
+    let flashTimer: ReturnType<typeof setTimeout>;
+    let pointerType = "";
+    let feedbackDismissed = false;
+    const dismissFeedback = () => {
+      feedbackDismissed = true;
+      clearTimeout(tooltipTimer);
+      clearTimeout(flashTimer);
+      tooltip.hidden = true;
+      delete button.dataset.copied;
+    };
+
+    control.hidden = false;
+    button.hidden = false;
+    button.addEventListener("pointerdown", (event) => {
+      pointerType = event.pointerType;
+    });
+    button.addEventListener("keydown", () => {
+      pointerType = "";
+    });
+    const dismissOutside = (event: Event) => {
+      if (event.target instanceof Node && !button.contains(event.target)) {
+        dismissFeedback();
+      }
+    };
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("focusin", dismissOutside);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") dismissFeedback();
+    });
+    button.addEventListener("click", async (event) => {
+      if (button.getAttribute("aria-disabled") === "true") {
+        pointerType = "";
+        return;
+      }
+      const touchActivation =
+        event.isTrusted && event.detail > 0 && pointerType === "touch";
+      pointerType = "";
+      dismissFeedback();
+      feedbackDismissed = false;
+      button.setAttribute("aria-disabled", "true");
+      delete status.dataset.error;
+      status.textContent = "";
+
+      try {
+        await navigator.clipboard.writeText(address);
+        status.textContent = "Email address copied.";
+        if (!feedbackDismissed) {
+          tooltip.hidden = false;
+          button.dataset.copied = "";
+          flashTimer = setTimeout(() => delete button.dataset.copied, 300);
+          tooltipTimer = setTimeout(() => {
+            tooltip.hidden = true;
+          }, 2000);
+        }
+
+        // Optional hardware feedback must never change the clipboard result.
+        if (
+          touchActivation &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+          typeof navigator.vibrate === "function"
+        ) {
+          try {
+            navigator.vibrate(10);
+          } catch {
+            // Browsers, hardware, or user settings may reject vibration.
+          }
+        }
+      } catch {
+        status.dataset.error = "";
+        status.textContent =
+          "Couldn’t copy. Select and copy the email address above.";
+      } finally {
+        button.removeAttribute("aria-disabled");
+      }
+    });
+  }
+</script>

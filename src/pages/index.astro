@@ -1,5 +1,9 @@
 ---
 import DocumentLayout from "../layouts/DocumentLayout.astro";
+import EmailContact from "../components/EmailContact.astro";
+import Experience from "../components/Experience.astro";
+import GitHubIcon from "../assets/github.svg";
+import LinkedInIcon from "../assets/linkedin-in.svg";
 import { profile } from "../data/profile";
 
 const title = `${profile.name} — ${profile.role}`;
@@ -29,11 +33,50 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
 
     <p>I build AI products and the backend systems they depend on.</p>
 
-    <p>
-      My work often starts with an action on a screen. I follow it through the
-      API, database, queue, and worker, then back to the result or failure the
-      user sees.
-    </p>
+    <ul class="profile-links">
+      <li>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.github}
+        >
+          <GitHubIcon
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          />
+          GitHub
+        </a>
+      </li>
+      <li>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.linkedin}
+        >
+          <LinkedInIcon
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          />
+          LinkedIn
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="experience" aria-labelledby="experience-heading">
+    <h2 id="experience-heading">Experience</h2>
+
+    <Experience />
   </section>
 
   <section
@@ -45,27 +88,6 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
 
     <p>If you want to discuss a role or project, email me.</p>
 
-    <p>
-      I use <span itemprop="alternateName">{profile.username}</span> on GitHub
-      and LinkedIn.
-    </p>
-
-    <ul class="link-list">
-      <li>
-        <a itemprop="email" href={`mailto:${profile.email}`}>
-          {profile.email}
-        </a>
-      </li>
-      <li>
-        <a itemprop="sameAs" href={profile.github}>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a itemprop="sameAs" href={profile.linkedin}>
-          LinkedIn
-        </a>
-      </li>
-    </ul>
+    <EmailContact email={profile.email} />
   </section>
 </DocumentLayout>

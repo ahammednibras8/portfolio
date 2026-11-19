@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { pressTab } from "../helpers/keyboard";
 
 const missingPath = "/route-that-does-not-exist";
 const notFoundArtifact = resolve("dist/404.html");
@@ -20,6 +21,10 @@ test("the built 404 artifact exists with meaningful recovery links", async ({
     }),
   ).toBeVisible();
 
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   const recovery = page.getByRole("navigation", { name: "Page recovery" });
 
   const homepage = recovery.locator('a[href="/"]');
@@ -31,7 +36,7 @@ test("the built 404 artifact exists with meaningful recovery links", async ({
   );
   await expect(contact.locator("strong")).toHaveText("Get in touch");
   await expect(contact.locator("span").last()).toHaveText(
-    "Email, GitHub, and LinkedIn.",
+    "Email address and contact options.",
   );
 });
 
@@ -50,6 +55,10 @@ test("unknown routes return the authored 404 with recovery paths", async ({
     }),
   ).toBeVisible();
 
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   const recovery = page.getByRole("navigation", { name: "Page recovery" });
   const links = recovery.getByRole("link");
 
@@ -61,8 +70,9 @@ test("unknown routes return the authored 404 with recovery paths", async ({
   ).toEqual(["/", "/#contact"]);
 });
 
-test("the 320px recovery path works without JavaScript", async ({
+test("the 320px recovery actions open separate pages without JavaScript", async ({
   browser,
+  browserName,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -83,8 +93,33 @@ test("the 320px recovery path works without JavaScript", async ({
     name: /Homepage A short introduction/,
   });
   await expect(homepageLink).toBeVisible();
-  await homepageLink.click();
-  await expect(page).toHaveURL(/\/$/);
+  await pressTab(page, browserName);
+  await expect(homepageLink).toBeFocused();
+  const homePromise = context.waitForEvent("page");
+  await page.keyboard.press("Enter");
+  const home = await homePromise;
+  await expect(home).toHaveURL(new URL("/", page.url()).href);
+  await expect(home.getByRole("heading", { level: 1 })).toBeVisible();
+  expect(await home.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(new RegExp(`${missingPath}$`));
+  await home.close();
+  await page.bringToFront();
+
+  await page.goto(missingPath);
+  const contactLink = page.getByRole("link", {
+    name: /Get in touch Email address/,
+  });
+  await pressTab(page, browserName);
+  await pressTab(page, browserName);
+  await expect(contactLink).toBeFocused();
+  const contactPromise = context.waitForEvent("page");
+  await page.keyboard.press("Enter");
+  const contact = await contactPromise;
+  await expect(contact).toHaveURL(new URL("/#contact", page.url()).href);
+  await expect(contact.locator("#contact")).toBeInViewport();
+  expect(await contact.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(new RegExp(`${missingPath}$`));
+  await contact.close();
 
   await context.close();
 });

@@ -1,6 +1,10 @@
 ---
 import { profile } from "../data/profile";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
+import EmailContact from "../components/EmailContact.astro";
+import Experience from "../components/Experience.astro";
+import GitHubIcon from "../assets/github.svg";
+import LinkedInIcon from "../assets/linkedin-in.svg";
 
 const title = `About ${profile.name} — ${profile.role}`;
 const canonical = new URL("/about/", Astro.site ?? Astro.url);
@@ -28,7 +32,63 @@ const canonical = new URL("/about/", Astro.site ?? Astro.url);
       </span>
     </p>
 
-    <p>I build AI products and the backend systems they depend on.</p>
+    <p>
+      I build AI products and the backend systems they depend on.{" "}
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Opens in a new tab"
+        aria-describedby="new-tab-hint"
+        href="/"
+      >
+        Back to home
+      </a>
+      .
+    </p>
+    <ul class="profile-links">
+      <li>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.github}
+        >
+          <GitHubIcon
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          />
+          GitHub
+        </a>
+      </li>
+      <li>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          itemprop="sameAs"
+          href={profile.linkedin}
+        >
+          <LinkedInIcon
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          />
+          LinkedIn
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="experience" aria-labelledby="experience-heading">
+    <h2 id="experience-heading">Experience</h2>
+
+    <Experience />
   </section>
 
   <section aria-labelledby="approach-heading">
@@ -41,30 +101,9 @@ const canonical = new URL("/about/", Astro.site ?? Astro.url);
     </p>
   </section>
 
-  <section id="profile-links" aria-labelledby="profiles-heading">
-    <h2 id="profiles-heading">Public profiles</h2>
+  <section aria-labelledby="contact-heading">
+    <h2 id="contact-heading">Contact</h2>
 
-    <p>
-      I use <span itemprop="alternateName">{profile.username}</span> on GitHub
-      and LinkedIn.
-    </p>
-
-    <ul class="link-list">
-      <li>
-        <a itemprop="sameAs" href={profile.github}>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a itemprop="sameAs" href={profile.linkedin}>
-          LinkedIn
-        </a>
-      </li>
-      <li>
-        <a itemprop="email" href={`mailto:${profile.email}`}>
-          {profile.email}
-        </a>
-      </li>
-    </ul>
+    <EmailContact email={profile.email} />
   </section>
 </DocumentLayout>

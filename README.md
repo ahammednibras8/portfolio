@@ -9,11 +9,14 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 ## How the site works
 
 - [Astro](https://docs.astro.build/) builds the site as static HTML.
-- A typed document layout owns shared metadata, fonts, navigation, and the footer.
-- Shared profile data keeps the published name, role, location, and public links consistent.
-- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, without browser scripts.
-- Important content and navigation work without JavaScript.
+- A typed document layout owns shared metadata, local fonts, and the name/location footer.
+- Shared profile and experience data keep the published name, role, location, and public links consistent.
+- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, using static HTML.
+- Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
+- Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
+- Copy success uses a brief tooltip and icon-only color flash on a transparent background, with a polite live announcement; failure keeps visible manual-copy guidance. A single optional touch vibration is requested on supporting browsers, never relied on for feedback.
 - There is no application server, database, or client framework.
+- GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
 - Images are optimized during the build.
 - GitHub Actions builds and tests the site after a change reaches `main`.
 - The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.
@@ -24,7 +27,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 ## Finding the work
 
 - The [homepage](https://ahammednibras.com/) introduces Nibras and provides contact details.
-- [About](https://ahammednibras.com/about/) connects the full name, location, and public profile identifiers.
+- [About](https://ahammednibras.com/about/) adds the approach to work and links back home. Both pages retain public profiles, experience, and contact options. The footer keeps plain identity text without navigation links; the homepage has no About link under the current approved scope.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
 ## Deployment
@@ -60,6 +63,15 @@ Set `SITE_URL` in `.env` to a valid HTTPS URL. Never commit `.env`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and pull-request details.
 
+## Design tooling
+
+The repository includes [Impeccable skill 4.9.1](.agents/skills/impeccable/SKILL.md)
+and the portable Codex hooks in `.codex/hooks.json`. Its launcher pins engine
+0.1.24 and verifies downloads against the included checksums. A first run may
+download the engine into the user's cache; platform binaries, local settings,
+and generated reports are not committed. This development tooling is not part
+of the site's browser payload.
+
 ## Content rules
 
 Project stories must clearly separate my work from team work. Claims need a source when possible. Private or unapproved details stay private.
@@ -72,4 +84,7 @@ Project stories must clearly separate my work from team work. Claims need a sour
 
 Please report security problems privately. See [SECURITY.md](SECURITY.md).
 
-The code and documentation are available under the [MIT License](LICENSE).
+The portfolio code and documentation are available under the [MIT License](LICENSE).
+The vendored Impeccable distribution retains its [Apache 2.0 license](.agents/skills/impeccable/LICENSE)
+and [upstream attribution](.agents/skills/impeccable/UPSTREAM.txt). Its bundled
+modern-screenshot helper retains its [MIT license](.agents/skills/impeccable/scripts/LICENSE-modern-screenshot).

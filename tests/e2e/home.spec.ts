@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { pressTab } from "../helpers/keyboard";
 
-const homepageTitle = "Ahammed Nibras — Software engineer";
+const homepageTitle = "Ahammed Nibras — Software developer";
 const homepageDescription =
-  "Ahammed Nibras is a software engineer who builds AI products and the systems that keep them running.";
+  "Ahammed Nibras is a software developer who builds AI products and the systems that keep them running.";
 const productionOrigin = "https://ahammednibras.com";
 
-test("the homepage introduces Nibras and contact options in document order", async ({
+test("the homepage introduces Nibras, profiles, experience, and contact in document order", async ({
   page,
 }) => {
   await page.goto("/");
@@ -15,9 +15,21 @@ test("the homepage introduces Nibras and contact options in document order", asy
   await expect(
     page.getByRole("heading", { level: 1, name: "Hi, I’m Ahammed Nibras." }),
   ).toBeVisible();
-  await expect(page.locator("main > section > h2")).toHaveText(["Contact"]);
+  await expect(page.locator("main > section > h2")).toHaveText([
+    "Experience",
+    "Contact",
+  ]);
   await expect(page.getByRole("article")).toHaveCount(0);
-  await expect(page.locator("footer")).toContainText(
+  await expect(page.locator("main")).not.toContainText("I use ahammednibras8");
+  await expect(page.locator(".experience-list h3")).toHaveText([
+    "Developer · Insource Data",
+    "Intern · NysaClan",
+  ]);
+  await expect(page.locator(".experience-dates")).toHaveText([
+    "Jan 2026 — Present",
+    "Jun 2025 — Sep 2025",
+  ]);
+  await expect(page.getByRole("contentinfo")).toHaveText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
 });
@@ -122,154 +134,123 @@ test("the homepage publishes canonical, social, and favicon metadata", async ({
   }
 });
 
-test("the primary navigation points to real destinations", async ({ page }) => {
+test("the footer retains identity without navigation links", async ({
+  page,
+}) => {
+  for (const route of ["/", "/about/", "/404.html"]) {
+    await page.goto(route);
+    const footer = page.getByRole("contentinfo");
+    await expect(footer).toHaveText(
+      "Ahammed Nibras · Kozhikode, Kerala, India",
+    );
+    await expect(footer.getByRole("link")).toHaveCount(0);
+    await expect(footer.locator("ul, nav")).toHaveCount(0);
+    await expect(page.getByRole("banner")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(
+      0,
+    );
+    await expect(page.locator("main[tabindex]")).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /Skip to|Back to top|About my approach/ }),
+    ).toHaveCount(0);
+  }
+});
+
+test("the 320px layout keeps profile and contact paths usable", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/");
-
-  const navigation = page.getByRole("navigation", { name: "Primary" });
-  const links = navigation.getByRole("link");
-
-  await expect(links).toHaveCount(2);
   expect(
-    await links.evaluateAll((items) =>
-      items.map((item) => item.getAttribute("href")),
+    await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
     ),
-  ).toEqual(["#contact", "/about/"]);
-
-  await navigation.getByRole("link", { name: "Contact", exact: true }).click();
-  await expect(page).toHaveURL(/#contact$/);
-  await expect(page.locator("#contact")).toBeVisible();
-});
-
-test("the 320px layout keeps navigation and contact paths usable", async ({
-  browserName,
-  page,
-}) => {
-  await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto("/");
-
-  const viewport = await page.evaluate(() => ({
-    clientWidth: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
-
-  expect(viewport.scrollWidth).toBe(viewport.clientWidth);
-
-  const navigationLinks = page
-    .getByRole("navigation", { name: "Primary" })
-    .getByRole("link");
-  const linkBounds = await navigationLinks.evaluateAll((links) =>
-    links.map((link) => {
-      const bounds = link.getBoundingClientRect();
-
-      return {
-        top: Math.round(bounds.top),
-        left: bounds.left,
-        right: bounds.right,
-      };
-    }),
-  );
-
-  expect(linkBounds).toHaveLength(2);
-  expect(new Set(linkBounds.map(({ top }) => top)).size).toBe(1);
-
-  for (const bounds of linkBounds) {
-    expect(bounds.left).toBeGreaterThanOrEqual(0);
-    expect(bounds.right).toBeLessThanOrEqual(viewport.clientWidth);
-  }
-
-  await pressTab(page, browserName);
-
-  const skipLink = page.getByRole("link", { name: "Skip to content" });
-  await expect(skipLink).toBeFocused();
-  await expect(skipLink).toBeInViewport();
-
-  await page.keyboard.press("Enter");
-  await expect(page.locator("#main-content")).toBeFocused();
-
-  const contact = page.locator("#contact");
-  await contact.scrollIntoViewIfNeeded();
-  await expect(contact).toBeInViewport();
-  await expect(contact.getByRole("link", { name: "GitHub" })).toBeVisible();
-  await expect(contact.getByRole("link", { name: "LinkedIn" })).toBeVisible();
+  ).toBe(0);
   await expect(
-    contact.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+    page.getByRole("link", { name: "GitHub", exact: true }),
+  ).toBeInViewport();
+  await expect(
+    page.getByRole("link", { name: "LinkedIn", exact: true }),
+  ).toBeInViewport();
+  await expect(page.locator("[itemprop='email']")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copy email address" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
 });
 
-test("the homepage exposes a complete keyboard path", async ({
-  browserName,
-  page,
-}) => {
-  await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto("/");
-
-  const focusOrder = [
-    page.getByRole("link", { name: "Skip to content" }),
-    page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Contact", exact: true }),
-    page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "About", exact: true }),
-    page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
-    page.getByRole("link", { name: "GitHub" }),
-    page.getByRole("link", { name: "LinkedIn" }),
-    page.getByRole("link", { name: "Back to top" }),
-  ];
-
-  for (const link of focusOrder) {
-    await pressTab(page, browserName);
-    await expect(link).toBeFocused();
-  }
-
-  const backToTop = page.getByRole("link", { name: "Back to top" });
-  await backToTop.click();
-  await expect(page).toHaveURL(/#main-content$/);
-  await expect(page.locator("#main-content")).toBeFocused();
-});
-
-test("the responsive grid preserves section and navigation alignment", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 768, height: 900 });
-  await page.goto("/");
-
-  const mediumColumns = await page
-    .locator(".page > section")
-    .first()
-    .evaluate(
-      (section) =>
-        getComputedStyle(section).gridTemplateColumns.split(" ").length,
+for (const path of ["/", "/about/"]) {
+  test(`${path} exposes a complete keyboard path without footer stops`, async ({
+    browserName,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(path);
+    await expect(
+      page.getByRole("button", { name: "Copy email address" }),
+    ).toBeVisible();
+    const focusOrder = [
+      ...(path === "/about/"
+        ? [page.getByRole("link", { name: "Back to home", exact: true })]
+        : []),
+      page.getByRole("link", { name: "GitHub", exact: true }),
+      page.getByRole("link", { name: "LinkedIn", exact: true }),
+      page.getByRole("link", { name: "Insource Data", exact: true }),
+      page.getByRole("link", { name: "NysaClan", exact: true }),
+      page.getByRole("button", { name: "Copy email address" }),
+      page.getByRole("link", { name: "Write in Gmail" }),
+      page.getByRole("link", { name: "Open email app" }),
+    ];
+    await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
+      focusOrder.length,
     );
-  expect(mediumColumns).toBe(6);
-
-  await page.setViewportSize({ width: 1152, height: 900 });
-
-  const layout = await page.evaluate(() => {
-    const section = document.querySelector<HTMLElement>(".page > section");
-    const sectionHeading = document.querySelector<HTMLElement>(
-      ".page > section:not(.introduction) > h2",
-    );
-    const navigationList = document.querySelector<HTMLElement>(
-      ".primary-navigation ul",
-    );
-
-    if (!section || !sectionHeading || !navigationList) {
-      throw new Error("Expected homepage grid elements were not found.");
+    for (const control of focusOrder) {
+      await pressTab(page, browserName);
+      await expect(control).toBeFocused();
     }
-
-    return {
-      columns: getComputedStyle(section).gridTemplateColumns.split(" ").length,
-      headingLeft: Math.round(sectionHeading.getBoundingClientRect().left),
-      navigationLeft: Math.round(navigationList.getBoundingClientRect().left),
-    };
   });
+}
 
-  expect(layout.columns).toBe(12);
-  expect(
-    Math.abs(layout.navigationLeft - layout.headingLeft),
-  ).toBeLessThanOrEqual(1);
+test("the responsive grid preserves section alignment", async ({ page }) => {
+  for (const [width, columns] of [
+    [768, 6],
+    [1152, 12],
+  ] as const) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    expect(
+      await page
+        .locator("main > section")
+        .first()
+        .evaluate(
+          (section) =>
+            getComputedStyle(section).gridTemplateColumns.split(" ").length,
+        ),
+    ).toBe(columns);
+    const headingPositions = await page
+      .locator("main > section:not(.introduction) > h2")
+      .evaluateAll((headings) =>
+        headings.map((heading) =>
+          Math.round(heading.getBoundingClientRect().left),
+        ),
+      );
+    expect(new Set(headingPositions).size).toBe(1);
+    const alignment = await page
+      .locator("main > section:not(.introduction)")
+      .evaluateAll((sections) =>
+        sections.map((section) => {
+          const heading = section.querySelector("h2");
+          const content = heading?.nextElementSibling;
+          if (!heading || !content) throw new Error("Missing section content.");
+          return Math.abs(
+            heading.getBoundingClientRect().top -
+              content.getBoundingClientRect().top,
+          );
+        }),
+      );
+    expect(alignment.every((offset) => offset < 1)).toBe(true);
+  }
 });
 
 test("the page uses the named interface and editorial spacing rhythm", async ({
@@ -320,25 +301,23 @@ test("the page uses the named interface and editorial spacing rhythm", async ({
   });
 });
 
-test("typography keeps reading and navigation roles consistent", async ({
+test("typography keeps reading and control roles consistent", async ({
   page,
 }) => {
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
 
   const typography = await page.evaluate(() => {
-    const navigationLink = document.querySelector<HTMLElement>(
-      ".primary-navigation a",
-    );
+    const control = document.querySelector<HTMLElement>("[data-copy-email]");
 
-    if (!navigationLink) {
-      throw new Error("Expected a homepage navigation link.");
+    if (!control) {
+      throw new Error("Expected a homepage email control.");
     }
 
     return {
       bodyFamily: getComputedStyle(document.body).fontFamily,
       bodySize: getComputedStyle(document.body).fontSize,
-      navigationFamily: getComputedStyle(navigationLink).fontFamily,
+      controlFamily: getComputedStyle(control).fontFamily,
       origin: location.origin,
       fontResources: performance
         .getEntriesByType("resource")
@@ -349,7 +328,7 @@ test("typography keeps reading and navigation roles consistent", async ({
 
   expect(typography.bodyFamily).toContain("IBM Plex Sans");
   expect(typography.bodySize).toBe("16px");
-  expect(typography.navigationFamily).toContain("IBM Plex Sans");
+  expect(typography.controlFamily).toContain("IBM Plex Sans");
   expect(typography.fontResources).toHaveLength(2);
 
   for (const resource of typography.fontResources) {
@@ -433,38 +412,23 @@ test("links expose deliberate pointer and reduced-motion states", async ({
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
 
-  const contactLink = page.getByRole("link", {
-    name: "ahammednibras737@gmail.com",
-  });
-  const navigationLink = page
-    .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "Contact", exact: true });
-  const skipLink = page.getByRole("link", { name: "Skip to content" });
-
+  const contactLink = page.getByRole("link", { name: "Open email app" });
   await expect(contactLink).toHaveCSS(
     "transition-property",
     "color, text-decoration-thickness",
   );
   await expect(contactLink).toHaveCSS("transition-duration", "0.18s, 0.18s");
-  await expect(skipLink).toHaveCSS("transition-property", "transform");
-  await expect(skipLink).toHaveCSS("transition-duration", "0.22s");
-
   await contactLink.hover();
   await expect(contactLink).toHaveCSS("text-decoration-thickness", "2.08px");
-
-  await navigationLink.hover();
-  await expect(navigationLink).toHaveCSS("color", "rgb(161, 31, 53)");
-  await expect(navigationLink).toHaveCSS("text-decoration-line", "underline");
-
   await page.mouse.down();
-  await expect(navigationLink).toHaveCSS("transition-duration", "0.12s");
-  await expect(navigationLink).toHaveCSS("color", "rgb(100, 20, 38)");
-  await expect(navigationLink).toHaveCSS("text-decoration-thickness", "1.69px");
+  await expect(contactLink).toHaveCSS("transition-duration", "0.12s");
+  await expect(contactLink).toHaveCSS("color", "rgb(100, 20, 38)");
+  await page.mouse.move(0, 0);
   await page.mouse.up();
 
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  const reducedMotion = await page.locator("a").evaluateAll((links) =>
+  const reducedMotion = await page.locator("a, button").evaluateAll((links) =>
     links.map((link) => ({
       animationName: getComputedStyle(link).animationName,
       transitionDuration: getComputedStyle(link).transitionDuration,
@@ -492,14 +456,11 @@ test("forced colors preserve link and keyboard-focus visibility", async ({
   await page.goto("/");
   await page.keyboard.press("Tab");
 
-  const skipLink = page.getByRole("link", { name: "Skip to content" });
-  const contactLink = page.getByRole("link", {
-    name: "ahammednibras737@gmail.com",
-  });
-
-  await expect(skipLink).toBeFocused();
-  await expect(skipLink).toHaveCSS("outline-style", "solid");
-  await expect(skipLink).toHaveCSS("outline-width", "3px");
+  const firstLink = page.getByRole("link", { name: "GitHub", exact: true });
+  const contactLink = page.getByRole("link", { name: "Open email app" });
+  await expect(firstLink).toBeFocused();
+  await expect(firstLink).toHaveCSS("outline-style", "solid");
+  await expect(firstLink).toHaveCSS("outline-width", "3px");
 
   const bodyColor = await page.evaluate(
     () => getComputedStyle(document.body).color,
@@ -517,13 +478,12 @@ test("two surfaces and two border widths create depth without shadows", async ({
     const rootStyles = getComputedStyle(document.documentElement);
     const tokenValue = (name: string) =>
       Number.parseFloat(rootStyles.getPropertyValue(name));
-    const siteHeader = document.querySelector<HTMLElement>(".site-header");
     const pageFrame = document.querySelector<HTMLElement>(".page");
     const signatureBand = document.querySelector<HTMLElement>(
       ".page > .signature-band",
     );
 
-    if (!siteHeader || !pageFrame || !signatureBand) {
+    if (!pageFrame || !signatureBand) {
       throw new Error("Expected homepage depth targets were not found.");
     }
 
@@ -545,7 +505,6 @@ test("two surfaces and two border widths create depth without shadows", async ({
     }
 
     const bodyStyles = getComputedStyle(document.body);
-    const headerStyles = getComputedStyle(siteHeader);
     const signatureStyles = getComputedStyle(signatureBand);
 
     return {
@@ -558,12 +517,9 @@ test("two surfaces and two border widths create depth without shadows", async ({
       },
       surfaces: new Set([
         bodyStyles.backgroundColor,
-        headerStyles.backgroundColor,
         signatureStyles.backgroundColor,
       ]).size,
-      headerPosition: headerStyles.position,
-      headerTop: siteHeader.getBoundingClientRect().top,
-      shadows: [headerStyles.boxShadow, signatureStyles.boxShadow],
+      shadows: [signatureStyles.boxShadow],
     };
   });
 
@@ -576,34 +532,8 @@ test("two surfaces and two border widths create depth without shadows", async ({
       rendered: ["1px", "4px"],
     },
     surfaces: 2,
-    headerPosition: "sticky",
-    headerTop: 0,
-    shadows: ["none", "none"],
+    shadows: ["none"],
   });
-
-  await page
-    .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "Contact", exact: true })
-    .click();
-  await expect(page).toHaveURL(/#contact$/);
-
-  const anchoredPosition = await page.evaluate(() => {
-    const siteHeader = document.querySelector<HTMLElement>(".site-header");
-    const target = document.querySelector<HTMLElement>("#contact");
-
-    if (!siteHeader || !target) {
-      throw new Error("Expected sticky navigation targets were not found.");
-    }
-
-    return {
-      headerBottom: siteHeader.getBoundingClientRect().bottom,
-      targetTop: target.getBoundingClientRect().top,
-    };
-  });
-
-  expect(anchoredPosition.targetTop).toBeGreaterThan(
-    anchoredPosition.headerBottom,
-  );
 });
 
 test("signature bands mark identity and contact", async ({ page }) => {
@@ -644,7 +574,7 @@ test("the contact links expose their real destinations", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByRole("link", { name: "ahammednibras737@gmail.com" }),
+    page.getByRole("link", { name: "Open email app" }),
   ).toHaveAttribute("href", "mailto:ahammednibras737@gmail.com");
   await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
     "href",
@@ -654,10 +584,9 @@ test("the contact links expose their real destinations", async ({ page }) => {
     "href",
     "https://linkedin.com/in/ahammednibras8",
   );
-  await expect(page.getByRole("link", { name: "Back to top" })).toHaveAttribute(
-    "href",
-    "#main-content",
-  );
+  await expect(
+    page.getByRole("link", { name: "About my approach" }),
+  ).toHaveCount(0);
 });
 
 test("the complete homepage remains available without JavaScript", async ({
@@ -674,8 +603,18 @@ test("the complete homepage remains available without JavaScript", async ({
   await expect(
     page.getByRole("heading", { level: 2, name: "Contact" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to top" })).toBeVisible();
-  await expect(page.locator("script")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "About my approach" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.locator("[itemprop='email']")).toHaveText(
+    "ahammednibras737@gmail.com",
+  );
+  await expect(
+    page.getByRole("button", { name: "Copy email address" }),
+  ).toHaveCount(0);
 
   await context.close();
 });

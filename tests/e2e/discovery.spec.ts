@@ -8,7 +8,7 @@ const expectedPerson = {
   properties: {
     url: [`${origin}/`],
     name: ["Ahammed Nibras"],
-    jobTitle: ["Software engineer"],
+    jobTitle: ["Software developer"],
     homeLocation: [
       {
         type: "https://schema.org/Place",
@@ -16,8 +16,7 @@ const expectedPerson = {
         properties: { name: ["Kozhikode, Kerala, India"] },
       },
     ],
-    alternateName: ["ahammednibras8"],
-    email: ["mailto:ahammednibras737@gmail.com"],
+    email: ["ahammednibras737@gmail.com"],
     sameAs: [
       "https://github.com/ahammednibras8",
       "https://linkedin.com/in/ahammednibras8",
@@ -26,9 +25,11 @@ const expectedPerson = {
 };
 
 for (const path of ["/", "/about/"]) {
-  test(`${path} exposes the same factual identity without scripts`, async ({
-    page,
+  test(`${path} exposes the same factual identity without JavaScript`, async ({
+    browser,
   }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
     await page.goto(path);
 
     // Read each item's own properties, stopping at nested scopes. This catches
@@ -100,12 +101,17 @@ for (const path of ["/", "/about/"]) {
       `${origin}${path}`,
     );
     await expect(page.locator("main [itemprop='name']").first()).toBeVisible();
-    await expect(page.locator("[itemprop='alternateName']")).toBeVisible();
-    await expect(page.locator("script")).toHaveCount(0);
+    await expect(page.locator("main")).not.toContainText(
+      "I use ahammednibras8",
+    );
+    await expect(
+      page.getByRole("button", { name: "Copy email address" }),
+    ).toHaveCount(0);
+    await context.close();
   });
 }
 
-test("the About route and profile links work at 320px without JavaScript", async ({
+test("the direct About route opens Home separately at 320px without JavaScript", async ({
   browser,
   browserName,
 }) => {
@@ -114,20 +120,17 @@ test("the About route and profile links work at 320px without JavaScript", async
     viewport: { width: 320, height: 800 },
   });
   const page = await context.newPage();
-  await page.goto("/");
-
-  await page
-    .getByRole("navigation", { name: "Primary" })
-    .getByRole("link", { name: "About", exact: true })
-    .click();
+  await page.goto("/about/");
   await expect(page).toHaveURL(/\/about\/$/);
-  await expect(page).toHaveTitle("About Ahammed Nibras — Software engineer");
+  await expect(page).toHaveTitle("About Ahammed Nibras — Software developer");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "About Ahammed Nibras",
   );
-  await expect(
-    page.getByRole("link", { name: "About", exact: true }),
-  ).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("contentinfo")).toHaveText(
+    "Ahammed Nibras · Kozhikode, Kerala, India",
+  );
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("navigation")).toHaveCount(0);
 
   const viewport = await page.evaluate(() => ({
     width: document.documentElement.clientWidth,
@@ -135,17 +138,10 @@ test("the About route and profile links work at 320px without JavaScript", async
   }));
   expect(viewport.scrollWidth).toBe(viewport.width);
 
-  await pressTab(page, browserName);
-  await expect(
-    page.getByRole("link", { name: "Skip to content" }),
-  ).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(page.locator("main")).toBeFocused();
-
   await expect(page.getByRole("heading", { name: "How I work" })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Public profiles" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
     "href",
     "https://github.com/ahammednibras8",
@@ -154,6 +150,17 @@ test("the About route and profile links work at 320px without JavaScript", async
     "href",
     "https://linkedin.com/in/ahammednibras8",
   );
+  await pressTab(page, browserName);
+  await expect(page.getByRole("link", { name: "Back to home" })).toBeFocused();
+  const popupPromise = context.waitForEvent("page");
+  await page.keyboard.press("Enter");
+  const home = await popupPromise;
+  await expect(home).toHaveURL(new URL("/", page.url()).href);
+  await expect(home.locator("#contact [itemprop='email']")).toBeVisible();
+  expect(await home.evaluate(() => window.opener)).toBeNull();
+  await expect(page).toHaveURL(/\/about\/$/);
+  await home.close();
+  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   await context.close();
 });
 

@@ -68,9 +68,25 @@ pnpm run test:a11y
 Keyboard-navigation tests use Option+Tab for WebKit on macOS, where the
 browser's default Tab behavior skips links. Other browser/platform combinations
 use Tab. The shared `tests/helpers/keyboard.ts` helper sends the native shortcut;
-the tests still assert the complete focus order and skip-link behavior.
+the tests assert the complete focus order and real new-tab navigation for the
+About-to-Home link and both 404 recovery actions without JavaScript. Popup tests
+close their pages and check that the original remains available. Gmail navigation
+is intercepted before any login or mail action; native email-app launching is
+left to browser configuration. Copy-feedback coverage checks awaited success, tooltip dismissal/expiry/repeated use, color reset, visible failures, and optional touch-only vibration. Emulation verifies the API request, not a physical haptic response.
 See [Apple's Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)
 and [the Playwright maintainer's guidance](https://github.com/microsoft/playwright/issues/5609).
+
+Repository checks cover first-party source and shared design context, including
+`PRODUCT.md`, `DESIGN.md`, and `.impeccable/config.json` and `design.json`.
+The committed `.agents/skills/impeccable/` distribution is vendor tooling, so
+formatting, JavaScript lint, spelling, and link checks exclude it. The portable
+Codex hook configuration in `.codex/hooks.json` is shared with the repository.
+Keep vendor-managed files unchanged during application work; update the skill
+deliberately with its version, checksums, and upstream licenses. Platform binaries,
+generated critique/audit/review output, caches, and machine-local settings remain
+outside Git. The launcher can download its pinned engine to the user's cache on
+first use. Machine-local hook consent stays in ignored
+`.impeccable/config.local.json`.
 
 HTML and Lighthouse checks skip with a clear message until the first page exists.
 

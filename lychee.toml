@@ -25,6 +25,9 @@ host_request_interval = "250ms"
 exclude = []
 
 exclude_path = [
+  # Installed third-party documentation and generated critique archives.
+  "(^|/)\\.agents/skills/impeccable/",
+  "(^|/)\\.impeccable/critique/",
   "(^|/)\\.cache/",
   "(^|/)node_modules/",
   "(^|/)\\.astro/",

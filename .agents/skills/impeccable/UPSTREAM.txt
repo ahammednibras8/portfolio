@@ -1,0 +1,16 @@
+Impeccable skill 4.9.1 by Paul Bakaus
+Source: https://github.com/pbakaus/impeccable/tree/skill-v4.9.1
+License: Apache-2.0; see LICENSE.
+
+This directory contains the installed Codex skill distribution. Its original
+instructions, helper scripts, data, and agent definitions are retained unchanged.
+The engine launcher pins engine 0.1.24 using scripts/VERSION and
+scripts/engine-checksums.txt. Platform binaries and user caches are not vendored.
+
+scripts/modern-screenshot.umd.js is the bundled modern-screenshot helper by wxm.
+Source: https://github.com/qq15725/modern-screenshot
+License: MIT; see scripts/LICENSE-modern-screenshot.
+
+Added for this repository: LICENSE, scripts/LICENSE-modern-screenshot, and this
+provenance file. The repository's MIT license does not replace these upstream
+licenses.

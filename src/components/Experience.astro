@@ -1,0 +1,31 @@
+---
+import { experience } from "../data/experience";
+---
+
+<ol class="experience-list">
+  {experience.map((entry) => (
+    <li>
+      <h3>
+        {entry.role} ·{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+          href={entry.organizationUrl}
+        >
+          {entry.organization}
+        </a>
+      </h3>
+      <p class="experience-dates">
+        <time datetime={entry.start}>{entry.startLabel}</time> —{" "}
+        {entry.end ? (
+          <time datetime={entry.end}>{entry.endLabel}</time>
+        ) : (
+          entry.endLabel
+        )}
+      </p>
+      <p class="experience-context">{entry.context}</p>
+    </li>
+  ))}
+</ol>
