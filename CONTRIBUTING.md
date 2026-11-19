@@ -33,6 +33,60 @@ Start from the latest `main` and create a branch for one clear change.
 
 Do not add an empty directory or a new abstraction before it has a real use. See [AGENTS.md](AGENTS.md) for the repository rules.
 
+## Change GitHub Actions dependencies
+
+All workflows use `.github/workflows/actions.lock` to record their direct and
+transitive action dependencies. Use an authenticated GitHub CLI and the same
+extension release as CI:
+
+```sh
+gh extension install github/gh-actions-lock --pin v0.5.0
+gh actions-lock --version
+```
+
+If the extension is already installed at another version, remove it with
+`gh extension remove actions-lock`, then install the pinned release. Review
+extension release changes before updating the pin in CI and this guide together;
+the extension itself is not covered by the Actions lockfile.
+
+After adding, removing, or changing a workflow or an action reference, run from
+the repository root:
+
+```sh
+gh actions-lock
+git diff -- .github/workflows/
+gh actions-lock --verify --fail-on-warning
+```
+
+Run against the whole workflow directory so new workflows are onboarded and
+deleted entries are pruned. Commit generated workflow changes and the lockfile
+together. Never edit the lockfile by hand. CI verifies coverage and upstream
+provenance without changing files and treats warnings as failures. An offline
+coverage check, `gh actions-lock --verify-local --fail-on-warning`, is useful
+while editing but does not replace online verification.
+
+Use exact version tags only for actions covered by the lockfile. Keep full
+commit SHAs for uncovered actions and external reusable workflow calls. When
+converting an existing SHA reference, verify that the selected tag resolves to
+the same commit; keep dependency upgrades separate from that conversion.
+
+Review changed commits as executable dependency updates. Investigate changes
+to `owner_id` or `repo_id`, which identify the source repository. To advance a
+moved reference intentionally, review upstream history first, then run
+`gh actions-lock --relock` and inspect the complete diff. Never use
+`--accept-moved` in automation or accept rewritten history without investigation.
+
+The existing weekly Dependabot Actions updates also update matching lockfile
+entries for onboarded workflows. Review both files in those PRs. Dependabot does
+not onboard new workflows. The first Actions version-update PR after adoption
+must be checked for this behavior; initial generation alone does not prove it.
+
+The lockfile does not cover shell downloads, package dependencies, runner
+images, container images, or external reusable workflow calls. It pins action
+code; it does not establish that the code is safe. See
+[ADR 0004](docs/decisions/0004-workflow-dependency-lockfile.md) for the adoption
+decision and enforcement rollout.
+
 ## Write public content carefully
 
 - Use the [case-study template](docs/content/case-study-template.md).

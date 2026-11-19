@@ -78,7 +78,8 @@ Commands that load Astro need `SITE_URL`. Copy `.env.example` to the ignored `.e
 - Change `pnpm-lock.yaml` only through pnpm.
 - Keep dependency versions exact.
 - Keep the approved build list in `pnpm-workspace.yaml`.
-- Pin third-party GitHub Actions to full commit SHAs.
+- Use exact version tags for third-party GitHub Actions only when the workflow and its dependencies are covered by `.github/workflows/actions.lock`. Otherwise use full commit SHAs. External reusable workflow calls must always use full commit SHAs.
+- After changing workflows or action references, regenerate the lockfile with the pinned `gh-actions-lock` version in `CONTRIBUTING.md`, review the diff, and run `gh actions-lock --verify --fail-on-warning`. Never edit the lockfile by hand or automatically accept moved history.
 - Keep workflow permissions read-only unless a job clearly needs more.
 - Update `README.md` and add a decision record when the architecture changes.
 - Do not weaken a quality check to hide a real failure.

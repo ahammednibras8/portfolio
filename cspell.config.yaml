@@ -47,6 +47,7 @@ words:
   - lhci
   - lighthouseci
   - lighthouserc
+  - lockfiles
   - lycheeverse
   - microdata
   - Nibras
@@ -56,6 +57,7 @@ words:
   - nums
   - Qwik
   - recrawl
+  - relock
   - résumé
   - undici
   - WCAG
