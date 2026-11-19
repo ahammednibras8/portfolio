@@ -27,6 +27,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - Only a push to `main` may deploy production.
 - The full repository verification must pass before upload.
 - The deployment step must upload the `dist/` directory produced by that verification run. It must not rebuild it.
+- The production smoke test must compare the served homepage with the verified `dist/index.html`. Retry HTTP failures and content mismatches within a bounded window, then fail if the bytes still differ; a matching title alone does not identify the verified artifact.
 - The deployable artifact contains only `dist/` and remains available for 14 days during the feedback period.
 - Playwright and Lighthouse output belongs in the separate `ci-reports-<commit>` artifact. Reports, caches, environment files, and credentials must never enter the deployable artifact.
 - The feedback deployment must use Cloudflare's `feedback` preview branch and match the workflow commit SHA.
