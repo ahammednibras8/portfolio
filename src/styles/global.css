@@ -512,8 +512,7 @@ h2 + * {
 }
 
 .copy-email[data-copied] {
-  background: var(--color-action);
-  color: var(--color-surface-raised);
+  color: var(--color-ink-primary);
 }
 
 .copy-tooltip {
@@ -533,9 +532,7 @@ h2 + * {
 
 @media (prefers-reduced-motion: no-preference) {
   .copy-email {
-    transition:
-      color 120ms var(--motion-ease-out),
-      background-color 120ms var(--motion-ease-out);
+    transition: color 120ms var(--motion-ease-out);
   }
 }
 
@@ -545,8 +542,7 @@ h2 + * {
   }
 
   .copy-email[data-copied] {
-    background: Highlight;
-    color: HighlightText;
+    color: Highlight;
   }
 
   .copy-tooltip {
@@ -554,12 +550,6 @@ h2 + * {
     background: Canvas;
     color: CanvasText;
   }
-}
-
-.email-actions .gmail-compose {
-  padding: var(--space-interface) var(--space-component);
-  border: var(--border-width-default) solid currentcolor;
-  background: var(--color-surface-raised);
 }
 
 .email-status:not([data-error]) {

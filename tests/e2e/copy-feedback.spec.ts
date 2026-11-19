@@ -38,6 +38,8 @@ test("a delayed failed copy does not move focus back after the visitor leaves", 
 test("copy feedback is transient, dismissible, repeatable, and does not move content", async ({
   page,
 }) => {
+  // Keep timer/state assertions independent of CSS transition sampling.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: () => Promise.resolve() },
@@ -53,6 +55,13 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
   const button = page.getByRole("button", { name: "Copy email address" });
   const tooltip = page.locator("[data-copy-tooltip]");
   const actions = page.locator(".email-actions");
+  for (const link of ["Write in Gmail", "Open email app"]) {
+    const action = page.getByRole("link", { name: link, exact: true });
+    await expect(action).toHaveCSS("border-top-width", "0px");
+    await expect(action).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(action).toHaveCSS("text-decoration-line", "underline");
+    expect((await action.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  }
   const before = await actions.boundingBox();
   await button.focus();
   await page.keyboard.press("Enter");
@@ -64,7 +73,10 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
   await expect(page.getByRole("status")).toHaveText("Email address copied.");
   expect((await page.getByRole("status").boundingBox())?.height).toBe(1);
   expect(await actions.boundingBox()).toEqual(before);
-  await page.clock.runFor(450);
+  await page.clock.runFor(150);
+  await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(button).toHaveCSS("color", "rgb(23, 25, 26)");
+  await page.clock.runFor(300);
   await expect(button).not.toHaveAttribute("data-copied");
   await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await page.clock.runFor(900);

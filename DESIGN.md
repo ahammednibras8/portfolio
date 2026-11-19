@@ -66,11 +66,10 @@ components:
     rounded: "{rounded.control}"
     padding: "0.5rem"
   gmail-compose:
-    backgroundColor: "{colors.surface-raised}"
+    backgroundColor: "transparent"
     textColor: "{colors.action}"
     typography: "{typography.body}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1rem"
+    padding: "0.5rem 0"
   text-link:
     textColor: "{colors.action}"
     typography: "{typography.body}"
@@ -122,7 +121,7 @@ The palette combines a warm off-white canvas, white surfaces, dark ink, dark red
 ### Neutral
 
 - **Canvas:** warm off-white behind the document and footer.
-- **Raised surface:** white for signature bands and the Gmail action.
+- **Raised surface:** white for signature bands.
 - **Primary ink:** near-black for headings and reading text.
 - **Secondary ink:** muted gray for location, experience metadata, recovery explanations, and email status feedback.
 - **Quiet rule:** primary ink at the grid opacity (8%) for the page frame and section separators.
@@ -166,7 +165,7 @@ Keep boundaries meaningful. Do not add generic cards or shadows merely to fill s
 
 ## Shapes
 
-The implemented form language is rectangular. The Gmail action has square corners; the copy icon has no border or surface box; sections, lists, and recovery links have no rounded-card treatment. There is no pill, chip, avatar, or dialog system to extend.
+The implemented form language is rectangular. The Gmail action is a plain underlined text link; the copy icon has no border or surface box; sections, lists, and recovery links have no rounded-card treatment. There is no pill, chip, avatar, or dialog system to extend.
 
 The favicon is the existing uppercase N derived from IBM Plex Sans Bold on the canvas color. Preserve that asset rather than inventing a separate logo system during refinement.
 
@@ -184,11 +183,11 @@ For pointer devices without a reduced-motion preference, color and underline thi
 
 The [shared email component](src/components/EmailContact.astro) keeps the address selectable and places an icon-only copy button immediately to its right. The sourced Font Awesome copy mark inherits the action color, with no border or decorative box. Its native button has a 44px hit target, an accessible Copy email address label, a title, and the shared focus outline with a compact 1px offset. The address can wrap while the icon remains inside the row.
 
-The button appears only when JavaScript and a secure Clipboard API are available. A pending write sets aria-disabled and guards repeated activations while retaining keyboard focus, secondary ink, and a waiting cursor. Completion never moves focus if the visitor has moved elsewhere. Only a completed write shows a “Copied” tooltip without controls above the icon for two seconds and a 300ms action-color flash. Escape dismisses feedback; a new attempt clears earlier timers. The polite live announcement stays visually hidden on success, with no reserved success row or layout shift. Failure shows persistent manual-copy guidance in that same live region. Hover and active states use the existing active action color. The button transitions color over 120ms only without reduced motion; reduced motion preserves the feedback without transitions. Forced colors use system colors for tooltip, success, icon, and focus.
+The button appears only when JavaScript and a secure Clipboard API are available. A pending write sets aria-disabled and guards repeated activations while retaining keyboard focus, secondary ink, and a waiting cursor. Completion never moves focus if the visitor has moved elsewhere. Only a completed write shows a “Copied” tooltip without controls above the icon for two seconds and a 300ms icon-only primary-ink flash. Escape dismisses feedback; a new attempt clears earlier timers. The polite live announcement stays visually hidden on success, with no reserved success row or layout shift. Failure shows persistent manual-copy guidance in that same live region. Hover and active states use the existing active action color. The button transitions color over 120ms only without reduced motion; reduced motion preserves the feedback without transitions. Forced colors use system colors for tooltip, success, icon, and focus.
 
 After a successful trusted touch activation, the component requests one 10ms vibration only if the API exists and reduced motion is not requested. Mouse and keyboard never request vibration. Unsupported, rejected, or throwing hardware feedback cannot change copy success. This is optional vibration on supporting browsers, not a promise of iOS haptics; see ADR 0002.
 
-Below the address, Write in Gmail is an underlined link action with the existing square border, raised surface, and control padding. Its compose URL encodes the recipient and does not force a sender account. Open email app remains a separate native-handler option. Both links and the selectable address work without JavaScript; the copy button stays hidden when unavailable. Actions wrap at narrow widths.
+Below the address, Write in Gmail uses the same plain underlined link treatment as Open email app, with no border or background. Both retain the existing 44px minimum target height and focus/hover states. Its compose URL encodes the recipient and does not force a sender account. Open email app remains a separate native-handler option. Both links and the selectable address work without JavaScript; the copy button stays hidden when unavailable. Actions wrap at narrow widths.
 
 ### Signature band
 
