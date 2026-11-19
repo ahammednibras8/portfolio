@@ -84,7 +84,9 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
     let tooltipTimer: ReturnType<typeof setTimeout>;
     let flashTimer: ReturnType<typeof setTimeout>;
     let pointerType = "";
+    let feedbackDismissed = false;
     const dismissFeedback = () => {
+      feedbackDismissed = true;
       clearTimeout(tooltipTimer);
       clearTimeout(flashTimer);
       tooltip.hidden = true;
@@ -99,6 +101,13 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
     button.addEventListener("keydown", () => {
       pointerType = "";
     });
+    const dismissOutside = (event: Event) => {
+      if (event.target instanceof Node && !button.contains(event.target)) {
+        dismissFeedback();
+      }
+    };
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("focusin", dismissOutside);
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") dismissFeedback();
     });
@@ -111,6 +120,7 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
         event.isTrusted && event.detail > 0 && pointerType === "touch";
       pointerType = "";
       dismissFeedback();
+      feedbackDismissed = false;
       button.setAttribute("aria-disabled", "true");
       delete status.dataset.error;
       status.textContent = "";
@@ -118,12 +128,14 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
       try {
         await navigator.clipboard.writeText(address);
         status.textContent = "Email address copied.";
-        tooltip.hidden = false;
-        button.dataset.copied = "";
-        flashTimer = setTimeout(() => delete button.dataset.copied, 300);
-        tooltipTimer = setTimeout(() => {
-          tooltip.hidden = true;
-        }, 2000);
+        if (!feedbackDismissed) {
+          tooltip.hidden = false;
+          button.dataset.copied = "";
+          flashTimer = setTimeout(() => delete button.dataset.copied, 300);
+          tooltipTimer = setTimeout(() => {
+            tooltip.hidden = true;
+          }, 2000);
+        }
 
         // Optional hardware feedback must never change the clipboard result.
         if (

@@ -37,6 +37,7 @@ test("a delayed failed copy does not move focus back after the visitor leaves", 
 
 test("copy feedback is transient, dismissible, repeatable, and does not move content", async ({
   page,
+  browserName,
 }) => {
   // Keep timer/state assertions independent of CSS transition sampling.
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -83,17 +84,59 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
   await button.click();
   await page.clock.runFor(800);
   await expect(tooltip).toBeVisible(); // The first attempt's timer cannot dismiss this one.
+  await page.getByRole("heading", { name: "Contact", exact: true }).click();
+  await expect(tooltip).toBeHidden({ timeout: 200 });
+  await expect(button).not.toHaveAttribute("data-copied");
+  await button.locator("svg").click();
+  await expect(tooltip).toBeVisible();
+  await pressTab(page, browserName);
+  await expect(
+    page.getByRole("link", { name: "Write in Gmail" }),
+  ).toBeFocused();
+  await expect(tooltip).toBeHidden({ timeout: 200 });
+  await button.focus();
+  await page.keyboard.press("Enter");
+  await expect(tooltip).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(tooltip).toBeHidden();
+  await expect(tooltip).toBeHidden({ timeout: 200 });
   await button.focus();
   await page.keyboard.press("Space");
   await expect(tooltip).toBeVisible();
   await page.clock.runFor(2100);
-  await expect(tooltip).toBeHidden();
+  await expect(tooltip).toBeHidden({ timeout: 200 });
   await expect(button).not.toHaveAttribute("data-copied");
   await expect(page.locator("html")).not.toHaveAttribute(
     "data-unexpected-pulse",
   );
+});
+
+test("leaving during a pending copy prevents late success feedback from reopening", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: () =>
+          new Promise<void>((resolve) => {
+            document.addEventListener("finish-copy", () => resolve(), {
+              once: true,
+            });
+          }),
+      },
+    });
+  });
+  await page.goto("/about/");
+  const button = page.getByRole("button", { name: "Copy email address" });
+  await button.click();
+  await expect(button).toBeDisabled();
+  await page.getByRole("heading", { name: "Contact", exact: true }).click();
+  await page.evaluate(() => document.dispatchEvent(new Event("finish-copy")));
+  await expect(button).toBeEnabled();
+  await expect(page.getByRole("status")).toHaveText("Email address copied.");
+  await expect(page.locator("[data-copy-tooltip]")).toBeHidden({
+    timeout: 200,
+  });
+  await expect(button).not.toHaveAttribute("data-copied");
 });
 
 for (const mode of [
@@ -149,7 +192,9 @@ for (const mode of [
     await button.tap();
     if (mode === "denied") {
       await expect(page.getByRole("status")).toContainText("Select and copy");
-      await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
+      await expect(page.locator("[data-copy-tooltip]")).toBeHidden({
+        timeout: 200,
+      });
     } else {
       await expect(page.locator("[data-copy-tooltip]")).toBeVisible();
       await expect(page.getByRole("status")).toHaveText(
@@ -157,6 +202,10 @@ for (const mode of [
       );
       if (mode === "reduced")
         await expect(button).toHaveCSS("transition-duration", "0s");
+      await page.getByRole("heading", { name: "Contact", exact: true }).tap();
+      await expect(page.locator("[data-copy-tooltip]")).toBeHidden({
+        timeout: 200,
+      });
     }
     if (["supported", "false", "throw"].includes(mode)) {
       await expect(page.locator("html")).toHaveAttribute("data-pulses", "1");
