@@ -78,11 +78,15 @@ and [the Playwright maintainer's guidance](https://github.com/microsoft/playwrig
 
 Repository checks cover first-party source and shared design context, including
 `PRODUCT.md`, `DESIGN.md`, and `.impeccable/config.json` and `design.json`.
-The separately installed `.agents/skills/impeccable/` distribution is vendor
-tooling, so formatting, JavaScript lint, spelling, and link checks exclude it.
-Generated critique/audit archives and machine-local hook/settings files are also
-outside the first-party checks. Do not reformat or commit that installed tooling
-as part of an application change.
+The committed `.agents/skills/impeccable/` distribution is vendor tooling, so
+formatting, JavaScript lint, spelling, and link checks exclude it. The portable
+Codex hook configuration in `.codex/hooks.json` is shared with the repository.
+Keep vendor-managed files unchanged during application work; update the skill
+deliberately with its version, checksums, and upstream licenses. Platform binaries,
+generated critique/audit/review output, caches, and machine-local settings remain
+outside Git. The launcher can download its pinned engine to the user's cache on
+first use. Machine-local hook consent stays in ignored
+`.impeccable/config.local.json`.
 
 HTML and Lighthouse checks skip with a clear message until the first page exists.
 

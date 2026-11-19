@@ -13,7 +13,10 @@ dist/
 .stylelintcache
 *.tsbuildinfo
 .impeccable/config.local.json
+.impeccable/audit/
 .impeccable/critique/
+.impeccable/review/
+.agents/skills/impeccable/scripts/bin/
 
 # Test and browser reports
 coverage/

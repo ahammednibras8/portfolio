@@ -63,6 +63,15 @@ Set `SITE_URL` in `.env` to a valid HTTPS URL. Never commit `.env`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and pull-request details.
 
+## Design tooling
+
+The repository includes [Impeccable skill 4.9.1](.agents/skills/impeccable/SKILL.md)
+and the portable Codex hooks in `.codex/hooks.json`. Its launcher pins engine
+0.1.24 and verifies downloads against the included checksums. A first run may
+download the engine into the user's cache; platform binaries, local settings,
+and generated reports are not committed. This development tooling is not part
+of the site's browser payload.
+
 ## Content rules
 
 Project stories must clearly separate my work from team work. Claims need a source when possible. Private or unapproved details stay private.
@@ -75,4 +84,7 @@ Project stories must clearly separate my work from team work. Claims need a sour
 
 Please report security problems privately. See [SECURITY.md](SECURITY.md).
 
-The code and documentation are available under the [MIT License](LICENSE).
+The portfolio code and documentation are available under the [MIT License](LICENSE).
+The vendored Impeccable distribution retains its [Apache 2.0 license](.agents/skills/impeccable/LICENSE)
+and [upstream attribution](.agents/skills/impeccable/UPSTREAM.txt). Its bundled
+modern-screenshot helper retains its [MIT license](.agents/skills/impeccable/scripts/LICENSE-modern-screenshot).

@@ -13,3 +13,6 @@
 *.woff binary
 *.woff2 binary
 *.zip binary
+
+# Preserve the vendored Windows launcher format on checkout.
+.agents/skills/impeccable/scripts/impeccable.cmd text eol=crlf
