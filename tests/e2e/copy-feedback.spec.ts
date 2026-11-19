@@ -1,4 +1,39 @@
 import { expect, test } from "@playwright/test";
+import { pressTab } from "../helpers/keyboard";
+
+test("a delayed failed copy does not move focus back after the visitor leaves", async ({
+  page,
+  browserName,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: () =>
+          new Promise<void>((_resolve, reject) => {
+            document.addEventListener(
+              "reject-copy",
+              () => reject(new Error("Denied")),
+              { once: true },
+            );
+          }),
+      },
+    });
+  });
+  await page.goto("/");
+  const button = page.getByRole("button", { name: "Copy email address" });
+  await button.focus();
+  await page.keyboard.press("Space");
+  await expect(button).toBeDisabled();
+  await expect(button).toBeFocused();
+  await pressTab(page, browserName);
+  const gmail = page.getByRole("link", { name: "Write in Gmail" });
+  await expect(gmail).toBeFocused();
+  await page.evaluate(() => document.dispatchEvent(new Event("reject-copy")));
+  await expect(page.getByRole("status")).toContainText("Select and copy");
+  await expect(page.getByRole("status")).toBeVisible();
+  await expect(button).toBeEnabled();
+  await expect(gmail).toBeFocused();
+});
 
 test("copy feedback is transient, dismissible, repeatable, and does not move content", async ({
   page,

@@ -12,6 +12,9 @@ for (const path of ["/", "/about/"]) {
           writeText: (text: string) =>
             new Promise<void>((resolve) => {
               document.documentElement.dataset.copiedText = text;
+              document.documentElement.dataset.copyWrites = String(
+                Number(document.documentElement.dataset.copyWrites ?? 0) + 1,
+              );
               document.addEventListener("finish-copy", () => resolve(), {
                 once: true,
               });
@@ -24,6 +27,9 @@ for (const path of ["/", "/about/"]) {
     await button.focus();
     await page.keyboard.press("Enter");
     await expect(button).toBeDisabled();
+    await expect(button).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("html")).toHaveAttribute("data-copy-writes", "1");
     await expect(page.getByRole("status")).toBeEmpty();
     await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
     await expect(button).not.toHaveAttribute("data-copied");
@@ -34,6 +40,7 @@ for (const path of ["/", "/about/"]) {
     await page.evaluate(() => document.dispatchEvent(new Event("finish-copy")));
     await expect(page.getByRole("status")).toHaveText("Email address copied.");
     await expect(button).toBeEnabled();
+    await expect(button).toBeFocused();
     await expect(page).toHaveURL(new RegExp(`${path}$`));
   });
 

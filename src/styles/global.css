@@ -506,7 +506,7 @@ h2 + * {
   color: var(--color-action-active);
 }
 
-.copy-email:disabled {
+.copy-email[aria-disabled="true"] {
   color: var(--color-ink-secondary);
   cursor: wait;
 }

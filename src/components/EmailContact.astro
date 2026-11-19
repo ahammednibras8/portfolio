@@ -104,11 +104,15 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
       if (event.key === "Escape") dismissFeedback();
     });
     button.addEventListener("click", async (event) => {
+      if (button.getAttribute("aria-disabled") === "true") {
+        pointerType = "";
+        return;
+      }
       const touchActivation =
         event.isTrusted && event.detail > 0 && pointerType === "touch";
       pointerType = "";
       dismissFeedback();
-      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
       delete status.dataset.error;
       status.textContent = "";
 
@@ -139,7 +143,7 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
         status.textContent =
           "Couldn’t copy. Select and copy the email address above.";
       } finally {
-        button.disabled = false;
+        button.removeAttribute("aria-disabled");
       }
     });
   }
