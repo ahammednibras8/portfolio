@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-for (const path of ["/", "/about/", "/404.html"]) {
+for (const path of ["/", "/404.html"]) {
   test(`${path} gives every link native new-tab behavior with advance hints`, async ({
     page,
   }) => {

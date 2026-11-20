@@ -118,7 +118,7 @@ test("leaving during a pending copy prevents late success feedback from reopenin
       },
     });
   });
-  await page.goto("/about/");
+  await page.goto("/");
   const button = page.getByRole("button", { name: "Copy email address" });
   await button.click();
   await expect(button).toBeDisabled();

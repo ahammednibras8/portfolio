@@ -11,7 +11,7 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - [Astro](https://docs.astro.build/) builds the site as static HTML.
 - A typed document layout owns shared metadata, local fonts, and the name/location footer.
 - Shared profile and experience data keep the published name, role, location, and public links consistent.
-- The homepage includes Person and WebSite microdata. The About page describes the same person through ProfilePage microdata, using static HTML.
+- The homepage includes Person and WebSite microdata in static HTML.
 - Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
 - Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
 - Copy success uses a brief tooltip and icon-only color flash on a transparent background, with a polite live announcement; failure keeps visible manual-copy guidance. A single optional touch vibration is requested on supporting browsers, never relied on for feedback.
@@ -27,8 +27,8 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 
 ## Finding the work
 
-- The [homepage](https://ahammednibras.com/) introduces Nibras and provides contact details.
-- [About](https://ahammednibras.com/about/) adds the approach to work and links back home. Both pages retain public profiles, experience, and contact options. The footer keeps plain identity text without navigation links; the homepage has no About link under the current approved scope.
+- The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text without navigation links.
+- The former About route is removed and returns the authored 404 page with Home and contact recovery links.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
 ## Deployment

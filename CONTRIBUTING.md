@@ -125,8 +125,9 @@ pnpm run test:a11y
 Keyboard-navigation tests use Option+Tab for WebKit on macOS, where the
 browser's default Tab behavior skips links. Other browser/platform combinations
 use Tab. The shared `tests/helpers/keyboard.ts` helper sends the native shortcut;
-the tests assert the complete focus order and real new-tab navigation for the
-About-to-Home link and both 404 recovery actions without JavaScript. Popup tests
+the tests assert the complete homepage focus order and real new-tab navigation
+for both 404 recovery actions without JavaScript. The removed About route must
+return the authored 404 page and stay out of the sitemap. Popup tests
 close their pages and check that the original remains available. Gmail navigation
 is intercepted before any login or mail action; native email-app launching is
 left to browser configuration. Copy-feedback coverage checks awaited success, tooltip dismissal/expiry/repeated use, visible failures, and optional touch-only vibration. Emulation verifies the API request, not a physical haptic response.

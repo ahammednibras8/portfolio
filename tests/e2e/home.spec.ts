@@ -120,37 +120,32 @@ test("the 320px layout keeps profile and contact paths usable", async ({
   ).toBeVisible();
 });
 
-for (const path of ["/", "/about/"]) {
-  test(`${path} exposes a complete keyboard path`, async ({
-    browserName,
-    page,
-  }) => {
-    await page.setViewportSize({ width: 320, height: 800 });
-    await page.goto(path);
-    await expect(
-      page.getByRole("button", { name: "Copy email address" }),
-    ).toBeVisible();
-    const focusOrder = [
-      ...(path === "/about/"
-        ? [page.getByRole("link", { name: "Back to home", exact: true })]
-        : []),
-      page.getByRole("link", { name: "GitHub", exact: true }),
-      page.getByRole("link", { name: "LinkedIn", exact: true }),
-      page.getByRole("link", { name: "Insource Data", exact: true }),
-      page.getByRole("link", { name: "NysaClan", exact: true }),
-      page.getByRole("button", { name: "Copy email address" }),
-      page.getByRole("link", { name: "Write in Gmail" }),
-      page.getByRole("link", { name: "Open email app" }),
-    ];
-    await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
-      focusOrder.length,
-    );
-    for (const control of focusOrder) {
-      await pressTab(page, browserName);
-      await expect(control).toBeFocused();
-    }
-  });
-}
+test("the homepage exposes a complete keyboard path", async ({
+  browserName,
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Copy email address" }),
+  ).toBeVisible();
+  const focusOrder = [
+    page.getByRole("link", { name: "GitHub", exact: true }),
+    page.getByRole("link", { name: "LinkedIn", exact: true }),
+    page.getByRole("link", { name: "Insource Data", exact: true }),
+    page.getByRole("link", { name: "NysaClan", exact: true }),
+    page.getByRole("button", { name: "Copy email address" }),
+    page.getByRole("link", { name: "Write in Gmail" }),
+    page.getByRole("link", { name: "Open email app" }),
+  ];
+  await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
+    focusOrder.length,
+  );
+  for (const control of focusOrder) {
+    await pressTab(page, browserName);
+    await expect(control).toBeFocused();
+  }
+});
 
 test("reduced motion removes link and control animations", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
