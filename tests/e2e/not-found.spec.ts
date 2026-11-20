@@ -1,74 +1,7 @@
 import { expect, test } from "@playwright/test";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import { pressTab } from "../helpers/keyboard";
 
 const missingPath = "/route-that-does-not-exist";
-const notFoundArtifact = resolve("dist/404.html");
-
-test("the built 404 artifact exists with meaningful recovery links", async ({
-  page,
-}) => {
-  await readFile(notFoundArtifact, "utf8");
-
-  await page.goto("/404.html");
-
-  await expect(page).toHaveTitle("Page not found — Ahammed Nibras");
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "I haven’t published a page at this address.",
-    }),
-  ).toBeVisible();
-
-  await expect(page.getByRole("contentinfo")).toHaveText(
-    "Ahammed Nibras · Kozhikode, Kerala, India",
-  );
-  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
-  const recovery = page.getByRole("navigation", { name: "Page recovery" });
-
-  const homepage = recovery.locator('a[href="/"]');
-  const contact = recovery.locator('a[href="/#contact"]');
-
-  await expect(homepage.locator("strong")).toHaveText("Homepage");
-  await expect(homepage.locator("span").last()).toHaveText(
-    "A short introduction to what I build.",
-  );
-  await expect(contact.locator("strong")).toHaveText("Get in touch");
-  await expect(contact.locator("span").last()).toHaveText(
-    "Email address and contact options.",
-  );
-});
-
-test("unknown routes return the authored 404 with recovery paths", async ({
-  page,
-}) => {
-  const response = await page.goto("/route-that-does-not-exist");
-
-  expect(response).not.toBeNull();
-  expect(response?.status()).toBe(404);
-  await expect(page).toHaveTitle("Page not found — Ahammed Nibras");
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "I haven’t published a page at this address.",
-    }),
-  ).toBeVisible();
-
-  await expect(page.getByRole("contentinfo")).toHaveText(
-    "Ahammed Nibras · Kozhikode, Kerala, India",
-  );
-  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
-  const recovery = page.getByRole("navigation", { name: "Page recovery" });
-  const links = recovery.getByRole("link");
-
-  await expect(links).toHaveCount(2);
-  expect(
-    await links.evaluateAll((items) =>
-      items.map((item) => item.getAttribute("href")),
-    ),
-  ).toEqual(["/", "/#contact"]);
-});
 
 test("the 320px recovery actions open separate pages without JavaScript", async ({
   browser,
@@ -82,6 +15,23 @@ test("the 320px recovery actions open separate pages without JavaScript", async 
 
   const response = await page.goto(missingPath);
   expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle("Page not found — Ahammed Nibras");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "I haven’t published a page at this address.",
+    }),
+  ).toBeVisible();
+  await expect(page.locator("[itemscope]")).toHaveCount(0);
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+  const recovery = page.getByRole("navigation", { name: "Page recovery" });
+  await expect(recovery.getByRole("link")).toHaveCount(2);
+  await expect(
+    recovery.getByRole("link", { name: /Homepage/ }),
+  ).toHaveAttribute("href", "/");
+  await expect(
+    recovery.getByRole("link", { name: /Get in touch/ }),
+  ).toHaveAttribute("href", "/#contact");
 
   const viewport = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,

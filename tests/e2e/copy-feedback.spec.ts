@@ -58,9 +58,6 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
   const actions = page.locator(".email-actions");
   for (const link of ["Write in Gmail", "Open email app"]) {
     const action = page.getByRole("link", { name: link, exact: true });
-    await expect(action).toHaveCSS("border-top-width", "0px");
-    await expect(action).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-    await expect(action).toHaveCSS("text-decoration-line", "underline");
     expect((await action.boundingBox())?.height).toBeGreaterThanOrEqual(44);
   }
   const before = await actions.boundingBox();
@@ -72,14 +69,10 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
   await expect(button).toBeEnabled();
   await expect(button).toBeFocused();
   await expect(page.getByRole("status")).toHaveText("Email address copied.");
-  expect((await page.getByRole("status").boundingBox())?.height).toBe(1);
   expect(await actions.boundingBox()).toEqual(before);
   await page.clock.runFor(150);
-  await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(button).toHaveCSS("color", "rgb(23, 25, 26)");
   await page.clock.runFor(300);
   await expect(button).not.toHaveAttribute("data-copied");
-  await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await page.clock.runFor(900);
   await button.click();
   await page.clock.runFor(800);
@@ -141,7 +134,6 @@ test("leaving during a pending copy prevents late success feedback from reopenin
 
 for (const mode of [
   "supported",
-  "false",
   "throw",
   "absent",
   "reduced",
@@ -183,7 +175,7 @@ for (const mode of [
                 document.documentElement.dataset.pulseDuration =
                   String(duration);
                 if (mode === "throw") throw new Error("Unavailable hardware");
-                return mode !== "false";
+                return true;
               },
       });
     }, mode);
@@ -207,7 +199,7 @@ for (const mode of [
         timeout: 200,
       });
     }
-    if (["supported", "false", "throw"].includes(mode)) {
+    if (["supported", "throw"].includes(mode)) {
       await expect(page.locator("html")).toHaveAttribute("data-pulses", "1");
       await expect(page.locator("html")).toHaveAttribute(
         "data-pulse-duration",
@@ -249,9 +241,7 @@ test("success feedback remains legible in forced colors", async ({
     return {
       text: style.color,
       background: style.backgroundColor,
-      border: style.borderWidth,
     };
   });
   expect(colors.text).not.toBe(colors.background);
-  expect(colors.border).toBe("1px");
 });

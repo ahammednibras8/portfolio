@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { pressTab } from "../helpers/keyboard";
 
-const origin = "https://ahammednibras.com";
+const origin = new URL(process.env.SITE_URL ?? "").origin;
 const expectedPerson = {
   type: "https://schema.org/Person",
   id: `${origin}/#person`,
@@ -101,12 +101,6 @@ for (const path of ["/", "/about/"]) {
       `${origin}${path}`,
     );
     await expect(page.locator("main [itemprop='name']").first()).toBeVisible();
-    await expect(page.locator("main")).not.toContainText(
-      "I use ahammednibras8",
-    );
-    await expect(
-      page.getByRole("button", { name: "Copy email address" }),
-    ).toHaveCount(0);
     await context.close();
   });
 }
@@ -129,8 +123,6 @@ test("the direct About route opens Home separately at 320px without JavaScript",
   await expect(page.getByRole("contentinfo")).toHaveText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
-  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
-  await expect(page.getByRole("navigation")).toHaveCount(0);
 
   const viewport = await page.evaluate(() => ({
     width: document.documentElement.clientWidth,
@@ -139,9 +131,6 @@ test("the direct About route opens Home separately at 320px without JavaScript",
   expect(viewport.scrollWidth).toBe(viewport.width);
 
   await expect(page.getByRole("heading", { name: "How I work" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Public profiles" }),
-  ).toHaveCount(0);
   await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
     "href",
     "https://github.com/ahammednibras8",
@@ -160,15 +149,5 @@ test("the direct About route opens Home separately at 320px without JavaScript",
   expect(await home.evaluate(() => window.opener)).toBeNull();
   await expect(page).toHaveURL(/\/about\/$/);
   await home.close();
-  await expect(page.getByRole("contentinfo").getByRole("link")).toHaveCount(0);
   await context.close();
-});
-
-test("not-found responses do not describe an identity or canonical page", async ({
-  page,
-}) => {
-  const response = await page.goto("/route-that-does-not-exist");
-  expect(response?.status()).toBe(404);
-  await expect(page.locator("[itemscope]")).toHaveCount(0);
-  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });

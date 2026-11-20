@@ -20,6 +20,9 @@ pnpm exec playwright install chromium
 ```
 
 Set `SITE_URL` in `.env` to a valid HTTPS URL. Never commit `.env` or credentials.
+Playwright loads the same `.env` file as the Astro build, with exported environment
+variables taking precedence. Metadata and sitemap checks use that configured
+origin; there is no separate example-domain fallback.
 
 Firefox and WebKit are needed only for local cross-browser checks:
 
@@ -126,7 +129,7 @@ the tests assert the complete focus order and real new-tab navigation for the
 About-to-Home link and both 404 recovery actions without JavaScript. Popup tests
 close their pages and check that the original remains available. Gmail navigation
 is intercepted before any login or mail action; native email-app launching is
-left to browser configuration. Copy-feedback coverage checks awaited success, tooltip dismissal/expiry/repeated use, color reset, visible failures, and optional touch-only vibration. Emulation verifies the API request, not a physical haptic response.
+left to browser configuration. Copy-feedback coverage checks awaited success, tooltip dismissal/expiry/repeated use, visible failures, and optional touch-only vibration. Emulation verifies the API request, not a physical haptic response.
 See [Apple's Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)
 and [the Playwright maintainer's guidance](https://github.com/microsoft/playwright/issues/5609).
 
