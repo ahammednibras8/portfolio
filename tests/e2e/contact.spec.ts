@@ -154,6 +154,66 @@ test("the About page initializes its copy action", async ({ page }) => {
 });
 
 for (const path of ["/", "/about/"]) {
+  test(`${path} keeps contact usable with the root font at 200%`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        value: {
+          writeText: (text: string) => {
+            document.documentElement.dataset.copiedText = text;
+            return Promise.resolve();
+          },
+        },
+      });
+    });
+    await page.goto(path);
+    await page.locator("html").evaluate((root) => {
+      root.style.fontSize = "200%";
+    });
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator("html")).toHaveCSS("font-size", "32px");
+    await expect(page.locator("[data-email-address]")).toHaveCSS(
+      "font-size",
+      "32px",
+    );
+
+    const pageOverflow = () =>
+      page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+    await expect.poll(pageOverflow).toBe(0);
+
+    const button = page.getByRole("button", { name: "Copy email address" });
+    for (const control of [
+      page.locator("[data-email-address]"),
+      button,
+      page.getByRole("link", { name: "Write in Gmail" }),
+      page.getByRole("link", { name: "Open email app" }),
+    ]) {
+      await expect(control).toBeVisible();
+      await control.scrollIntoViewIfNeeded();
+      await expect(control).toBeInViewport({ ratio: 1 });
+      expect(await page.evaluate(() => window.scrollX)).toBe(0);
+    }
+
+    await button.click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-copied-text",
+      email,
+    );
+    await expect(page.getByRole("status")).toHaveText("Email address copied.");
+    await expect(page.locator("[data-copy-tooltip]")).toBeVisible();
+    await expect.poll(pageOverflow).toBe(0);
+    await expect(page.locator("[data-email-address]")).toHaveCSS(
+      "font-size",
+      "32px",
+    );
+  });
+
   test(`${path} keeps profiles, experience, and contact usable without JavaScript`, async ({
     browser,
   }) => {

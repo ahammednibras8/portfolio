@@ -149,7 +149,7 @@ Do not use mono for sustained paragraphs. Keep names, role labels, dates, and te
 
 ## Layout
 
-The centered document and footer share a maximum width of 76rem. The page uses a single column below 48rem, six equal columns from 48rem, and twelve from 72rem. The minimum supported page width in the stylesheet is 20rem.
+The centered document and footer share a maximum width of 76rem. The page uses a single column below 48rem, six equal columns from 48rem, and twelve from 72rem. The minimum supported page width in the stylesheet is 320 CSS pixels, independent of the root font size so enlarged default text can reflow at that width.
 
 The frontmatter spacing names match the stylesheet. Interface spacing belongs inside controls and close groups; component spacing separates related content; editorial spacing separates reading units; section spacing defines the major vertical rhythm. Section padding is the section step vertically and the component step horizontally, increasing to the editorial step horizontally at 48rem. Grid gaps similarly increase from component to editorial spacing.
 
