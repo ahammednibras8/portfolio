@@ -19,10 +19,11 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
 - Images are optimized during the build.
 - GitHub Actions builds and tests the site after a change reaches `main`.
+- Workflow action commits, including transitive actions, are recorded in `.github/workflows/actions.lock`. Pull-request CI verifies the lockfile before running the site checks.
 - The same tested `dist/` directory is uploaded to Cloudflare Pages with the repository's pinned Wrangler version.
 - Cloudflare serves static files only. The site has no Pages Functions, Worker, database, or storage service.
 
-The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), and [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md).
+The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md), and [ADR 0004](docs/decisions/0004-workflow-dependency-lockfile.md).
 
 ## Finding the work
 
