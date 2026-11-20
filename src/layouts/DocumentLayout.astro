@@ -9,18 +9,15 @@ interface Props {
   title: string;
   description: string;
   canonical?: URL;
-  pageType?: "ProfilePage";
 }
 
-const { title, description, canonical, pageType } = Astro.props;
+const { title, description, canonical } = Astro.props;
 
 const canonicalUrl = canonical?.href;
 const isHomepage = Astro.url.pathname === "/";
 const homepage = new URL("/", Astro.site ?? Astro.url);
 const websiteId = new URL("#website", homepage).href;
 const personId = new URL("#person", homepage).href;
-const pageId = canonical && new URL("#webpage", canonical).href;
-const isPersonPage = isHomepage || pageType === "ProfilePage";
 ---
 
 <!doctype html>
@@ -66,21 +63,15 @@ const isPersonPage = isHomepage || pageType === "ProfilePage";
     <title>{title}</title>
   </head>
 
-  <body
-    itemscope={Boolean(pageType)}
-    itemtype={pageType && `https://schema.org/${pageType}`}
-    itemid={pageType ? pageId : undefined}
-  >
-    {pageType && canonicalUrl && <link itemprop="url" href={canonicalUrl} />}
+  <body>
     <main
       id="main-content"
       class="page"
-      itemscope={isPersonPage}
-      itemtype={isPersonPage ? "https://schema.org/Person" : undefined}
-      itemid={isPersonPage ? personId : undefined}
-      itemprop={pageType ? "mainEntity" : undefined}
+      itemscope={isHomepage}
+      itemtype={isHomepage ? "https://schema.org/Person" : undefined}
+      itemid={isHomepage ? personId : undefined}
     >
-      {isPersonPage && <link itemprop="url" href={homepage.href} />}
+      {isHomepage && <link itemprop="url" href={homepage.href} />}
       <span id="new-tab-hint" hidden>
         Opens in a new tab.
       </span>

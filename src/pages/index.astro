@@ -1,10 +1,10 @@
 ---
 import DocumentLayout from "../layouts/DocumentLayout.astro";
 import EmailContact from "../components/EmailContact.astro";
-import Experience from "../components/Experience.astro";
 import GitHubIcon from "../assets/github.svg";
 import LinkedInIcon from "../assets/linkedin-in.svg";
 import { profile } from "../data/profile";
+import { experience } from "../data/experience";
 
 const title = `${profile.name} — ${profile.role}`;
 const description = profile.description;
@@ -76,7 +76,33 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
   <section id="experience" aria-labelledby="experience-heading">
     <h2 id="experience-heading">Experience</h2>
 
-    <Experience />
+    <ol class="experience-list">
+      {experience.map((entry) => (
+        <li>
+          <h3>
+            {entry.role} ·{" "}
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Opens in a new tab"
+              aria-describedby="new-tab-hint"
+              href={entry.organizationUrl}
+            >
+              {entry.organization}
+            </a>
+          </h3>
+          <p class="experience-dates">
+            <time datetime={entry.start}>{entry.startLabel}</time> —{" "}
+            {entry.end ? (
+              <time datetime={entry.end}>{entry.endLabel}</time>
+            ) : (
+              entry.endLabel
+            )}
+          </p>
+          <p class="experience-context">{entry.context}</p>
+        </li>
+      ))}
+    </ol>
   </section>
 
   <section

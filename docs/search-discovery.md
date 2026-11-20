@@ -9,9 +9,9 @@ Track completion and dated observations in [issue #63](https://github.com/ahamme
 ## Repository checks
 
 1. Review `src/data/profile.ts` against the published identity. The actual account identifier is `ahammednibras8`; a plausible typo is not automatically an alternate name.
-2. Check that the full name, role, location, and profile identifier are visible on the homepage and About page. Review final wording with Nibras. Changes to project claims require the [evidence checklist](content/evidence-and-disclosure.md).
-3. Inspect the built microdata with a structured-data validator. Check the homepage's WebSite and Person, and the About page's ProfilePage with that same Person as its main entity. The Person identifier ends in `/#person` on both pages.
-4. Confirm page-specific canonical URLs, real HTML links, and sitemap membership. Do not put 404 or preview URLs in the sitemap.
+2. Check that the full name, role, location, and profile identifier are visible on the homepage. Review final wording with Nibras. Changes to project claims require the [evidence checklist](content/evidence-and-disclosure.md).
+3. Inspect the built microdata with a structured-data validator. Check the homepage's WebSite and Person. The Person identifier ends in `/#person`.
+4. Confirm page-specific canonical URLs, real HTML links, and sitemap membership. Do not put removed routes, 404, or preview URLs in the sitemap. Confirm `/about/` returns the authored 404 page.
 5. Run `pnpm run verify` with the pinned toolchain. Shared layout changes also need the full cross-browser checks in [CONTRIBUTING.md](../CONTRIBUTING.md).
 6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy allows only same-origin scripts and connections.
 
@@ -31,7 +31,7 @@ These checks require the relevant account access. A repository change does not c
 ### Inspect Google Search Console
 
 - Verify the Domain property for `ahammednibras.com` if needed through the account's normal DNS verification workflow. Never commit verification credentials or private exports.
-- Inspect the homepage and `/about/`: check indexing, the Google-selected canonical, last crawl information, and any reported errors.
+- Inspect the homepage: check indexing, the Google-selected canonical, last crawl information, and any reported errors. Confirm the removed `/about/` URL is reported as not found after the next crawl.
 - Submit `https://ahammednibras.com/sitemap-index.xml` and check that its child sitemap is processed.
 - Check **Settings → Search generative AI** and any inherited control. Google's documentation describes inclusion as the default. Do not assume a missing AI answer means this setting is disabled.
 - After meaningful updates, request indexing for the important URLs once. Repeated requests do not speed up crawling.

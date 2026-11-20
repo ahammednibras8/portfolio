@@ -2,13 +2,13 @@
 
 - Status: Accepted
 - Date: 2026-09-22
-- Updated: 2026-11-17
+- Updated: 2026-11-20
 
 ## Decision
 
 Use Astro with static output and strict TypeScript.
 
-Describe the public identity with HTML microdata in the generated documents. Use a shared profile record for the name, role, location, and public links. Keep the WebSite, Person, and ProfilePage scopes distinct, with stable identifiers derived from the configured canonical origin.
+Describe the public identity with HTML microdata in the generated documents. Use a shared profile record for the name, role, location, and public links. Keep the WebSite and Person scopes distinct, with stable identifiers derived from the configured canonical origin.
 
 ## Reason
 
@@ -16,7 +16,7 @@ The portfolio needs reusable pages, checked content, and optimized images. It do
 
 Static HTML keeps the site fast, accessible without JavaScript, and easy to move between hosts.
 
-Microdata describes the same identity that visitors can read without requiring JavaScript. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The About page provides an identity destination. A separate project route belongs to the broader navigation work in ADR 0002 and should be added only when reviewed evidence is ready.
+Microdata describes the same identity that visitors can read without requiring JavaScript. It does not require a client library, duplicate JSON payload, or crawler-specific version of the page. The homepage provides the identity destination. On 2026-11-20, Nibras requested removal of the About page; its former route returns the authored 404 page. The unused ProfilePage metadata is removed with it. A separate project route belongs to the broader navigation work in ADR 0002 and should be added only when reviewed evidence is ready.
 
 On 2026-11-17, Nibras requested a contact path that does not depend on a configured mail application. The shared email component progressively enhances a selectable address with a Clipboard API button. The static build remains complete without it. Permit only same-origin external scripts through `script-src 'self'`; keep inline and third-party scripts blocked, and keep all other CSP directives unchanged. This adds no framework or server. Reconsider the enhancement if it stops providing a useful fallback or needs broader script permissions.
 
@@ -27,7 +27,7 @@ Set Vite's `assetsInlineLimit` to zero so Astro's small processed contact script
 - The current homepage and navigation work as complete HTML.
 - The product has no server-only feature or persistent application state.
 - The build, HTML validation, browser tests, accessibility tests, and Lighthouse checks run against the generated site.
-- Google documents [microdata as a supported structured-data format](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data), [WebSite information for site names](https://developers.google.com/search/docs/appearance/site-names), and [ProfilePage information for an About page](https://developers.google.com/search/docs/appearance/structured-data/profile-page).
+- Google documents [microdata as a supported structured-data format](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) and [WebSite information for site names](https://developers.google.com/search/docs/appearance/site-names).
 - The existing homepage already publishes the name, location, role, and GitHub/LinkedIn links used by this identity record. No alternate spelling or project claim is needed.
 
 ## Constraints
@@ -43,7 +43,7 @@ Set Vite's `assetsInlineLimit` to zero so Astro's small processed contact script
 - `src/layouts/DocumentLayout.astro` owns the shared document shell and metadata used by route pages.
 - `src/pages/` contains the route entry points.
 - `src/data/profile.ts` and `src/data/experience.ts` hold shared identity, public links, and verified role facts.
-- `src/pages/about.astro` describes the same Person as the homepage, using a ProfilePage relationship.
+- `src/pages/index.astro` describes the public identity with WebSite and Person microdata.
 - CI tests the generated `dist/` output that will be deployed.
 
 ## Reconsider when

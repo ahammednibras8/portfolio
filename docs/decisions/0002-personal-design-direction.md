@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-23
-- Updated: 2026-11-18
+- Updated: 2026-11-20
 
 ## Decision
 
@@ -93,6 +93,8 @@ Keep the existing palette, typography, and section grid. Put GitHub and LinkedIn
 
 On 2026-11-18, Nibras requested removal of the footer navigation and clarified that his name and location must remain. Keep that identity line as plain text; remove only the Home/About/Contact/Back to top list and its unused styling. Remove the main landmark’s programmatic focus stop, which served Back to top. Nibras also rejected the added “About my approach” CTA and requested no replacement Home-to-About link. About retains its contextual Back to home link, both pages retain email contact options, and 404 retains dedicated Home and contact recovery actions. About remains available at its existing URL but is no longer discoverable through a link on Home. Reconsider that limitation only when Nibras wants a different route. This preserves complete built HTML and no-JavaScript access without adding replacement navigation.
 
+On 2026-11-20, Nibras requested removal of the About page because he no longer wants it. This supersedes the earlier instructions to retain its route and detailed approach. Remove the page without moving that content elsewhere or adding a replacement route. Its former URL returns the authored 404 page and is excluded from the sitemap. The homepage remains the identity, experience, and contact destination. Remove unused ProfilePage support and inline the experience list into the homepage now that its shared presentation boundary no longer exists. Reconsider only if Nibras requests another page.
+
 Present experience in reverse chronological order with company, role, dates, and concise employment context. Omit duplicated labels and elapsed-month counters. Nibras supplied the Insource Data and NysaClan roles and dates, and his [public profile README](https://github.com/ahammednibras8/ahammednibras8) supplies the general professional scope. Do not assign that general scope, other contributors' commits, or an organization-wide project to a particular role without evidence. This follows [Harvard's guidance](https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/) on factual, specific writing that is easy to scan. Company-specific achievements remain subject to Nibras's review.
 
 Keep the public profiles focused on GitHub and LinkedIn. Nibras chose to omit his Google developer profile and the proposed cloud-learning content. Reconsider when he wants to publish specific, verified credentials.
@@ -107,7 +109,7 @@ After successful trusted touch activation, request a single 10ms `navigator.vibr
 
 Nibras also requested that every authored link on Home, About, and 404 open in a new tab. Apply explicit `target="_blank"` and `rel="noopener noreferrer"` to each anchor, including companies, public profiles, contact choices, and internal recovery routes. This supersedes the earlier same-tab company-link behavior. Add concise title and `aria-describedby` hints, informed by [W3C's advance-warning guidance](https://www.w3.org/WAI/WCAG21/Techniques/general/G201), while preserving visible names. The mail link requests a new tab but the browser can still invoke its configured email handler; do not promise a tab instead of an app. Use native links rather than a global base target, a universal link wrapper, or JavaScript interception. Reconsider compose URLs if Gmail changes its routing, and reconsider the tab policy only when Nibras requests a different behavior.
 
-The shared experience component renders the two reviewed roles as an ordered list. Each entry requires a company, its public website URL, role, start month, end month or Present, and employment context. Nibras supplied the company URLs on 2026-11-18: [Insource Data](https://insourcedata.io/) and [NysaClan](https://nysaclan.com/). Link only the organization name using ordinary underlined text links, preserving native keyboard and new-tab navigation without JavaScript. Entries remain in document order and wrap within the existing section grid at all widths. No animation or client script is needed. Remove it if experience is no longer shared between the homepage and About page.
+The homepage renders the two reviewed roles as an ordered list. Each entry requires a company, its public website URL, role, start month, end month or Present, and employment context. Nibras supplied the company URLs on 2026-11-18: [Insource Data](https://insourcedata.io/) and [NysaClan](https://nysaclan.com/). Link only the organization name using ordinary underlined text links, preserving native keyboard and new-tab navigation without JavaScript. Entries remain in document order and wrap within the existing section grid at all widths. No animation or client script is needed. The former shared experience component is removed with About; keep the markup in the homepage until reuse or distinct behavior creates a new component boundary.
 
 ## Reconsider when
 

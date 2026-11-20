@@ -149,13 +149,13 @@ Do not use mono for sustained paragraphs. Keep names, role labels, dates, and te
 
 ## Layout
 
-The centered document and footer share a maximum width of 76rem. The page uses a single column below 48rem, six equal columns from 48rem, and twelve from 72rem. The minimum supported page width in the stylesheet is 20rem.
+The centered document and footer share a maximum width of 76rem. The page uses a single column below 48rem, six equal columns from 48rem, and twelve from 72rem. The minimum supported page width in the stylesheet is 320 CSS pixels, independent of the root font size so enlarged default text can reflow at that width.
 
 The frontmatter spacing names match the stylesheet. Interface spacing belongs inside controls and close groups; component spacing separates related content; editorial spacing separates reading units; section spacing defines the major vertical rhythm. Section padding is the section step vertically and the component step horizontally, increasing to the editorial step horizontally at 48rem. Grid gaps similarly increase from component to editorial spacing.
 
 At medium widths, introduction content spans the first five columns. In ordinary sections, headings span the first two columns and content occupies the remaining four. At wide widths, the introduction heading occupies columns two through five, while its supporting content occupies columns seven through eleven. Other section headings occupy columns two and three, with content beginning at column four. The footer identity follows the same wide grid.
 
-GitHub and LinkedIn sit inline in the introduction after the role and concise scope, with small static Font Awesome brand marks and visible labels. Each link retains a 44px minimum touch target. There is no separate Public profiles section. Experience begins with the verified employment record; the detailed approach appears on About. From the medium breakpoint, section headings and their first content align at the top; stacked mobile sections retain the editorial gap.
+GitHub and LinkedIn sit inline in the introduction after the role and concise scope, with small static Font Awesome brand marks and visible labels. Each link retains a 44px minimum touch target. There is no separate Public profiles section. Experience begins with the verified employment record. From the medium breakpoint, section headings and their first content align at the top; stacked mobile sections retain the editorial gap.
 
 ## Elevation & Depth
 
@@ -195,11 +195,11 @@ The existing white band between strong dark red rules marks identity and the hom
 
 ### Experience list
 
-The [shared experience component](src/components/Experience.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Each organization name links to its company website in a new tab using the existing underlined text-link states. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
+The experience markup in the [homepage](src/pages/index.astro) is a semantic ordered list with list markers visually removed. Role and organization share a title line. Each organization name links to its company website in a new tab using the existing underlined text-link states. Dates use semantic time elements; dates and employment context use secondary ink. Later entries have a structural divider and editorial spacing. No timeline icons, logos, badges, expansion controls, or animation are implemented.
 
 ### Footer identity and route access
 
-The footer retains Nibras's name and location as plain text. Its Home/About/Contact/Back to top list is removed, along with the unused main focus stop. There is no navbar or skip control. About retains “Back to home” in its introduction, and the dedicated 404 recovery actions retain Home and contact destinations. The rejected “About my approach” CTA is removed without a replacement; About remains directly addressable at `/about/`, with no link from Home under the approved scope.
+The footer retains Nibras's name and location as plain text, without navigation links or an unused main focus stop. There is no navbar or skip control. Nibras requested removal of the About page; `/about/` returns the authored 404 page. Its dedicated recovery actions retain Home and contact destinations.
 
 ### Recovery links
 

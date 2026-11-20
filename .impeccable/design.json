@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-17T16:30:44.560Z",
+  "generatedAt": "2026-11-20T18:52:02.000Z",
   "title": "Design System: Ahammed Nibras Portfolio",
   "extensions": {
     "colorMeta": {
@@ -180,7 +180,7 @@
       {
         "name": "short",
         "value": "120ms",
-        "purpose": "Shortened active-link transition."
+        "purpose": "Shortened active-link transition and copy-icon color transition without reduced motion."
       },
       {
         "name": "standard",
@@ -207,7 +207,7 @@
       {
         "name": "default",
         "value": "1px",
-        "purpose": "Frame, control outline, list divider, and section boundary."
+        "purpose": "Page frame, list dividers, section boundaries, tooltip border, and copy-control focus offset."
       },
       {
         "name": "emphasis",
@@ -221,6 +221,11 @@
       }
     ],
     "layout": [
+      {
+        "name": "minimum-page-width",
+        "value": "320px",
+        "purpose": "Minimum page width independent of the root font size so enlarged default text can reflow at that width."
+      },
       {
         "name": "page-measure",
         "value": "76rem",
@@ -244,8 +249,8 @@
       "kind": "button",
       "refersTo": "copy-email",
       "description": "Unboxed 44px copy icon; successful writes show a two-second Copied tooltip and 300ms icon-only primary-ink flash on a transparent background, with hidden live announcement. Outside pointer input, focus leaving the button, or Escape dismisses feedback; delayed writes cannot reopen dismissed feedback. Failures show manual guidance. Optional supported touch vibration respects reduced motion.",
-      "html": "<div class=\"ds-email\"><p class=\"ds-email-row\"><span>ahammednibras737@gmail.com</span><span class=\"ds-copy-control\"><button type=\"button\" class=\"ds-copy\" aria-label=\"Copy email address\" title=\"Copy email address\"><svg width=\"18\" height=\"18\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 448 512\"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc. --><path fill=\"currentColor\" d=\"M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l58.5 58.5c3 3 4.7 7.1 4.7 11.3L400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-197.5c0-17-6.7-33.3-18.7-45.3L370.7 18.7C358.7 6.7 342.5 0 325.5 0L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-16-48 0 0 16c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l16 0 0-48-16 0z\"/></svg></button><span class=\"ds-copy-tooltip\" aria-hidden=\"true\" hidden>Copied</span></span></p><p class=\"ds-status\" role=\"status\"></p></div>",
-      "css": ".ds-email { font-family: var(--font-reading); color: var(--color-ink-primary); } .ds-email-row {\n  display: flex;\n  min-block-size: var(--touch-target);\n  align-items: center;\n  gap: calc(var(--space-interface) / 2);\n}\n\n.ds-email-row > [data-email-address] {\n  min-inline-size: 0;\n}\n\n.ds-copy-control {\n  position: relative;\n  flex: 0 0 var(--touch-target);\n}\n\n.ds-copy-control:not([hidden]) {\n  display: flex;\n}\n\n.ds-copy {\n  inline-size: var(--touch-target);\n  min-block-size: var(--touch-target);\n  padding: var(--space-interface);\n  border: 0;\n  border-radius: 0;\n  background: transparent;\n  color: var(--color-action);\n  font: inherit;\n  cursor: pointer;\n}\n\n.ds-copy:not([hidden]) {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.ds-copy svg {\n  fill: currentcolor;\n}\n\n.ds-copy:focus-visible {\n  outline-offset: var(--border-width-default);\n}\n\n@media (hover: hover) {\n  .ds-copy:hover {\n    color: var(--color-action-active);\n  }\n}\n\n.ds-copy:active {\n  color: var(--color-action-active);\n}\n\n.ds-copy[aria-disabled=\"true\"] {\n  color: var(--color-ink-secondary);\n  cursor: wait;\n}\n\n.ds-copy[data-copied] {\n  color: var(--color-ink-primary);\n}\n\n.ds-copy-tooltip {\n  position: absolute;\n  z-index: 1;\n  inset-block-end: calc(100% + var(--space-interface));\n  inset-inline-end: 0;\n  padding: calc(var(--space-interface) / 2) var(--space-interface);\n  border: var(--border-width-default) solid var(--color-ink-primary);\n  background: var(--color-ink-primary);\n  color: var(--color-surface-raised);\n  font-size: 0.875em;\n  line-height: 1.55;\n  white-space: nowrap;\n  pointer-events: none;\n}\n\n@media (prefers-reduced-motion: no-preference) {\n  .ds-copy {\n    transition: color 120ms var(--motion-ease-out);\n  }\n}\n\n@media (forced-colors: active) {\n  .ds-copy {\n    color: ButtonText;\n  }\n\n  .ds-copy[data-copied] {\n    color: Highlight;\n  }\n\n  .ds-copy-tooltip {\n    border-color: CanvasText;\n    background: Canvas;\n    color: CanvasText;\n  }\n}\n\n.ds-status:not([data-error]) {\n  position: absolute;\n  overflow: hidden;\n  inline-size: 1px;\n  block-size: 1px;\n  padding: 0;\n  border: 0;\n  clip-path: inset(50%);\n  white-space: nowrap;\n}\n\n.ds-status[data-error] {\n  margin-block-start: var(--space-interface);\n  color: var(--color-ink-secondary);\n}\n\n .ds-copy:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: var(--border-width-default); }"
+      "html": "<div class=\"ds-email\"><p class=\"ds-email-row\"><span data-email-address>ahammednibras737@gmail.com</span><span class=\"ds-copy-control\"><button type=\"button\" class=\"ds-copy\" aria-label=\"Copy email address\" title=\"Copy email address\"><svg width=\"18\" height=\"18\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 448 512\"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc. --><path fill=\"currentColor\" d=\"M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l58.5 58.5c3 3 4.7 7.1 4.7 11.3L400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-197.5c0-17-6.7-33.3-18.7-45.3L370.7 18.7C358.7 6.7 342.5 0 325.5 0L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-16-48 0 0 16c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l16 0 0-48-16 0z\"/></svg></button><span class=\"ds-copy-tooltip\" aria-hidden=\"true\" hidden>Copied</span></span></p><p class=\"ds-status\" role=\"status\"></p></div>",
+      "css": ".ds-email { font-family: var(--font-reading); color: var(--color-ink-primary); line-height: 1.55; overflow-wrap: anywhere; }\n.ds-email-row, .ds-status { margin: 0; }\n\n.ds-email-row {\n  display: flex;\n  min-block-size: var(--touch-target);\n  align-items: center;\n  gap: calc(var(--space-interface) / 2);\n}\n\n.ds-email-row > [data-email-address] {\n  min-inline-size: 0;\n}\n\n.ds-copy-control {\n  position: relative;\n  flex: 0 0 var(--touch-target);\n}\n\n.ds-copy-control:not([hidden]) {\n  display: flex;\n}\n\n.ds-copy {\n  inline-size: var(--touch-target);\n  min-block-size: var(--touch-target);\n  padding: var(--space-interface);\n  border: 0;\n  border-radius: 0;\n  background: transparent;\n  color: var(--color-action);\n  font: inherit;\n  cursor: pointer;\n}\n\n.ds-copy:not([hidden]) {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.ds-copy svg {\n  fill: currentcolor;\n}\n\n.ds-copy:focus-visible {\n  outline-offset: var(--border-width-default);\n}\n\n@media (hover: hover) {\n  .ds-copy:hover {\n    color: var(--color-action-active);\n  }\n}\n\n.ds-copy:active {\n  color: var(--color-action-active);\n}\n\n.ds-copy[aria-disabled=\"true\"] {\n  color: var(--color-ink-secondary);\n  cursor: wait;\n}\n\n.ds-copy[data-copied] {\n  color: var(--color-ink-primary);\n}\n\n.ds-copy-tooltip {\n  position: absolute;\n  z-index: 1;\n  inset-block-end: calc(100% + var(--space-interface));\n  inset-inline-end: 0;\n  padding: calc(var(--space-interface) / 2) var(--space-interface);\n  border: var(--border-width-default) solid var(--color-ink-primary);\n  background: var(--color-ink-primary);\n  color: var(--color-surface-raised);\n  font-size: 0.875em;\n  line-height: 1.55;\n  white-space: nowrap;\n  pointer-events: none;\n}\n\n@media (prefers-reduced-motion: no-preference) {\n  .ds-copy {\n    transition: color 120ms var(--motion-ease-out);\n  }\n}\n\n@media (forced-colors: active) {\n  .ds-copy {\n    color: ButtonText;\n  }\n\n  .ds-copy[data-copied] {\n    color: Highlight;\n  }\n\n  .ds-copy-tooltip {\n    border-color: CanvasText;\n    background: Canvas;\n    color: CanvasText;\n  }\n}\n\n.ds-status:not([data-error]) {\n  position: absolute;\n  overflow: hidden;\n  inline-size: 1px;\n  block-size: 1px;\n  padding: 0;\n  border: 0;\n  clip-path: inset(50%);\n  white-space: nowrap;\n}\n\n.ds-status[data-error] {\n  margin-block-start: var(--space-interface);\n  color: var(--color-ink-secondary);\n}\n\n.ds-copy:focus-visible { outline: 0.1875rem solid var(--color-focus); outline-offset: var(--border-width-default); }\n@media (forced-colors: active) { .ds-copy:focus-visible { outline-color: Highlight; } }"
     },
     {
       "name": "Text link",
@@ -261,7 +266,7 @@
       "refersTo": "signature-band",
       "description": "Raised white surface with dark red rules; no shadow or rounded card.",
       "html": "<section class=\"ds-band\"><h2 class=\"ds-band-heading\">Contact</h2><p>If you want to discuss a role or project, email me.</p></section>",
-      "css": ".ds-band { padding: var(--space-section) var(--space-component); background: var(--color-surface-raised); color: var(--color-ink-primary); border-block: var(--border-width-emphasis) solid var(--color-action); font-family: var(--font-reading); } .ds-band-heading { font-size: 1.5rem; line-height: 1.15; letter-spacing: -.025em; margin: 0 0 var(--space-editorial); } @media (width >= 48rem) { .ds-band { padding-inline: var(--space-editorial); } }"
+      "css": ".ds-band { display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--space-section) var(--space-component); background: var(--color-surface-raised); color: var(--color-ink-primary); border-block: var(--border-width-emphasis) solid var(--color-action); font-family: var(--font-reading); line-height: 1.55; overflow-wrap: anywhere; }\n.ds-band > * { min-width: 0; max-width: var(--text-measure); margin: 0; }\n.ds-band-heading { font-size: 1.5rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.025em; text-wrap: balance; }\n.ds-band-heading + * { margin-block-start: var(--space-editorial); }\n@media (width >= 48rem) { .ds-band { grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: var(--space-editorial); padding-inline: var(--space-editorial); } .ds-band-heading { grid-column: 1 / span 2; } .ds-band > :not(.ds-band-heading) { grid-column: 3 / -1; } .ds-band-heading + * { margin-block-start: 0; } }\n@media (width >= 72rem) { .ds-band { grid-template-columns: repeat(12, minmax(0, 1fr)); } .ds-band-heading { grid-column: 2 / span 2; } .ds-band > :not(.ds-band-heading) { grid-column: 4 / span 6; } }"
     },
     {
       "name": "Experience entry",
@@ -285,20 +290,17 @@
       "refersTo": "gmail-compose",
       "description": "Plain underlined Gmail compose link; same 44px minimum height and focus states as native email option.",
       "html": "<a class=\"ds-gmail\" href=\"https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ahammednibras737%40gmail.com\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Opens in a new tab\" aria-describedby=\"ds-gmail-compose-new-tab\">Write in Gmail</a><span id=\"ds-gmail-compose-new-tab\" hidden>Opens in a new tab.</span>",
-      "css": ".ds-gmail { display: inline-flex; align-items: center; min-block-size: var(--touch-target); padding-block: var(--space-interface); background: transparent; color: var(--color-action); font-family: var(--font-reading); text-decoration: underline; text-underline-offset: .2em; } .ds-gmail:visited { color: var(--color-action-visited); } .ds-gmail:active { color: var(--color-action-active); } .ds-gmail:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; }"
+      "css": ".ds-gmail { display: inline-block; min-block-size: var(--touch-target); padding-block: var(--space-interface); background: transparent; color: var(--color-action); font-family: var(--font-reading); line-height: 1.55; text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .2em; } .ds-gmail:visited { color: var(--color-action-visited); } .ds-gmail:active { color: var(--color-action-active); text-decoration-thickness: .13em; } .ds-gmail:focus-visible { outline: .1875rem solid var(--color-focus); outline-offset: .1875rem; } @media (hover: hover) and (prefers-reduced-motion: no-preference) { .ds-gmail { transition: color var(--motion-standard) var(--motion-ease-out), text-decoration-thickness var(--motion-standard) var(--motion-ease-out); } .ds-gmail:active { transition-duration: var(--motion-short); } } @media (hover: hover) { .ds-gmail:hover { text-decoration-thickness: .13em; } } @media (forced-colors: active) { .ds-gmail { color: LinkText; } .ds-gmail:visited { color: VisitedText; } .ds-gmail:active { color: ActiveText; } .ds-gmail:focus-visible { outline-color: Highlight; } }"
     }
   ],
   "narrative": {
     "northStar": "A clear conversation about the work.",
-    "overview": "The established direction is technical without resembling a terminal, precise without being cold, and quiet without being empty. Typography carries the reading hierarchy. White surfaces, dark red rules, and faint structural borders organize the page without shadows or ornamental containers. These descriptions come from [ADR 0002](docs/decisions/0002-personal-design-direction.md); no replacement identity or new visual metaphor is introduced here.",
+    "overview": "This records the visual system in the current working source, including the profile, experience, and contact changes. It is not a claim that those changes are deployed or that every interaction has passed verification. The source is [global.css](src/styles/global.css), the [document layout](src/layouts/DocumentLayout.astro), the route pages, and the shared components. Update this record when an approved implementation changes those sources.\n\nThe established direction is technical without resembling a terminal, precise without being cold, and quiet without being empty. Typography carries the reading hierarchy. White surfaces, dark red rules, and faint structural borders organize the page without shadows or ornamental containers. These descriptions come from [ADR 0002](docs/decisions/0002-personal-design-direction.md); no replacement identity or new visual metaphor is introduced here.\n\nADR 0002's living system map remains the direction for a future iteration. The current framed page is not an implemented map. Relationships in future work must connect real content, routes, or evidence.",
     "keyCharacteristics": [
       "Readable technical content with a limited type and color vocabulary.",
       "Clear hierarchy through weight, spacing, and restrained rules.",
       "Responsive alignment that preserves the HTML reading order.",
-      "Visible links and focus feedback, with motion limited to interaction states.",
-      "Inline labelled brand links keep profiles beside identity; experience starts with verified roles.",
-      "The footer keeps plain name/location text without navigation links. About links home; Home has no About CTA.",
-      "Copy is an inline icon; Gmail and native email are separate choices. Authored links request new tabs with advance hints."
+      "Visible links and focus feedback, with motion limited to interaction states."
     ],
     "rules": [],
     "dos": [
