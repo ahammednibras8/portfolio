@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("robots allows production crawling and advertises the generated sitemap", async ({
   request,
 }) => {
-  const siteUrl = process.env.SITE_URL ?? "https://example.com";
+  const siteUrl = process.env.SITE_URL;
   const response = await request.get("/robots.txt");
 
   expect(response.ok()).toBe(true);

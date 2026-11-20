@@ -1,4 +1,17 @@
 import { defineConfig, devices } from "@playwright/test";
+import { existsSync } from "node:fs";
+
+const envFile = new URL(".env", import.meta.url);
+if (existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+}
+
+const siteURL = process.env.SITE_URL;
+if (!siteURL) {
+  throw new Error(
+    "Set SITE_URL in .env or the environment before running browser tests.",
+  );
+}
 
 const isCI = Boolean(process.env.CI);
 const baseURL = "http://127.0.0.1:4322";
@@ -8,6 +21,7 @@ const useExistingBuild = process.env.PLAYWRIGHT_USE_EXISTING_BUILD === "true";
 
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   outputDir: "test-results",
   fullyParallel: true,
   forbidOnly: isCI,
@@ -45,7 +59,7 @@ export default defineConfig({
       : `pnpm run build && ${pagesCommand}`,
     url: baseURL,
     env: {
-      SITE_URL: process.env.SITE_URL ?? "https://example.com",
+      SITE_URL: siteURL,
     },
     reuseExistingServer: false,
     timeout: 120_000,

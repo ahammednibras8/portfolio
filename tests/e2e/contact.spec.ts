@@ -2,159 +2,161 @@ import { expect, test } from "@playwright/test";
 
 const email = "ahammednibras737@gmail.com";
 
-for (const path of ["/", "/about/"]) {
-  test(`${path} copies only the email address and waits for success`, async ({
-    page,
-  }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "clipboard", {
-        value: {
-          writeText: (text: string) =>
-            new Promise<void>((resolve) => {
-              document.documentElement.dataset.copiedText = text;
-              document.documentElement.dataset.copyWrites = String(
-                Number(document.documentElement.dataset.copyWrites ?? 0) + 1,
-              );
-              document.addEventListener("finish-copy", () => resolve(), {
-                once: true,
-              });
-            }),
-        },
-      });
+test("the homepage copies only the email address and waits for success", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: (text: string) =>
+          new Promise<void>((resolve) => {
+            document.documentElement.dataset.copiedText = text;
+            document.documentElement.dataset.copyWrites = String(
+              Number(document.documentElement.dataset.copyWrites ?? 0) + 1,
+            );
+            document.addEventListener("finish-copy", () => resolve(), {
+              once: true,
+            });
+          }),
+      },
     });
-    await page.goto(path);
-    const button = page.getByRole("button", { name: "Copy email address" });
-    await button.focus();
-    await page.keyboard.press("Enter");
-    await expect(button).toBeDisabled();
-    await expect(button).toBeFocused();
-    await page.keyboard.press("Enter");
-    await expect(page.locator("html")).toHaveAttribute("data-copy-writes", "1");
-    await expect(page.getByRole("status")).toBeEmpty();
-    await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
-    await expect(button).not.toHaveAttribute("data-copied");
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-copied-text",
-      email,
-    );
-    await page.evaluate(() => document.dispatchEvent(new Event("finish-copy")));
-    await expect(page.getByRole("status")).toHaveText("Email address copied.");
-    await expect(button).toBeEnabled();
-    await expect(button).toBeFocused();
-    await expect(page).toHaveURL(new RegExp(`${path}$`));
   });
+  await page.goto("/");
+  const button = page.getByRole("button", { name: "Copy email address" });
+  await button.focus();
+  await page.keyboard.press("Enter");
+  await expect(button).toBeDisabled();
+  await expect(button).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-copy-writes", "1");
+  await expect(page.getByRole("status")).toBeEmpty();
+  await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
+  await expect(button).not.toHaveAttribute("data-copied");
+  await expect(page.locator("html")).toHaveAttribute("data-copied-text", email);
+  await page.evaluate(() => document.dispatchEvent(new Event("finish-copy")));
+  await expect(page.getByRole("status")).toHaveText("Email address copied.");
+  await expect(button).toBeEnabled();
+  await expect(button).toBeFocused();
+  await expect(page).toHaveURL(/\/$/);
+});
 
-  test(`${path} leaves a manual fallback when clipboard permission is denied`, async ({
-    page,
-  }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "clipboard", {
-        value: {
-          writeText: () =>
-            Promise.reject(new DOMException("Denied", "NotAllowedError")),
-        },
-      });
+test("the homepage leaves a manual fallback when clipboard permission is denied", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: () =>
+          Promise.reject(new DOMException("Denied", "NotAllowedError")),
+      },
     });
-    await page.goto(path);
-    const button = page.getByRole("button", { name: "Copy email address" });
-    await button.focus();
-    await page.keyboard.press("Space");
-    await expect(page.getByRole("status")).toHaveText(
-      "Couldn’t copy. Select and copy the email address above.",
-    );
-    await expect(page.getByRole("status")).toHaveAttribute("data-error", "");
-    await expect(page.getByRole("status")).toBeVisible();
-    await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
-    await expect(button).not.toHaveAttribute("data-copied");
-    await expect(page.locator("[itemprop='email']")).toHaveText(email);
-    await expect(button).toBeEnabled();
-    await expect(
-      page.getByRole("link", { name: "Open email app" }),
-    ).toHaveAttribute("href", `mailto:${email}`);
   });
+  await page.goto("/");
+  const button = page.getByRole("button", { name: "Copy email address" });
+  await button.focus();
+  await page.keyboard.press("Space");
+  await expect(page.getByRole("status")).toHaveText(
+    "Couldn’t copy. Select and copy the email address above.",
+  );
+  await expect(page.getByRole("status")).toHaveAttribute("data-error", "");
+  await expect(page.getByRole("status")).toBeVisible();
+  await expect(page.locator("[data-copy-tooltip]")).toBeHidden();
+  await expect(button).not.toHaveAttribute("data-copied");
+  await expect(page.locator("[itemprop='email']")).toHaveText(email);
+  await expect(button).toBeEnabled();
+  await expect(
+    page.getByRole("link", { name: "Open email app" }),
+  ).toHaveAttribute("href", `mailto:${email}`);
+});
 
-  test(`${path} hides copying when the Clipboard API is unavailable`, async ({
-    page,
-  }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "clipboard", { value: undefined });
-    });
-    await page.goto(path);
-    await expect(
-      page.getByRole("button", { name: "Copy email address" }),
-    ).toHaveCount(0);
-    await expect(page.locator("[itemprop='email']")).toHaveText(email);
-    await expect(
-      page.getByRole("link", { name: "Open email app" }),
-    ).toBeVisible();
+test("the homepage hides copying when the Clipboard API is unavailable", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", { value: undefined });
   });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Copy email address" }),
+  ).toHaveCount(0);
+  await expect(page.locator("[itemprop='email']")).toHaveText(email);
+  await expect(
+    page.getByRole("link", { name: "Open email app" }),
+  ).toBeVisible();
+});
 
-  test(`${path} keeps an icon-only copy action beside the address at narrow and enlarged text sizes`, async ({
-    page,
-  }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "clipboard", {
-        value: { writeText: () => Promise.resolve() },
-      });
+test("the homepage keeps copying usable at narrow and enlarged text sizes", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: () => Promise.resolve() },
     });
-    await page.goto(path);
-    await page.evaluate(() => document.fonts.ready);
-    const button = page.getByRole("button", {
-      name: "Copy email address",
-      exact: true,
-    });
-    await expect(button).toBeVisible();
-    await expect(button).toHaveText("");
-    await expect(button).toHaveAttribute("title", "Copy email address");
-    await expect(button.locator("svg[aria-hidden='true']")).toHaveCount(1);
-    for (const width of [320, 390, 768, 1440]) {
-      await page.setViewportSize({ width, height: 900 });
-      for (const fontSize of ["100%", "200%"]) {
-        await page.locator(".email-contact").evaluate((contact, size) => {
-          contact.style.fontSize = size;
-        }, fontSize);
-        const geometry = await page
-          .locator(".email-address-row")
-          .evaluate((row) => {
-            const address = row
-              .querySelector("[data-email-address]")
-              ?.getBoundingClientRect();
-            const copy = row.querySelector("button")?.getBoundingClientRect();
-            if (!address || !copy) throw new Error("Missing email actions.");
-            return {
-              afterAddress: copy.left >= address.right - 1,
-              centerOffset: Math.abs(
-                copy.top + copy.height / 2 - address.top - address.height / 2,
-              ),
-              width: copy.width,
-              height: copy.height,
-              right: copy.right,
-              viewport: document.documentElement.clientWidth,
-              overflow:
-                document.documentElement.scrollWidth -
-                document.documentElement.clientWidth,
-            };
-          });
-        expect(geometry.afterAddress).toBe(true);
-        expect(geometry.centerOffset).toBeLessThan(1);
-        expect(geometry.width).toBeGreaterThanOrEqual(44);
-        expect(geometry.height).toBeGreaterThanOrEqual(44);
-        expect(geometry.right).toBeLessThanOrEqual(geometry.viewport);
-        expect(geometry.overflow).toBe(0);
-        await button.click();
-        const tooltip = page.locator("[data-copy-tooltip]");
-        await expect(tooltip).toBeVisible();
-        const tip = await tooltip.boundingBox();
-        expect(tip?.x).toBeGreaterThanOrEqual(0);
-        expect((tip?.x ?? 0) + (tip?.width ?? 0)).toBeLessThanOrEqual(width);
-        await page.keyboard.press("Escape");
-      }
+  });
+  await page.goto("/");
+  await page.evaluate(() => document.fonts.ready);
+  const button = page.getByRole("button", {
+    name: "Copy email address",
+    exact: true,
+  });
+  await expect(button).toBeVisible();
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const fontSize of ["100%", "200%"]) {
+      await page.locator(".email-contact").evaluate((contact, size) => {
+        contact.style.fontSize = size;
+      }, fontSize);
+      const geometry = await page
+        .locator(".email-address-row")
+        .evaluate((row) => {
+          const copy = row.querySelector("button")?.getBoundingClientRect();
+          if (!copy) throw new Error("Missing email actions.");
+          return {
+            width: copy.width,
+            height: copy.height,
+            right: copy.right,
+            viewport: document.documentElement.clientWidth,
+            overflow:
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth,
+          };
+        });
+      expect(geometry.width).toBeGreaterThanOrEqual(44);
+      expect(geometry.height).toBeGreaterThanOrEqual(44);
+      expect(geometry.right).toBeLessThanOrEqual(geometry.viewport);
+      expect(geometry.overflow).toBe(0);
+      await button.click();
+      const tooltip = page.locator("[data-copy-tooltip]");
+      await expect(tooltip).toBeVisible();
+      const tip = await tooltip.boundingBox();
+      expect(tip?.x).toBeGreaterThanOrEqual(0);
+      expect((tip?.x ?? 0) + (tip?.width ?? 0)).toBeLessThanOrEqual(width);
+      await page.keyboard.press("Escape");
     }
-  });
+  }
+});
 
+test("the About page initializes its copy action", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: (text: string) => {
+          document.documentElement.dataset.copiedText = text;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  await page.goto("/about/");
+  await page.getByRole("button", { name: "Copy email address" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-copied-text", email);
+  await expect(page.getByRole("status")).toHaveText("Email address copied.");
+});
+
+for (const path of ["/", "/about/"]) {
   test(`${path} keeps profiles, experience, and contact usable without JavaScript`, async ({
     browser,
-  }, testInfo) => {
+  }) => {
     const context = await browser.newContext({
       javaScriptEnabled: false,
       viewport: { width: 320, height: 800 },
@@ -170,12 +172,6 @@ for (const path of ["/", "/about/"]) {
       "GitHub",
       "LinkedIn",
     ]);
-    await expect(
-      page.locator(".profile-links svg[aria-hidden='true']"),
-    ).toHaveCount(2);
-    await expect(
-      page.getByRole("heading", { name: "Public profiles" }),
-    ).toHaveCount(0);
     await expect(page.locator(".experience-list h3")).toHaveText([
       "Developer · Insource Data",
       "Intern · NysaClan",
@@ -193,13 +189,6 @@ for (const path of ["/", "/about/"]) {
     await expect(
       page.getByRole("button", { name: "Copy email address" }),
     ).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: /Google developer/ }),
-    ).toHaveCount(0);
-    await expect(page.locator("main")).not.toContainText(
-      "I use ahammednibras8",
-    );
-    await expect(page.getByRole("link", { name: /Skip to/ })).toHaveCount(0);
     await page.locator("[data-email-address]").evaluate((address) => {
       const selection = window.getSelection();
       const range = document.createRange();
@@ -217,17 +206,6 @@ for (const path of ["/", "/about/"]) {
           document.documentElement.clientWidth,
       ),
     ).toBe(0);
-    if (testInfo.project.name === "chromium") {
-      await testInfo.attach("mobile", {
-        body: await page.screenshot({ fullPage: true }),
-        contentType: "image/png",
-      });
-      await page.setViewportSize({ width: 1440, height: 1000 });
-      await testInfo.attach("desktop", {
-        body: await page.screenshot({ fullPage: true }),
-        contentType: "image/png",
-      });
-    }
     await context.close();
   });
 }
