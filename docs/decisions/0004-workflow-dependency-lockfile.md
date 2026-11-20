@@ -57,8 +57,8 @@ coverage gaps and unsupported references for review.
 - The lockfile does not pin packages, shell downloads, runner images, or
   container images. External reusable workflow dependencies need coverage in
   their source repositories. Locked code still needs review.
-- Preserve the verified artifact, protected environments, and manual production
-  approval from ADR 0003.
+- Preserve the verified artifact, protected environments, and production
+  deployment policy from ADR 0003.
 
 ## Where it is used
 
@@ -79,7 +79,7 @@ this PR.
 After merge, confirm CI runs successfully with the lockfile. Check the first
 Dependabot Actions version-update PR for coordinated workflow and lockfile
 changes, and observe audit and deployment through their normal triggers and
-approval process. These checks cannot be established by local generation.
+verification steps. These checks cannot be established by local generation.
 
 Then check whether Require lockfile is available in the repository's Actions
 settings. Enable it only after all targeted workflows are covered and verified;
