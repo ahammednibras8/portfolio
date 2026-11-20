@@ -7,13 +7,15 @@
 
 Host the static site on Cloudflare Pages. Use Direct Upload from GitHub Actions instead of Cloudflare's Git integration.
 
-The production branch is `main`. GitHub Actions builds and verifies `dist/`, then stores that exact directory as the SHA-qualified `portfolio-dist-<commit>` workflow artifact. A separate job deploys the artifact to Cloudflare's `feedback` preview branch and verifies both its immutable deployment URL and stable feedback alias. Only then does the workflow pause for approval through the protected `production` environment. After approval, production receives the same artifact through the Wrangler version pinned in `package.json`.
+The production branch is `main`. GitHub Actions builds and verifies `dist/`, then stores that exact directory as the SHA-qualified `portfolio-dist-<commit>` workflow artifact. A separate job deploys the artifact to Cloudflare's `feedback` preview branch and verifies both its immutable deployment URL and stable feedback alias. Production then automatically receives the same artifact through the Wrangler version pinned in `package.json`, using the branch-restricted `production` environment without a separate approval step.
 
 ## Reason
 
 The site is already a complete static artifact. It does not need another build system or a runtime service.
 
 Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives the files that passed the repository checks instead of rebuilding the source independently.
+
+On 2026-11-19, Nibras approved automatic deployment to remove the repeated production approval step. Merging a pull request after the required checks pass is the publishing decision. Each deployment records its Git commit SHA; deployment does not require a version bump or named release.
 
 ## Evidence or source
 
@@ -33,7 +35,7 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 - The feedback deployment must use Cloudflare's `feedback` preview branch and match the workflow commit SHA.
 - Both the immutable feedback URL and stable feedback alias must serve the built homepage with Cloudflare's `X-Robots-Tag: noindex` header before production can proceed.
 - Cloudflare credentials belong to protected GitHub environments, not repository-level Actions secrets, and are unavailable to pull-request and verification jobs.
-- Production deployment requires manual approval during the feedback phase. The approver confirms that the verified commit is intended for release; approval does not replace automated verification.
+- The `production` environment must not require reviewers or a wait timer. Production proceeds automatically only after repository verification and feedback verification pass. Keep the environment's deployment branch restriction set to `main`.
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
 - Do not add Pages Functions, Workers, R2, another server, or another build pipeline under this decision.
 - Pull requests do not receive public preview deployments. Feedback previews are created only after a change reaches `main`, remain outside search indexes, and do not receive production-environment credentials.
@@ -42,9 +44,9 @@ Direct Upload keeps testing and deployment in one pipeline. Cloudflare receives 
 ## Where it is used
 
 - `.github/workflows/ci.yml` verifies pull requests without deployment credentials.
-- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, deploys and verifies the feedback preview, waits for production approval, and uploads the same site artifact.
+- `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, deploys and verifies the feedback preview, and automatically uploads the same site artifact to production.
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
-- The `production` environment limits deployment to `main`, requires approval, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job.
+- The `production` environment limits deployment to `main`, has no required reviewer or wait timer, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job. These protection settings are managed in GitHub, separately from the workflow file.
 - The `feedback` environment is restricted to `main`, exposes deployment credentials only to the feedback job, and records the stable feedback alias as its deployment URL.
 - Cloudflare Pages project `ahammed-nibras` serves the canonical `https://ahammednibras.com/` origin. Its `pages.dev` host remains the Pages service hostname and preview namespace.
 

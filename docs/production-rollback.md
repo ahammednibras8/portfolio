@@ -20,6 +20,8 @@ Fix forward when production remains safe and usable, the correction is small and
 
 ## Roll back in Cloudflare
 
+Before rolling back, cancel any running or queued Deploy workflow runs and pause merging changes to `main`. Production deploys automatically after verification, so an in-flight run or a new merge can replace the rollback.
+
 1. In the target deployment's three-dot actions menu, select **Rollback to this deployment**.
 2. Confirm that the dialog names the intended production deployment and commit.
 3. Confirm the rollback.
@@ -84,4 +86,4 @@ Repeat this rehearsal after a material deployment-process change.
 
 ## Repair after rollback
 
-Create a focused pull request that fixes or reverts the bad change. Run the full verification suite, deploy the feedback artifact, and approve production only after the real-user checks pass. Never force-push or reset `main` to imitate a rollback.
+Create a focused pull request that fixes or reverts the bad change. Run the full verification suite and complete the real-user review before merging. Merging resumes automatic deployment through feedback verification and production smoke testing. Never force-push or reset `main` to imitate a rollback.
