@@ -251,17 +251,6 @@ jobs:
           CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
 
       - name: Smoke test production
-        run: |
-          production_body="$RUNNER_TEMP/production-home.html"
-
-          curl --fail --silent --show-error --location \
-            --retry 5 \
-            --retry-delay 2 \
-            --retry-all-errors \
-            --output "$production_body" \
-            "$PRODUCTION_URL"
-
-          test -s "$production_body"
-          grep -Fq "<title>Ahammed Nibras — Software developer</title>" "$production_body"
+        run: bash scripts/verify-production.sh "$PRODUCTION_URL" dist/index.html
         env:
           PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}

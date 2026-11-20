@@ -2,7 +2,7 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-Current version: `v0.1.0`. This is the first public release.
+Current version: `v0.2.1`.
 
 Production: [ahammednibras.com](https://ahammednibras.com/)
 
@@ -35,6 +35,7 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 
 - Pull requests run the quality checks but do not create public preview deployments.
 - A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. After the feedback deployment passes its smoke test, production requires manual approval before that same artifact is uploaded to the `ahammed-nibras` Pages project.
+- The production smoke test checks the homepage against the verified artifact, retrying HTTP failures and content mismatches up to six times. It fails if production never serves the expected bytes.
 - Cloudflare keeps each successful production deployment. Follow the [production rollback runbook](docs/production-rollback.md) when a release must be reverted.
 - The canonical public address is `ahammednibras.com`. The production `pages.dev` hostname redirects to it while immutable preview deployments remain available.
 
