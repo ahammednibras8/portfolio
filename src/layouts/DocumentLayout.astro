@@ -61,6 +61,38 @@ const personId = new URL("#person", homepage).href;
     <meta name="twitter:description" content={description} />
 
     <title>{title}</title>
+
+    <script>
+      function shouldLoadAnalytics() {
+        if (
+          import.meta.env.PUBLIC_ANALYTICS_ENABLED !== "true" ||
+          window.location.origin !== "https://ahammednibras.com" ||
+          window.location.pathname !== "/"
+        ) {
+          return false;
+        }
+
+        try {
+          return window.localStorage.getItem("umami.disabled") === null;
+        } catch {
+          return false;
+        }
+      }
+
+      if (shouldLoadAnalytics()) {
+        const tracker = document.createElement("script");
+        tracker.src = "https://cloud.umami.is/script.js";
+        tracker.async = true;
+        tracker.referrerPolicy = "no-referrer";
+        tracker.dataset.websiteId = "994f1189-2ae4-48b0-9b15-6b8c6f5c785f";
+        tracker.dataset.autoTrack = "false";
+        tracker.dataset.domains = "ahammednibras.com";
+        tracker.dataset.excludeSearch = "true";
+        tracker.dataset.excludeHash = "true";
+
+        document.head.append(tracker);
+      }
+    </script>
   </head>
 
   <body>
