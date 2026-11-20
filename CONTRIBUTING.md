@@ -99,6 +99,64 @@ decision and enforcement rollout.
 - Never invent a number, quote, date, customer, or technical detail.
 - Do not publish a name, image, metric, or internal detail without permission.
 
+## Use Impeccable
+
+The project skill is already committed in `.agents/skills/impeccable/`; a fresh
+clone does not need another installation. Open the repository in your coding
+tool and reload it if the skill is not listed. Read [AGENTS.md](AGENTS.md),
+[PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md), and the relevant decision record
+before design work. Nibras owns the direction, factual claims, and final choices.
+
+In Codex chat, start with a named surface and request findings before edits:
+
+```text
+$impeccable critique the homepage introduction. Report findings only.
+$impeccable audit the email contact controls. Report findings only.
+```
+
+Choose one of those reviews for the task. Read the evidence with Nibras, who
+selects the findings to address. Then request a targeted refinement, for example:
+
+```text
+$impeccable adapt the homepage for the verified enlarged-text overflow.
+Preserve the approved design and factual copy. Fix only the selected finding.
+```
+
+Run the smallest relevant check first, review the rendered result when appearance
+or interaction changes, then run `pnpm run verify`. Shared layout, interaction,
+and browser-sensitive CSS also require the cross-browser checks below. Review
+findings are evidence to assess, not automatic permission to redesign the site.
+
+Use `$impeccable doctor` to diagnose context drift. If it calls for a sidecar
+refresh, request `$impeccable document` with an explicit instruction to preserve
+`DESIGN.md` and refresh only `.impeccable/design.json`. Re-run doctor afterward.
+Keep setup and hook checks separate from UI refinement; inspect hook status with
+`$impeccable hooks status` and review local hook consent in the coding tool.
+
+### Update the vendored skill
+
+Make updates on a dedicated branch. Read the
+[upstream installation and update guide](https://impeccable.style/tutorials/getting-started/)
+and review the intended release first. Run `npx impeccable@X.Y.Z update` from the
+repository root, replacing `X.Y.Z` with the exact reviewed installer version.
+Keep the integration scoped to this project. The installer version and the
+installed skill and engine versions must each be reviewed; do not assume they
+are identical.
+
+Inspect the complete diff in `.agents/skills/impeccable/` and `.codex/hooks.json`.
+Confirm the skill version in `SKILL.md`, the engine pin in `scripts/VERSION`, and
+its matching `scripts/engine-checksums.txt` entries against the reviewed upstream
+release. Retain upstream licenses and attribution; update `UPSTREAM.txt` and the
+README's recorded versions to match. Preserve project context and review any
+migrations separately. Reload the coding tool, run doctor and check hook status,
+then run `pnpm run verify` before committing the update.
+
+Generated review reports belong in the ignored `.impeccable/critique/`,
+`.impeccable/audit/`, and `.impeccable/review/` directories. They are temporary
+evidence tied to a particular source version; put accepted durable decisions in
+the ledger instead. Commit reviewed context and version metadata, while keeping
+reports, platform binaries, caches, and local hook consent out of Git.
+
 ## Check the work
 
 Run all required local checks:

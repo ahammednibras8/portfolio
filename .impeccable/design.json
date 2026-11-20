@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-20T06:35:25.611Z",
+  "generatedAt": "2026-11-20T18:52:02.000Z",
   "title": "Design System: Ahammed Nibras Portfolio",
   "extensions": {
     "colorMeta": {
@@ -221,6 +221,11 @@
       }
     ],
     "layout": [
+      {
+        "name": "minimum-page-width",
+        "value": "320px",
+        "purpose": "Minimum page width independent of the root font size so enlarged default text can reflow at that width."
+      },
       {
         "name": "page-measure",
         "value": "76rem",
