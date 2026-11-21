@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { promisify } from "node:util";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 
 const run = promisify(execFile);
 let buildDirectory = "";
@@ -15,6 +15,7 @@ type AnalyticsWindow = Window & {
   ) => Record<string, unknown> | false;
   umami?: { track: (payload: Record<string, unknown>) => unknown };
   testPageviews?: Record<string, unknown>[];
+  testPolicyViolations?: { directive: string; url: string }[];
 };
 
 // Each project builds both settings once; do not change source or the local env.
@@ -44,6 +45,7 @@ async function visitBuild(
   enabled: string,
   destination: string,
   policy: string,
+  respondToExternal?: (route: Route) => Promise<void>,
 ) {
   const externalRequests: string[] = [];
   const origin = new URL(destination).origin;
@@ -62,7 +64,8 @@ async function visitBuild(
     const url = new URL(route.request().url());
     if (url.origin !== origin) {
       externalRequests.push(url.href);
-      await route.abort();
+      if (respondToExternal) await respondToExternal(route);
+      else await route.abort();
       return;
     }
 
@@ -114,13 +117,18 @@ for (const [enabled, destination] of [
   });
 }
 
-test("the enabled production homepage configures manual tracking and remains blocked by the current policy", async ({
+test("the enabled production homepage configures manual tracking at the permitted URLs", async ({
   page,
   request,
 }) => {
   const response = await request.get("/");
   const policy = response.headers()["content-security-policy"];
-  expect(policy).toContain("script-src 'self';");
+  expect(policy).toContain(
+    "script-src 'self' https://cloud.umami.is/script.js;",
+  );
+  expect(policy).toContain(
+    "connect-src 'self' https://gateway.umami.is/api/send;",
+  );
   const externalRequests = await visitBuild(
     page,
     "true",
@@ -137,6 +145,10 @@ test("the enabled production homepage configures manual tracking and remains blo
     "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
   );
   await expect(tracker).toHaveAttribute("data-auto-track", "false");
+  await expect(tracker).toHaveAttribute(
+    "data-host-url",
+    "https://gateway.umami.is",
+  );
   await expect(tracker).toHaveAttribute("data-domains", "ahammednibras.com");
   await expect(tracker).toHaveAttribute("data-exclude-search", "true");
   await expect(tracker).toHaveAttribute("data-exclude-hash", "true");
@@ -146,7 +158,152 @@ test("the enabled production homepage configures manual tracking and remains blo
   );
   await expect(tracker).toHaveJSProperty("referrerPolicy", "no-referrer");
   await expect(page.locator("script:not([src])")).toHaveCount(0);
-  expect(externalRequests).toEqual([]);
+  expect(externalRequests).toEqual(["https://cloud.umami.is/script.js"]);
+});
+
+test("the permitted SDK load sends filtered pageviews and successful copies through the collector", async ({
+  page,
+  request,
+}) => {
+  const collected: unknown[] = [];
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: () => Promise.resolve() },
+    });
+  });
+  const response = await request.get("/");
+  const externalRequests = await visitBuild(
+    page,
+    "true",
+    "https://ahammednibras.com/?private=value#contact",
+    response.headers()["content-security-policy"] ?? "",
+    async (route) => {
+      const url = route.request().url();
+      if (url === "https://cloud.umami.is/script.js") {
+        expect(route.request().headers().referer).toBeUndefined();
+        // Replace only the third-party SDK. The product must initiate tracking
+        // after the browser's real load event and use native fetch under CSP.
+        await route.fulfill({
+          contentType: "application/javascript",
+          body: `
+            const collector = document.currentScript.dataset.hostUrl + "/api/send";
+            window.umami = {
+              track: (payload) => fetch(collector, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: "event", payload }),
+              }).then((response) => {
+                if (!response.ok) throw new Error("Collection failed");
+              }),
+            };
+          `,
+        });
+      } else if (url === "https://gateway.umami.is/api/send") {
+        if (route.request().method() === "POST") {
+          collected.push(route.request().postDataJSON());
+        }
+        await route.fulfill({
+          contentType: "application/json",
+          headers: {
+            "access-control-allow-origin": "https://ahammednibras.com",
+            "access-control-allow-methods": "POST, OPTIONS",
+            "access-control-allow-headers": "content-type",
+          },
+          body: "{}",
+        });
+      } else {
+        await route.abort();
+      }
+    },
+  );
+  const payload = {
+    website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+    hostname: "ahammednibras.com",
+    url: "/",
+    title: "Portfolio",
+    referrer: "",
+  };
+  await expect.poll(() => collected).toEqual([{ type: "event", payload }]);
+  await page.getByRole("button", { name: "Copy email address" }).click();
+  await expect(page.getByRole("status")).toHaveText("Email address copied.");
+  await expect
+    .poll(() => collected)
+    .toEqual([
+      { type: "event", payload },
+      { type: "event", payload: { ...payload, name: "contact_email_copied" } },
+    ]);
+  expect(
+    externalRequests.every((url) =>
+      [
+        "https://cloud.umami.is/script.js",
+        "https://gateway.umami.is/api/send",
+      ].includes(url),
+    ),
+  ).toBe(true);
+  expect(pageErrors).toEqual([]);
+});
+
+test("the policy blocks other script and collection paths, other hosts, and inline scripts", async ({
+  page,
+  request,
+}) => {
+  const response = await request.get("/");
+  const externalRequests = await visitBuild(
+    page,
+    "true",
+    "https://ahammednibras.com/",
+    response.headers()["content-security-policy"] ?? "",
+  );
+  await page.evaluate(async () => {
+    const violations: { directive: string; url: string }[] = [];
+    (window as AnalyticsWindow).testPolicyViolations = violations;
+    document.addEventListener("securitypolicyviolation", (event) => {
+      violations.push({
+        directive: event.effectiveDirective.startsWith("script-src")
+          ? "script-src"
+          : event.effectiveDirective,
+        url:
+          event.blockedURI === "inline"
+            ? "inline"
+            : new URL(event.blockedURI).origin,
+      });
+    });
+    for (const src of [
+      "https://cloud.umami.is/other.js",
+      "https://unapproved.example/script.js",
+    ]) {
+      const script = document.createElement("script");
+      script.src = src;
+      document.head.append(script);
+    }
+    const inline = document.createElement("script");
+    inline.textContent =
+      "document.documentElement.dataset.inlineExecuted = 'true'";
+    document.head.append(inline);
+    await Promise.allSettled([
+      fetch("https://gateway.umami.is/api/other", { method: "POST" }),
+      fetch("https://unapproved.example/api/send", { method: "POST" }),
+    ]);
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as AnalyticsWindow).testPolicyViolations),
+    )
+    .toEqual(
+      expect.arrayContaining([
+        { directive: "script-src", url: "https://cloud.umami.is" },
+        { directive: "script-src", url: "https://unapproved.example" },
+        { directive: "script-src", url: "inline" },
+        { directive: "connect-src", url: "https://gateway.umami.is" },
+        { directive: "connect-src", url: "https://unapproved.example" },
+      ]),
+    );
+  await expect(page.locator("html")).not.toHaveAttribute(
+    "data-inline-executed",
+  );
+  expect(externalRequests).toEqual(["https://cloud.umami.is/script.js"]);
 });
 
 test.describe("analytics payload filter", () => {
@@ -601,11 +758,15 @@ test("the internal visit exclusion survives reload and removing it restores trac
   expect(
     await page.evaluate(() => window.localStorage.getItem("umami.disabled")),
   ).toBe("1");
+  expect(externalRequests).toEqual(["https://cloud.umami.is/script.js"]);
 
   await page.evaluate(() => window.localStorage.removeItem("umami.disabled"));
   await page.reload();
   await expect(tracker).toHaveCount(1);
-  expect(externalRequests).toEqual([]);
+  expect(externalRequests).toEqual([
+    "https://cloud.umami.is/script.js",
+    "https://cloud.umami.is/script.js",
+  ]);
 });
 
 test("unreadable browser storage keeps analytics off without breaking contact", async ({

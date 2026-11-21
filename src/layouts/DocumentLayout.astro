@@ -141,6 +141,7 @@ const personId = new URL("#person", homepage).href;
         tracker.async = true;
         tracker.referrerPolicy = "no-referrer";
         tracker.dataset.websiteId = analyticsWebsiteId;
+        tracker.dataset.hostUrl = "https://gateway.umami.is";
         tracker.dataset.autoTrack = "false";
         tracker.dataset.domains = "ahammednibras.com";
         tracker.dataset.excludeSearch = "true";

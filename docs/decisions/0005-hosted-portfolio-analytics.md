@@ -2,6 +2,7 @@
 
 - Status: Accepted for implementation; production collection pending verification
 - Date: 2026-11-21
+- Updated: 2026-11-22
 
 ## Decision
 
@@ -50,6 +51,15 @@ Operating an analytics application and database is unnecessary for this scope.
 
 Production collection remains disabled until configuration, actual payloads,
 consent behavior, and failure cases have been verified.
+
+## Network policy
+
+Load the SDK from `https://cloud.umami.is/script.js`.
+Set `data-host-url` explicitly to `https://gateway.umami.is`.
+Allow collection requests only to `https://gateway.umami.is/api/send`.
+
+These security-policy permissions do not enable analytics.
+`PUBLIC_ANALYTICS_ENABLED` remains false pending rollout verification.
 
 ## Where it is used
 
