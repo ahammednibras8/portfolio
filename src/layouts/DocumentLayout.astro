@@ -80,15 +80,111 @@ const personId = new URL("#person", homepage).href;
       }
 
       if (shouldLoadAnalytics()) {
+        const analyticsWebsiteId = "994f1189-2ae4-48b0-9b15-6b8c6f5c785f";
+        const allowedEvents = new Set([
+          "contact_gmail_clicked",
+          "contact_email_app_clicked",
+          "contact_email_copied",
+        ]);
+
+        const analytics = Object.assign(window, {
+          portfolioAnalyticsBeforeSend(type: string, input: unknown) {
+            if (
+              type !== "event" ||
+              !shouldLoadAnalytics() ||
+              typeof input !== "object" ||
+              input === null ||
+              Array.isArray(input)
+            ) {
+              return false;
+            }
+
+            const payload = input as Record<string, unknown>;
+            if (payload.website !== analyticsWebsiteId) return false;
+
+            const name = payload.name;
+            if (
+              name !== undefined &&
+              (typeof name !== "string" || !allowedEvents.has(name))
+            ) {
+              return false;
+            }
+
+            let referrer = "";
+            if (typeof payload.referrer === "string" && payload.referrer) {
+              try {
+                const source = new URL(payload.referrer);
+                if (
+                  source.protocol === "https:" &&
+                  source.origin !== window.location.origin
+                ) {
+                  referrer = source.origin;
+                }
+              } catch {
+                // Discard malformed and relative referrers.
+              }
+            }
+
+            return {
+              website: analyticsWebsiteId,
+              hostname: "ahammednibras.com",
+              url: "/",
+              title: "Portfolio",
+              referrer,
+              ...(typeof name === "string" ? { name } : {}),
+            };
+          },
+        });
+
         const tracker = document.createElement("script");
         tracker.src = "https://cloud.umami.is/script.js";
         tracker.async = true;
         tracker.referrerPolicy = "no-referrer";
-        tracker.dataset.websiteId = "994f1189-2ae4-48b0-9b15-6b8c6f5c785f";
+        tracker.dataset.websiteId = analyticsWebsiteId;
         tracker.dataset.autoTrack = "false";
         tracker.dataset.domains = "ahammednibras.com";
         tracker.dataset.excludeSearch = "true";
         tracker.dataset.excludeHash = "true";
+        tracker.dataset.beforeSend = "portfolioAnalyticsBeforeSend";
+
+        function sendAnalytics(name?: string) {
+          try {
+            const payload = analytics.portfolioAnalyticsBeforeSend("event", {
+              website: analyticsWebsiteId,
+              url: "/",
+              referrer: document.referrer,
+              name,
+            });
+            if (!payload) return;
+
+            const umami = (
+              window as Window & {
+                umami?: {
+                  track: (payload: Record<string, unknown>) => unknown;
+                };
+              }
+            ).umami;
+            if (typeof umami?.track !== "function") return;
+
+            void Promise.resolve(umami.track(payload)).catch(() => {
+              // Tracking failure must not affect the page
+            });
+          } catch {
+            // An unavailable analytics SDK must not affect the page.
+          }
+        }
+
+        tracker.addEventListener("load", () => sendAnalytics(), { once: true });
+
+        document.addEventListener("portfolio-contact", (event) => {
+          if (
+            event instanceof CustomEvent &&
+            typeof event.detail === "string" &&
+            allowedEvents.has(event.detail)
+          ) {
+            sendAnalytics(event.detail);
+          }
+        });
 
         document.head.append(tracker);
       }
