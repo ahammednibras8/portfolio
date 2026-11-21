@@ -25,6 +25,32 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 
 The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md), and [ADR 0004](docs/decisions/0004-workflow-dependency-lockfile.md).
 
+## Analytics
+
+An optional Umami Cloud Hobby integration measures homepage pageviews and
+three contact signals: `contact_gmail_clicked`, `contact_email_app_clicked`,
+and `contact_email_copied`. A copy signal requires a successful clipboard write.
+Contact signals indicate intent, not a sent message or qualified inquiry.
+
+Analytics requires `PUBLIC_ANALYTICS_ENABLED=true` at build time and runs only
+on `https://ahammednibras.com/`. Development, preview, and other routes are
+excluded. Collection remains disabled pending the rollout checks in
+[ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).
+
+Event payloads omit query strings, fragments, custom identities, and free text.
+External HTTPS referrers are reduced to their origin. Contact controls remain
+usable when analytics is unavailable.
+
+To exclude your browser, run this in the production site's browser console,
+then reload:
+
+```js
+localStorage.setItem("umami.disabled", "1");
+```
+
+Remove that preference with `localStorage.removeItem("umami.disabled")`,
+then reload. The preference applies to that browser profile and origin.
+
 ## Finding the work
 
 - The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text without navigation links.
