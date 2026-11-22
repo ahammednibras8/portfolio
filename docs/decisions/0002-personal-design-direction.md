@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-23
-- Updated: 2026-11-20
+- Updated: 2026-11-22
 
 ## Decision
 
@@ -110,6 +110,14 @@ After successful trusted touch activation, request a single 10ms `navigator.vibr
 Nibras also requested that every authored link on Home, About, and 404 open in a new tab. Apply explicit `target="_blank"` and `rel="noopener noreferrer"` to each anchor, including companies, public profiles, contact choices, and internal recovery routes. This supersedes the earlier same-tab company-link behavior. Add concise title and `aria-describedby` hints, informed by [W3C's advance-warning guidance](https://www.w3.org/WAI/WCAG21/Techniques/general/G201), while preserving visible names. The mail link requests a new tab but the browser can still invoke its configured email handler; do not promise a tab instead of an app. Use native links rather than a global base target, a universal link wrapper, or JavaScript interception. Reconsider compose URLs if Gmail changes its routing, and reconsider the tab policy only when Nibras requests a different behavior.
 
 The homepage renders the two reviewed roles as an ordered list. Each entry requires a company, its public website URL, role, start month, end month or Present, and employment context. Nibras supplied the company URLs on 2026-11-18: [Insource Data](https://insourcedata.io/) and [NysaClan](https://nysaclan.com/). Link only the organization name using ordinary underlined text links, preserving native keyboard and new-tab navigation without JavaScript. Entries remain in document order and wrap within the existing section grid at all widths. No animation or client script is needed. The former shared experience component is removed with About; keep the markup in the homepage until reuse or distinct behavior creates a new component boundary.
+
+On 2026-11-22, Nibras approved a privacy notice and browser-specific analytics
+exclusion under [ADR 0005](0005-hosted-portfolio-analytics.md). Keep the footer
+identity as plain text and place one contextual link on the right: Privacy on
+the homepage and Home elsewhere. These footer links open in the current tab.
+This updates the earlier footer and tab directions for that navigation;
+main-content links retain their existing new-tab behavior. The privacy control
+uses a native checkbox with the existing action color and shared focus outline.
 
 ## Reconsider when
 

@@ -44,12 +44,13 @@ Operating an analytics application and database is unnecessary for this scope.
 - [Cloud pricing and limits](https://umami.is/pricing)
 - [Collected metrics and visitor grouping](https://docs.umami.is/docs/metric-definitions)
 - [Tracker configuration](https://docs.umami.is/docs/tracker-configuration)
+- Nibras confirmed the Hobby plan and EU (Frankfurt) account region during setup. This is owner-supplied account information, not proof that every provider operation occurs in that region.
 
 ## Constraints
 
 - Use the free Hobby plan without an automatic paid upgrade.
-- Confirm the account region, six-month analytics retention, processing terms,
-  and applicable consent behavior before enabling production collection.
+- Keep the confirmed EU (Frankfurt) account region. Verify current plan retention,
+  processing terms, and applicable consent behavior before enabling production collection.
 - Document the provider's visitor grouping accurately. Cookie-free tracking
   does not guarantee absolute anonymity.
 - Exclude URL query strings and fragments; sanitize referrers before sending.
@@ -65,6 +66,29 @@ Operating an analytics application and database is unnecessary for this scope.
 Production collection remains disabled until configuration, actual payloads,
 consent behavior, and failure cases have been verified.
 
+## Event and payload contract
+
+Keep SDK automatic tracking disabled. Send one pageview after the SDK loads,
+with no event name. The only named events are the three contact signals above.
+`EmailContact.astro` dispatches a document `portfolio-contact` event whose
+detail is an approved signal name; the document layout handles the provider.
+Signals that occur before the SDK is ready can be missed. Do not delay contact
+navigation or promise complete delivery.
+
+The before-send filter accepts only the `event` type and creates a fresh payload:
+
+- `website`: the configured public Umami website ID.
+- `hostname`: `ahammednibras.com`.
+- `url`: `/`.
+- `title`: `Portfolio`.
+- `referrer`: an external HTTPS origin, or an empty string.
+- `name`: one approved contact signal, omitted for a pageview.
+
+Reject unknown signal names and other record types. Do not copy arbitrary SDK
+properties into the payload. Recheck the route, build switch, and browser
+exclusion before sending. This payload boundary does not remove network
+metadata received by the provider.
+
 ## Network policy
 
 Load the SDK from `https://cloud.umami.is/script.js`.
@@ -73,6 +97,24 @@ Allow collection requests only to `https://gateway.umami.is/api/send`.
 
 These security-policy permissions do not enable analytics.
 `PUBLIC_ANALYTICS_ENABLED` remains false pending rollout verification.
+
+## Build and runtime gates
+
+Only the literal build-time value `PUBLIC_ANALYTICS_ENABLED=true` enables the
+integration. CI and Deploy read the repository Actions variable of that name,
+defaulting to `false` when unset. The ignored local `.env` file does not configure
+GitHub builds. A changed variable requires a new build and deployment; it cannot
+change an existing artifact.
+
+Even an enabled build loads the tracker only at `https://ahammednibras.com/`.
+Development, feedback previews, the privacy route, and other paths remain
+excluded. Any existing `umami.disabled` storage key excludes that browser,
+including an empty value. Storage read failures also prevent collection.
+
+Follow [the verification guide](../../CONTRIBUTING.md#verify-analytics) for
+automated checks, debugging, and live rollout. Intercepted tests verify browser
+behavior without establishing provider receipt. Update the recorded rollout
+status and the public notice when activation or data handling changes.
 
 ## Where it is used
 

@@ -53,6 +53,9 @@ Clearing site data resets the preference. It does not delete events already
 sent. Analytics stays off when browser storage cannot be read, and does not
 run without JavaScript.
 
+See [analytics verification](CONTRIBUTING.md#verify-analytics) for contributor
+testing, debugging, and rollout instructions.
+
 ## Finding the work
 
 - The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text and a Privacy link. The `/privacy/` page explains analytics and provides a browser-specific exclusion control, with Home in its footer.
