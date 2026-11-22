@@ -14,6 +14,7 @@ concurrency:
 
 env:
   SITE_URL: ${{ vars.PRODUCTION_URL }}
+  PUBLIC_ANALYTICS_ENABLED: ${{ vars.PUBLIC_ANALYTICS_ENABLED || 'false' }}
 
 jobs:
   verify:

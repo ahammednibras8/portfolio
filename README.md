@@ -37,6 +37,10 @@ on `https://ahammednibras.com/`. Development, preview, and other routes are
 excluded. Collection remains disabled pending the rollout checks in
 [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).
 
+GitHub builds read the repository Actions variable
+`PUBLIC_ANALYTICS_ENABLED`, defaulting to `false` when unset.
+Changing this variable takes effect on the next build and deployment.
+
 Event payloads omit query strings, fragments, custom identities, and free text.
 External HTTPS referrers are reduced to their origin. Contact controls remain
 usable when analytics is unavailable.
