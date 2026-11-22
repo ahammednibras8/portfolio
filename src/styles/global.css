@@ -209,6 +209,16 @@ h2 + * {
   font-size: 0.875rem;
 }
 
+.site-footer-link {
+  display: inline-flex;
+  min-inline-size: var(--touch-target);
+  min-block-size: var(--touch-target);
+  align-items: center;
+  justify-content: flex-end;
+  margin-inline-start: auto;
+  font-size: 0.875rem;
+}
+
 .email-actions {
   display: flex;
   margin-block-start: var(--space-interface);
@@ -222,7 +232,7 @@ h2 + * {
   padding-block: var(--space-interface);
 }
 
-.page a:visited {
+:is(.page, .site-footer) a:visited {
   color: var(--color-action-visited);
 }
 
@@ -232,19 +242,19 @@ h2 + * {
   }
 }
 
-.page a:active {
+:is(.page, .site-footer) a:active {
   color: var(--color-action-active);
   text-decoration-thickness: 0.13em;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .page a {
+  :is(.page, .site-footer) a {
     transition:
       color var(--motion-standard) var(--motion-ease-out),
       text-decoration-thickness var(--motion-standard) var(--motion-ease-out);
   }
 
-  .page a:active {
+  :is(.page, .site-footer) a:active {
     transition-duration: var(--motion-short);
   }
 }
@@ -254,15 +264,15 @@ h2 + * {
     outline-color: Highlight;
   }
 
-  .page a {
+  :is(.page, .site-footer) a {
     color: LinkText;
   }
 
-  .page a:visited {
+  :is(.page, .site-footer) a:visited {
     color: VisitedText;
   }
 
-  .page a:active {
+  :is(.page, .site-footer) a:active {
     color: ActiveText;
   }
 }
@@ -432,6 +442,11 @@ h2 + * {
     grid-column: 2 / span 5;
   }
 
+  .site-footer-link {
+    grid-column: 7 / span 5;
+    justify-self: end;
+  }
+
   .page > .not-found-introduction > .not-found-message {
     grid-column: 6 / span 6;
   }
@@ -592,4 +607,25 @@ h2 + * {
 
 .experience-context {
   margin-block-start: 0;
+}
+
+.analytics-exclusion {
+  display: flex;
+  min-block-size: var(--touch-target);
+  align-items: center;
+  gap: var(--space-interface);
+  margin-block-start: var(--space-interface);
+  cursor: pointer;
+}
+
+.analytics-exclusion input {
+  flex-shrink: 0;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  accent-color: var(--color-action);
+}
+
+[data-analytics-preference-status] {
+  margin-block-start: var(--space-interface);
 }

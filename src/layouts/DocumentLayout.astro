@@ -211,6 +211,9 @@ const personId = new URL("#person", homepage).href;
       <p class="site-footer-location">
         {profile.name} · {profile.location}
       </p>
+      <a class="site-footer-link" href={isHomepage ? "/privacy/" : "/"}>
+        {isHomepage ? "Privacy" : "Home"}
+      </a>
     </footer>
   </body>
 </html>

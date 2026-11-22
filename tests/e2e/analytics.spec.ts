@@ -57,6 +57,10 @@ async function visitBuild(
     ".svg": "image/svg+xml",
     ".ico": "image/x-icon",
   };
+  const documents: Record<string, string> = {
+    "/": "index.html",
+    "/privacy/": "privacy/index.html",
+  };
 
   // Serve actual build files at each origin without visiting the live website.
   // Preserve the deployed policy and prevent every external request escaping.
@@ -71,12 +75,10 @@ async function visitBuild(
 
     const isDocument = route.request().resourceType() === "document";
     const filename = isDocument
-      ? url.pathname === "/"
-        ? "index.html"
-        : "404.html"
+      ? (documents[url.pathname] ?? "404.html")
       : url.pathname.slice(1);
     await route.fulfill({
-      status: isDocument && url.pathname !== "/" ? 404 : 200,
+      status: isDocument && !documents[url.pathname] ? 404 : 200,
       contentType:
         contentTypes[extname(filename)] ?? "application/octet-stream",
       headers: { "content-security-policy": policy },
@@ -86,6 +88,31 @@ async function visitBuild(
 
   await page.goto(destination);
   return externalRequests;
+}
+
+for (const enabled of ["false", "true"] as const) {
+  test(`the privacy notice reflects analytics ${enabled} without loading the tracker`, async ({
+    page,
+    request,
+  }) => {
+    const response = await request.get("/");
+    const externalRequests = await visitBuild(
+      page,
+      enabled,
+      "https://ahammednibras.com/privacy/?private=value#questions",
+      response.headers()["content-security-policy"] ?? "",
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy");
+    await expect(page.locator(".introduction > p").first()).toHaveText(
+      enabled === "true"
+        ? "Optional analytics is configured for the production homepage."
+        : "Analytics collection is currently disabled.",
+    );
+    await expect(
+      page.locator('script[src="https://cloud.umami.is/script.js"]'),
+    ).toHaveCount(0);
+    expect(externalRequests).toEqual([]);
+  });
 }
 
 for (const [enabled, destination] of [
@@ -735,7 +762,7 @@ test("contact links still emit signals when the Clipboard API is unavailable", a
   ).toEqual(["contact_gmail_clicked", "contact_email_app_clicked"]);
 });
 
-test("the internal visit exclusion survives reload and removing it restores tracker loading", async ({
+test("the privacy control excludes production visits across reload and removing it restores tracker loading", async ({
   page,
   request,
 }) => {
@@ -751,8 +778,17 @@ test("the internal visit exclusion survives reload and removing it restores trac
   );
   await expect(tracker).toHaveCount(1);
 
-  // Use the documented console action, then exercise the persisted preference.
-  await page.evaluate(() => window.localStorage.setItem("umami.disabled", "1"));
+  // Save the preference through the product UI, then test the actual loader.
+  const footer = page.getByRole("contentinfo");
+  await footer.getByRole("link", { name: "Privacy", exact: true }).click();
+  await expect(page).toHaveURL("https://ahammednibras.com/privacy/");
+  const checkbox = page.getByRole("checkbox", {
+    name: "Exclude this browser from analytics",
+  });
+  await checkbox.check();
+  await footer.getByRole("link", { name: "Home", exact: true }).click();
+  await expect(page).toHaveURL("https://ahammednibras.com/");
+  await expect(tracker).toHaveCount(0);
   await page.reload();
   await expect(tracker).toHaveCount(0);
   expect(
@@ -760,8 +796,10 @@ test("the internal visit exclusion survives reload and removing it restores trac
   ).toBe("1");
   expect(externalRequests).toEqual(["https://cloud.umami.is/script.js"]);
 
-  await page.evaluate(() => window.localStorage.removeItem("umami.disabled"));
-  await page.reload();
+  await footer.getByRole("link", { name: "Privacy", exact: true }).click();
+  await expect(checkbox).toBeChecked();
+  await checkbox.uncheck();
+  await footer.getByRole("link", { name: "Home", exact: true }).click();
   await expect(tracker).toHaveCount(1);
   expect(externalRequests).toEqual([
     "https://cloud.umami.is/script.js",

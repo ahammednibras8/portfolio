@@ -32,5 +32,8 @@ test("robots allows production crawling and advertises the generated sitemap", a
     .map(([, url]) => url)
     .sort();
 
-  expect(entries).toEqual([new URL("/", siteUrl).href]);
+  expect(entries).toEqual([
+    new URL("/", siteUrl).href,
+    new URL("/privacy/", siteUrl).href,
+  ]);
 });

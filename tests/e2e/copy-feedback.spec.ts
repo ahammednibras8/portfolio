@@ -51,8 +51,10 @@ test("copy feedback is transient, dismissible, repeatable, and does not move con
       },
     });
   });
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-11-22T08:00:00Z") });
   await page.goto("/");
+  // Hold the 300ms success state until this test explicitly advances time.
+  await page.clock.pauseAt(new Date("2026-11-22T10:00:00Z"));
   const button = page.getByRole("button", { name: "Copy email address" });
   const tooltip = page.locator("[data-copy-tooltip]");
   const actions = page.locator(".email-actions");

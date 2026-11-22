@@ -19,6 +19,19 @@ Initially measure only the production homepage:
 These actions indicate contact intent, not a sent message or qualified inquiry.
 Keep actual inquiries, outcomes, and voluntary feedback in private records.
 
+Prefer a banner-free visitor experience with a public privacy notice and a
+simple browser-specific analytics opt-out. Do not introduce an opt-in
+interface as the default implementation.
+
+This preference does not establish a consent exemption. Assess the applicable
+scope and the provider's session processing and retention before enabling
+production collection.
+
+Place the privacy notice and browser-specific analytics controls at
+`/privacy/`. Keep the name and location as plain text, with one contextual
+link on the right side of the shared footer. Show Privacy on the homepage
+and Home on other pages. Footer links open in the current tab.
+
 ## Reason
 
 Nibras approved a limited hosted integration after reviewing issue #62.
@@ -63,11 +76,15 @@ These security-policy permissions do not enable analytics.
 
 ## Where it is used
 
-The planned integration belongs in `src/layouts/DocumentLayout.astro`,
+The integration uses `src/layouts/DocumentLayout.astro`,
 `src/components/EmailContact.astro`, and `public/_headers`.
+The notice and browser preference control live in `src/pages/privacy.astro`,
+with presentation in `src/styles/global.css`.
 
-Implementation must update README, security documentation, and the affected
-script restriction in ADR 0001.
+The preference uses the `umami.disabled` local-storage key. Open privacy tabs
+synchronize changes. Storage read failures prevent analytics collection.
+
+README, SECURITY, and ADR 0001 document the integration and its restrictions.
 
 ## Reconsider when
 

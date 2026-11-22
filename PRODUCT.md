@@ -24,7 +24,7 @@ Nibras's published professional focus is AI product features, backend systems, i
 
 ## Operating Context
 
-The portfolio is a public website at [ahammednibras.com](https://ahammednibras.com/). Its published pages are the homepage and an authored 404 page with recovery links. Nibras requested removal of the About page; its former URL returns 404.
+The portfolio is a public website at [ahammednibras.com](https://ahammednibras.com/). The current source includes the homepage, a privacy notice at `/privacy/`, and an authored 404 page with recovery links. Nibras requested removal of the About page; its former URL returns 404.
 
 GitHub and LinkedIn are the public profile destinations. Email is a contact path for both roles and contract work. Visitors must be able to obtain the address without configuring a native mail application.
 

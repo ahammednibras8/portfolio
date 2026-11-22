@@ -13,7 +13,7 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - Shared profile and experience data keep the published name, role, location, and public links consistent.
 - The homepage includes Person and WebSite microdata in static HTML.
 - Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
-- Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
+- Main-content links request a new tab with `noopener noreferrer` and advance hints. Footer navigation opens in the current tab. Native email handling remains browser-dependent.
 - Copy success uses a brief tooltip and icon-only color flash on a transparent background, with a polite live announcement; failure keeps visible manual-copy guidance. A single optional touch vibration is requested on supporting browsers, never relied on for feedback.
 - There is no application server, database, or client framework.
 - GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
@@ -41,19 +41,17 @@ Event payloads omit query strings, fragments, custom identities, and free text.
 External HTTPS referrers are reduced to their origin. Contact controls remain
 usable when analytics is unavailable.
 
-To exclude your browser, run this in the production site's browser console,
-then reload:
+Visit `/privacy/` and check **Exclude this browser from analytics** to save
+an exclusion for that browser profile and origin. Uncheck it to remove the
+exclusion. Open privacy tabs synchronize the preference automatically.
 
-```js
-localStorage.setItem("umami.disabled", "1");
-```
-
-Remove that preference with `localStorage.removeItem("umami.disabled")`,
-then reload. The preference applies to that browser profile and origin.
+Clearing site data resets the preference. It does not delete events already
+sent. Analytics stays off when browser storage cannot be read, and does not
+run without JavaScript.
 
 ## Finding the work
 
-- The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text without navigation links.
+- The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text and a Privacy link. The `/privacy/` page explains analytics and provides a browser-specific exclusion control, with Home in its footer.
 - The former About route is removed and returns the authored 404 page with Home and contact recovery links.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 
