@@ -9,9 +9,10 @@ interface Props {
   title: string;
   description: string;
   canonical?: URL;
+  trackPage?: boolean;
 }
 
-const { title, description, canonical } = Astro.props;
+const { title, description, canonical, trackPage = false } = Astro.props;
 
 const canonicalUrl = canonical?.href;
 const isHomepage = Astro.url.pathname === "/";
@@ -67,7 +68,7 @@ const personId = new URL("#person", homepage).href;
         if (
           import.meta.env.PUBLIC_ANALYTICS_ENABLED !== "true" ||
           window.location.origin !== "https://ahammednibras.com" ||
-          window.location.pathname !== "/"
+          document.body?.dataset.analyticsPath !== window.location.pathname
         ) {
           return false;
         }
@@ -103,8 +104,48 @@ const personId = new URL("#person", homepage).href;
             if (payload.website !== analyticsWebsiteId) return false;
 
             const name = payload.name;
-            if (
-              name !== undefined &&
+            let eventData: Record<string, string> | null = null;
+
+            if (name === "outbound_clicked") {
+              const data = payload.data;
+              if (
+                typeof data !== "object" ||
+                data === null ||
+                !("destination" in data)
+              ) {
+                return false;
+              }
+
+              const { destination } = data;
+              const isProfile =
+                destination === "github_profile" ||
+                destination === "linkedin_profile";
+              const isEmployer =
+                destination === "Insource Data" || destination === "NysaClan";
+
+              if (!isProfile && !isEmployer) return false;
+
+              eventData = {
+                destination,
+                placement: isProfile ? "introduction" : "experience",
+              };
+            } else if (name === "section_view") {
+              const data = payload.data;
+              if (
+                typeof data !== "object" ||
+                data === null ||
+                !("section" in data)
+              ) {
+                return false;
+              }
+
+              const { section } = data;
+              if (section !== "experience" && section !== "contact")
+                return false;
+
+              eventData = { section };
+            } else if (
+              typeof name !== "undefined" &&
               (typeof name !== "string" || !allowedEvents.has(name))
             ) {
               return false;
@@ -125,13 +166,39 @@ const personId = new URL("#person", homepage).href;
               }
             }
 
+            const incoming = new URLSearchParams(window.location.search);
+            const campaign = new URLSearchParams();
+            const approved = {
+              utm_source: ["github", "linkedin"],
+              utm_medium: ["referral", "social"],
+              utm_campaign: ["portfolio_launch"],
+              utm_content: ["profile", "readme"],
+            };
+
+            for (const [key, allowedValues] of Object.entries(approved)) {
+              const [value, duplicate] = incoming.getAll(key);
+              if (
+                value &&
+                duplicate === undefined &&
+                allowedValues.includes(value)
+              ) {
+                campaign.set(key, value);
+              }
+            }
+
+            const path = window.location.pathname;
+            const url = campaign.size ? `${path}?${campaign}` : path;
+
             return {
               website: analyticsWebsiteId,
               hostname: "ahammednibras.com",
-              url: "/",
-              title: "Portfolio",
+              url,
+              title: document.title,
+              language: navigator.language,
+              screen: `${window.screen.width}x${window.screen.height}`,
               referrer,
               ...(typeof name === "string" ? { name } : {}),
+              ...(eventData ? { data: eventData } : {}),
             };
           },
         });
@@ -148,13 +215,14 @@ const personId = new URL("#person", homepage).href;
         tracker.dataset.excludeHash = "true";
         tracker.dataset.beforeSend = "portfolioAnalyticsBeforeSend";
 
-        function sendAnalytics(name?: string) {
+        function sendAnalytics(name?: string, data?: Record<string, string>) {
           try {
             const payload = analytics.portfolioAnalyticsBeforeSend("event", {
               website: analyticsWebsiteId,
               url: "/",
               referrer: document.referrer,
               name,
+              data,
             });
             if (!payload) return;
 
@@ -175,7 +243,55 @@ const personId = new URL("#person", homepage).href;
           }
         }
 
-        tracker.addEventListener("load", () => sendAnalytics(), { once: true });
+        tracker.addEventListener(
+          "load",
+          () => {
+            sendAnalytics();
+
+            if (
+              window.location.pathname !== "/" ||
+              typeof IntersectionObserver !== "function"
+            ) {
+              return;
+            }
+
+            for (const section of ["experience", "contact"] as const) {
+              const heading = document.getElementById(`${section}-heading`);
+              if (!heading) continue;
+
+              let timer: number | undefined;
+              const observer = new IntersectionObserver(
+                (entries) => {
+                  window.clearTimeout(timer);
+                  if (
+                    document.hidden ||
+                    entries.at(-1)?.intersectionRatio !== 1
+                  ) {
+                    return;
+                  }
+
+                  timer = window.setTimeout(() => {
+                    if (document.hidden) return;
+                    sendAnalytics("section_view", { section });
+                    observer.disconnect();
+                    document.removeEventListener("visibilitychange", reset);
+                  }, 1000);
+                },
+                { threshold: 1 },
+              );
+
+              const reset = () => {
+                window.clearTimeout(timer);
+                observer.disconnect();
+                if (!document.hidden) observer.observe(heading);
+              };
+
+              document.addEventListener("visibilitychange", reset);
+              reset();
+            }
+          },
+          { once: true },
+        );
 
         document.addEventListener("portfolio-contact", (event) => {
           if (
@@ -187,12 +303,25 @@ const personId = new URL("#person", homepage).href;
           }
         });
 
+        document.addEventListener("click", (event) => {
+          if (!(event.target instanceof Element)) return;
+
+          const link = event.target.closest<HTMLAnchorElement>(
+            "a[data-analytics-outbound]",
+          );
+          const destination = link?.dataset.analyticsOutbound;
+
+          if (destination) {
+            sendAnalytics("outbound_clicked", { destination });
+          }
+        });
+
         document.head.append(tracker);
       }
     </script>
   </head>
 
-  <body>
+  <body data-analytics-path={trackPage ? Astro.url.pathname : undefined}>
     <main
       id="main-content"
       class="page"

@@ -27,21 +27,25 @@ The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-s
 
 ## Analytics
 
-An optional Umami Cloud Hobby integration measures homepage pageviews and
-three contact signals: `contact_gmail_clicked`, `contact_email_app_clicked`,
-and `contact_email_copied`. A copy signal requires a successful clipboard write.
-Contact signals indicate intent, not a sent message or qualified inquiry.
+An optional Umami Cloud Hobby integration measures homepage pageviews,
+exposure to the Experience and Contact headings, activations of profile and
+employer links, and three contact signals:
+`contact_gmail_clicked`, `contact_email_app_clicked`, and `contact_email_copied`.
+A copy signal requires a successful clipboard write. Use the contact signals
+to measure intent and keep confirmed inquiries in separate private records.
 
-Analytics requires `PUBLIC_ANALYTICS_ENABLED=true` at build time and runs only
-on `https://ahammednibras.com/`. Development, preview, and other routes are
-excluded. Collection remains disabled pending the rollout checks in
+Analytics requires `PUBLIC_ANALYTICS_ENABLED=true` at build time and an opted-in
+page on `https://ahammednibras.com`. The homepage opts in through the shared
+layout's `trackPage` prop. Collection remains disabled pending the rollout checks in
 [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).
 
 GitHub builds read the repository Actions variable
 `PUBLIC_ANALYTICS_ENABLED`, defaulting to `false` when unset.
 Changing this variable takes effect on the next build and deployment.
 
-Event payloads omit query strings, fragments, custom identities, and free text.
+Event payloads include the page path and title, browser language, screen size,
+and approved campaign labels. The tracker drops other query parameters,
+fragments, custom identities, and free text.
 External HTTPS referrers are reduced to their origin. Contact controls remain
 usable when analytics is unavailable.
 

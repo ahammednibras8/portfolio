@@ -8,6 +8,16 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const run = promisify(execFile);
 let buildDirectory = "";
 
+const homepagePayload = {
+  website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+  hostname: "ahammednibras.com",
+  url: "/",
+  title: "Ahammed Nibras — Software developer",
+  language: "en-GB",
+  screen: "1440x900",
+  referrer: "",
+};
+
 type AnalyticsWindow = Window & {
   portfolioAnalyticsBeforeSend?: (
     type: string,
@@ -20,6 +30,7 @@ type AnalyticsWindow = Window & {
 
 // Each project builds both settings once; do not change source or the local env.
 test.describe.configure({ mode: "default" });
+test.use({ locale: "en-GB", screen: { width: 1440, height: 900 } });
 test.beforeAll(async () => {
   test.setTimeout(120_000);
   buildDirectory = await mkdtemp(join(tmpdir(), "portfolio-analytics-"));
@@ -103,6 +114,9 @@ for (const enabled of ["false", "true"] as const) {
       response.headers()["content-security-policy"] ?? "",
     );
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy");
+    await expect(page.locator("body")).not.toHaveAttribute(
+      "data-analytics-path",
+    );
     await expect(page.locator(".introduction > p").first()).toHaveText(
       enabled === "true"
         ? "Optional analytics is configured for the production homepage."
@@ -122,6 +136,7 @@ for (const [enabled, destination] of [
   ["true", "https://ahammednibras.com.preview.example/"],
   ["true", "http://ahammednibras.com/"],
   ["true", "https://ahammednibras.com/404.html"],
+  ["true", "https://ahammednibras.com/missing/"],
 ] as const) {
   test(`analytics ${enabled} does not load on ${destination}`, async ({
     page,
@@ -166,6 +181,10 @@ test("the enabled production homepage configures manual tracking at the permitte
   const tracker = page.locator(
     'script[src="https://cloud.umami.is/script.js"]',
   );
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-analytics-path",
+    "/",
+  );
   await expect(tracker).toHaveCount(1);
   await expect(tracker).toHaveAttribute(
     "data-website-id",
@@ -188,7 +207,7 @@ test("the enabled production homepage configures manual tracking at the permitte
   expect(externalRequests).toEqual(["https://cloud.umami.is/script.js"]);
 });
 
-test("the permitted SDK load sends filtered pageviews and successful copies through the collector", async ({
+test("pageviews and successful copies keep approved campaign labels through the collector", async ({
   page,
   request,
 }) => {
@@ -196,6 +215,8 @@ test("the permitted SDK load sends filtered pageviews and successful copies thro
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.addInitScript(() => {
+    // Pageviews and contact tracking also work in browsers without the observer.
+    Object.defineProperty(window, "IntersectionObserver", { value: undefined });
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: () => Promise.resolve() },
     });
@@ -204,7 +225,7 @@ test("the permitted SDK load sends filtered pageviews and successful copies thro
   const externalRequests = await visitBuild(
     page,
     "true",
-    "https://ahammednibras.com/?private=value#contact",
+    "https://ahammednibras.com/?utm_source=linkedin&utm_medium=social&utm_campaign=portfolio_launch&utm_content=profile&private=value&fbclid=ignored#contact",
     response.headers()["content-security-policy"] ?? "",
     async (route) => {
       const url = route.request().url();
@@ -246,11 +267,8 @@ test("the permitted SDK load sends filtered pageviews and successful copies thro
     },
   );
   const payload = {
-    website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-    hostname: "ahammednibras.com",
-    url: "/",
-    title: "Portfolio",
-    referrer: "",
+    ...homepagePayload,
+    url: "/?utm_source=linkedin&utm_medium=social&utm_campaign=portfolio_launch&utm_content=profile",
   };
   await expect.poll(() => collected).toEqual([{ type: "event", payload }]);
   await page.getByRole("button", { name: "Copy email address" }).click();
@@ -373,10 +391,7 @@ test.describe("analytics payload filter", () => {
     });
 
     const base = {
-      website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-      hostname: "ahammednibras.com",
-      url: "/",
-      title: "Portfolio",
+      ...homepagePayload,
       referrer: "https://github.com",
     };
     expect(results).toEqual([
@@ -413,6 +428,113 @@ test.describe("analytics payload filter", () => {
       otherWebsite: false,
       names: [false, false, false, false],
       types: [false, false, false],
+    });
+  });
+
+  test("outbound events keep approved destinations and derive placement", async ({
+    page,
+  }) => {
+    const { accepted, rejected } = await page.evaluate(() => {
+      const filter = (window as AnalyticsWindow).portfolioAnalyticsBeforeSend;
+      if (!filter) throw new Error("Analytics filter was not registered.");
+      const outbound = {
+        website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+        name: "outbound_clicked",
+      };
+      return {
+        accepted: [
+          "github_profile",
+          "linkedin_profile",
+          "Insource Data",
+          "NysaClan",
+        ].map((destination) =>
+          filter("event", {
+            ...outbound,
+            data: {
+              destination,
+              placement: "unapproved",
+              href: "https://example.invalid/?private=value",
+            },
+          }),
+        ),
+        rejected: [
+          undefined,
+          null,
+          "github_profile",
+          {},
+          { destination: 5 },
+          { destination: "https://example.invalid/" },
+        ].map((data) => filter("event", { ...outbound, data })),
+      };
+    });
+
+    expect(accepted.map((event) => event && event.name)).toEqual(
+      Array(4).fill("outbound_clicked"),
+    );
+    expect(accepted.map((event) => event && event.data)).toEqual([
+      { destination: "github_profile", placement: "introduction" },
+      { destination: "linkedin_profile", placement: "introduction" },
+      { destination: "Insource Data", placement: "experience" },
+      { destination: "NysaClan", placement: "experience" },
+    ]);
+    expect(rejected).toEqual(Array(6).fill(false));
+  });
+
+  test("section views keep only an approved section name", async ({ page }) => {
+    const results = await page.evaluate(() => {
+      const filter = (window as AnalyticsWindow).portfolioAnalyticsBeforeSend;
+      if (!filter) throw new Error("Analytics filter was not registered.");
+      const view = {
+        website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+        name: "section_view",
+      };
+      return [
+        { section: "experience", time: 1234, label: "Private text" },
+        { section: "contact", email: "visitor@example.invalid" },
+        { section: "private" },
+        { section: 1 },
+        {},
+        null,
+      ].map((data) => filter("event", { ...view, data }));
+    });
+
+    expect(results).toEqual([
+      {
+        ...homepagePayload,
+        name: "section_view",
+        data: { section: "experience" },
+      },
+      {
+        ...homepagePayload,
+        name: "section_view",
+        data: { section: "contact" },
+      },
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  test("duplicate campaign keys and unapproved values are excluded", async ({
+    page,
+  }) => {
+    const result = await page.evaluate(() => {
+      const filter = (window as AnalyticsWindow).portfolioAnalyticsBeforeSend;
+      if (!filter) throw new Error("Analytics filter was not registered.");
+      window.history.replaceState(
+        {},
+        "",
+        "/?utm_source=linkedin&utm_source=github&utm_medium=social&utm_medium=&utm_campaign=portfolio_launch&utm_content=recipient-123&utm_term=ignored#contact",
+      );
+      return filter("event", {
+        website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+      });
+    });
+
+    expect(result).toEqual({
+      ...homepagePayload,
+      url: "/?utm_campaign=portfolio_launch",
     });
   });
 
@@ -466,7 +588,14 @@ test.describe("analytics payload filter", () => {
       const restored = filter("event", input);
       window.history.pushState({}, "", "/404.html");
       const otherRoute = filter("event", input);
+      // Model the static declaration of a future article without adding a public route.
+      window.history.replaceState({}, "", "/writing/example/");
+      document.body.dataset.analyticsPath = "/writing/example/";
+      document.title = "Example article";
+      const article = filter("event", input);
       window.history.replaceState({}, "", "/");
+      document.body.dataset.analyticsPath = "/";
+      document.title = "Ahammed Nibras — Software developer";
       const homeAgain = filter("event", input);
       Object.defineProperty(window, "localStorage", {
         get() {
@@ -478,24 +607,23 @@ test.describe("analytics payload filter", () => {
         excluded,
         restored,
         otherRoute,
+        article,
         homeAgain,
         storageBlocked: filter("event", input),
       };
     });
 
-    const pageview = {
-      website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-      hostname: "ahammednibras.com",
-      url: "/",
-      title: "Portfolio",
-      referrer: "",
-    };
     expect(results).toEqual({
-      initial: pageview,
+      initial: homepagePayload,
       excluded: false,
-      restored: pageview,
+      restored: homepagePayload,
       otherRoute: false,
-      homeAgain: pageview,
+      article: {
+        ...homepagePayload,
+        url: "/writing/example/",
+        title: "Example article",
+      },
+      homeAgain: homepagePayload,
       storageBlocked: false,
     });
   });
@@ -539,14 +667,98 @@ test.describe("analytics signals", () => {
 
     expect(
       await page.evaluate(() => (window as AnalyticsWindow).testPageviews),
-    ).toEqual([
-      {
-        website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-        hostname: "ahammednibras.com",
-        url: "/",
-        title: "Portfolio",
-        referrer: "",
-      },
+    ).toEqual([homepagePayload]);
+  });
+
+  test("section views require a full visible second and count each heading once", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 900, height: 260 });
+    await page.clock.install({ time: new Date("2026-11-24T08:00:00Z") });
+    await page.clock.pauseAt(new Date("2026-11-24T10:00:00Z"));
+    await page
+      .locator('script[src="https://cloud.umami.is/script.js"]')
+      .dispatchEvent("load");
+
+    // Observe real scrolling independently so the clock advances after layout.
+    await page.evaluate(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const { target, intersectionRatio } of entries) {
+            target.setAttribute(
+              "data-test-in-view",
+              String(intersectionRatio === 1),
+            );
+          }
+        },
+        { threshold: 1 },
+      );
+      for (const heading of document.querySelectorAll(
+        "#experience-heading, #contact-heading",
+      )) {
+        observer.observe(heading);
+      }
+    });
+
+    const experience = page.getByRole("heading", {
+      name: "Experience",
+      exact: true,
+    });
+    const contact = page.getByRole("heading", { name: "Contact", exact: true });
+    const reveal = async (heading: typeof experience) => {
+      await heading.evaluate((element) =>
+        element.scrollIntoView({ block: "center", behavior: "instant" }),
+      );
+      await expect(heading).toHaveAttribute("data-test-in-view", "true");
+    };
+    const recordedViews = () =>
+      page.evaluate(() =>
+        (window as AnalyticsWindow).testPageviews
+          ?.filter(({ name }) => name === "section_view")
+          .map(({ data }) => data),
+      );
+
+    await reveal(experience);
+    await page.clock.runFor(999);
+    expect(await recordedViews()).toEqual([]);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(experience).toHaveAttribute("data-test-in-view", "false");
+    await page.clock.runFor(1000);
+    expect(await recordedViews()).toEqual([]);
+
+    await reveal(experience);
+    await page.clock.runFor(999);
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        value: true,
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await page.clock.runFor(1000);
+    expect(await recordedViews()).toEqual([]);
+    await page.evaluate(() => {
+      Reflect.deleteProperty(document, "hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.scrollTo(0, 0);
+    });
+    await expect(experience).toHaveAttribute("data-test-in-view", "false");
+
+    await reveal(experience);
+    await page.clock.runFor(999);
+    expect(await recordedViews()).toEqual([]);
+    await page.clock.runFor(1);
+    const experienceView = { section: "experience" };
+    expect(await recordedViews()).toEqual([experienceView]);
+
+    await reveal(contact);
+    await expect(experience).toHaveAttribute("data-test-in-view", "false");
+    await page.clock.runFor(1000);
+    await reveal(experience);
+    await page.clock.runFor(1000);
+    expect(await recordedViews()).toEqual([
+      experienceView,
+      { section: "contact" },
     ]);
   });
 
@@ -612,18 +824,71 @@ test.describe("analytics signals", () => {
     );
     await emailApp.focus();
     await page.keyboard.press("Enter");
-    const base = {
-      website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-      hostname: "ahammednibras.com",
-      url: "/",
-      title: "Portfolio",
-      referrer: "",
-    };
     expect(
       await page.evaluate(() => (window as AnalyticsWindow).testPageviews),
     ).toEqual([
-      { ...base, name: "contact_gmail_clicked" },
-      { ...base, name: "contact_email_app_clicked" },
+      { ...homepagePayload, name: "contact_gmail_clicked" },
+      { ...homepagePayload, name: "contact_email_app_clicked" },
+    ]);
+  });
+
+  test("outbound link activation reports once and opens the destination without waiting", async ({
+    page,
+    context,
+  }) => {
+    await page.evaluate(() => {
+      const browserWindow = window as AnalyticsWindow;
+      browserWindow.umami = {
+        track: (payload) => {
+          browserWindow.testPageviews?.push(payload);
+          return new Promise<never>(() => {
+            // Keep tracking pending while the browser opens the link.
+          });
+        },
+      };
+    });
+
+    const github = "https://github.com/ahammednibras8";
+    const employer = "https://insourcedata.io/";
+    await context.route("**/*", (route) => {
+      if (![github, employer].includes(route.request().url()))
+        return route.abort();
+      return route.fulfill({
+        contentType: "text/plain",
+        body: "Outbound destination intercepted.",
+      });
+    });
+
+    const githubPopup = context.waitForEvent("page");
+    await page
+      .getByRole("link", { name: "GitHub", exact: true })
+      .locator("svg")
+      .click();
+    const githubPage = await githubPopup;
+    await expect(githubPage).toHaveURL(github);
+    await githubPage.close();
+
+    const employerPopup = context.waitForEvent("page");
+    await page
+      .getByRole("link", { name: "Insource Data", exact: true })
+      .press("Enter");
+    const employerPage = await employerPopup;
+    await expect(employerPage).toHaveURL(employer);
+    await employerPage.close();
+
+    expect(
+      await page.evaluate(() => (window as AnalyticsWindow).testPageviews),
+    ).toEqual([
+      {
+        ...homepagePayload,
+        name: "outbound_clicked",
+        data: { destination: "github_profile", placement: "introduction" },
+      },
+      {
+        ...homepagePayload,
+        name: "outbound_clicked",
+        data: { destination: "Insource Data", placement: "experience" },
+      },
     ]);
   });
 
@@ -656,11 +921,7 @@ test.describe("analytics signals", () => {
     await page.evaluate(() => document.dispatchEvent(new Event("finish-copy")));
     await expect(page.getByRole("status")).toHaveText("Email address copied.");
     const copied = {
-      website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
-      hostname: "ahammednibras.com",
-      url: "/",
-      title: "Portfolio",
-      referrer: "",
+      ...homepagePayload,
       name: "contact_email_copied",
     };
     expect(

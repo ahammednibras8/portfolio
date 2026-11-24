@@ -88,9 +88,9 @@ When the approved Umami integration is active and aggregate reports are availabl
 use its homepage visits, contact signals, and external-origin referrers alongside
 Search Console evidence. Follow [ADR 0005](decisions/0005-hosted-portfolio-analytics.md)
 and [the verification guide](../CONTRIBUTING.md#verify-analytics). The integration
-does not collect search queries, campaign parameters, or visitor-supplied
-identities. Its counts do not prove an AI citation or establish that a contact
-message was sent. Missing attribution remains unknown; do not infer results from
-the presence of tracking code.
+collects approved campaign labels for shared links and excludes search terms
+and visitor identifiers from the event payload. Its counts do not prove an AI
+citation or establish that a contact message was sent. Treat missing attribution
+as unknown and base observations on collected records.
 
 Google documents that Search ignores `llms.txt` and does not require a special AI writing format. Keep useful evidence readable in the normal pages rather than maintaining a crawler-specific version. See [Google's generative AI optimization guidance](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide).

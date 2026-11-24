@@ -37,7 +37,7 @@ Nibras reviews factual claims and makes final design decisions. Codex in T3 Code
 - Do not introduce a client framework, server rendering, Pages Functions, a database, or an application server without a new accepted architecture decision.
 - Use Software developer as Nibras's general role. Preserve verified historical job titles when describing individual positions.
 - Keep public profile links focused on GitHub and LinkedIn. Nibras chose to omit the Google developer profile and proposed cloud-learning content from this change.
-- Reuse the optional hosted Umami integration within [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md). Preserve its production-homepage scope, minimal payload, browser exclusion, and independent contact paths.
+- Reuse the optional hosted Umami integration within [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md). Its accepted expansion covers published production content, standard visitor context, generic campaigns, and bounded interaction signals. Preserve browser exclusion and independent contact paths.
 - Use the supported Node.js and pnpm versions and the quality gates defined in [AGENTS.md](AGENTS.md).
 - Keep architecture and substantial design decisions in the decision ledger, including [ADR 0001](docs/decisions/0001-static-astro-site.md) and [ADR 0002](docs/decisions/0002-personal-design-direction.md). This product record does not replace that ledger.
 
@@ -60,7 +60,10 @@ AI may review, challenge, and refine implementation. It must not invent project 
 
 ## Analytics and Evidence
 
-The optional integration measures homepage visits and three existing contact actions. These are exposure and intent signals; they do not establish that someone sent a message or became a qualified inquiry. Evaluate relevant role and project conversations using separately maintained private records.
+When enabled, Umami measures homepage visits, acquisition, visitor environments,
+section exposure, outbound link activations, and contact intent. Evaluate
+relevant role and project conversations using separately maintained private
+records. Published blog articles can opt in through the shared layout.
 
 Tracking code provides no traffic or conversion baseline by itself. Use authorized aggregate reports when a product decision depends on observed behavior, and state the reporting period, missing data, and uncertainty. Blocked tracking and missing referrers are unknowns. Do not infer a visitor's identity, employer, or emotions, or invent results when reports are unavailable.
 

@@ -225,23 +225,26 @@ pnpm exec playwright test \
 ```
 
 The analytics suite builds both flag settings in temporary directories and
-intercepts requests at simulated origins. It tests SDK configuration, payload
-filtering, contact failures, and the exclusion control without sending live
-events. Its SDK replacement does not establish compatibility with a changed
-hosted SDK or receipt by the provider. When checking the real SDK, preserve
-interception of all collector requests and record which SDK was inspected.
-Keep full verification and cross-browser checks for shared interaction changes.
+intercepts requests at simulated origins. It tests SDK configuration, published
+route eligibility, campaign filtering, outbound activations, section timing,
+contact failures, and browser exclusion without sending live events. Its SDK
+replacement does not establish compatibility with a changed hosted SDK or
+receipt by the provider. When checking the real SDK, preserve interception of
+all collector requests and record which SDK was inspected. Keep full
+verification and cross-browser checks for shared interaction changes.
 
 Debug missing requests in this order:
 
-1. Check `location.origin` and `location.pathname`, and which server or deployment
-   is actually running. Localhost, feedback previews, `/privacy/`, and other
-   routes intentionally do not load analytics, even in an enabled build.
+1. Check `location.origin` and confirm `location.pathname` matches
+   `document.body.dataset.analyticsPath` on the deployed page. The homepage
+   is the only route that currently opts in. Localhost, feedback previews,
+   `/privacy/`, and authored 404 pages do not load analytics, even in an enabled
+   build.
 2. Check the built flag, deployed commit, and browser exclusion. The privacy
    notice reflects build configuration, not proof of collection. Local `.env`
    values do not reach GitHub builds, and an Actions variable change requires a
    new artifact. Storage read failures intentionally keep collection off.
-3. On an eligible deployed homepage, inspect Network with all request types
+3. On an eligible deployed page, inspect Network with all request types
    visible. Look for `cloud.umami.is/script.js` and
    `gateway.umami.is/api/send`; inspect blocking or CSP errors. An ad blocker can
    prevent measurement while contact controls continue to work.
@@ -252,10 +255,11 @@ Debug missing requests in this order:
 
 After the ADR's rollout conditions are met, verify the deployed canonical
 homepage through the actual product controls in a dedicated test browser.
-Confirm the pageview and approved contact records appear in the hosted dashboard;
-a successful network response alone does not prove persistence. Do not seed the
-outcome by calling the tracking API directly. Keep test activity minimal and
-private reports out of Git.
+Confirm the pageview and approved contact, outbound, and section records appear
+in the hosted dashboard. Review any approved campaign labels on the pageview.
+A successful network response alone does not prove persistence. Do not seed
+the outcome by calling the tracking API directly. Keep test activity minimal
+and private reports out of Git.
 
 Then use the privacy checkbox, return Home, and reload to verify collection is
 excluded. Verify persistence and synchronization between privacy tabs. A build
