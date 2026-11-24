@@ -29,6 +29,15 @@ Never commit:
 
 If a secret is committed, deleting the file is not enough. Revoke or rotate the secret first. Then remove it from the repository and check whether it was used.
 
-The first version of this site has no login, database, server function, or third-party browser script.
+The site has no login, database, or server function. Its optional Umami Cloud
+integration remains disabled pending rollout verification.
 
-Any future service that handles data must include a security, privacy, and data-retention review.
+The security policy permits the analytics SDK at
+`https://cloud.umami.is/script.js` and collection at
+`https://gateway.umami.is/api/send`. Inline scripts remain blocked.
+
+The integration filters event payloads, but that does not eliminate network
+metadata received by the provider or establish absolute anonymity.
+Provider data handling, retention, processing terms, and applicable consent
+and withdrawal behavior must be reviewed before collection is enabled.
+See [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).

@@ -173,7 +173,7 @@ The favicon is the existing uppercase N derived from IBM Plex Sans Bold on the c
 
 ### Text links
 
-All authored links request a new tab with explicit `target="_blank"` and `rel="noopener noreferrer"`. Title and `aria-describedby` hints announce that behavior without changing visible labels. The native email link explains that the browser may instead open an email application. No global base target or script interception is used.
+Main-content links request a new tab with explicit `target="_blank"` and `rel="noopener noreferrer"`. Title and `aria-describedby` hints announce that behavior without changing visible labels. The native email link explains that the browser may instead open an email application. No global base target or script interception is used. Footer navigation opens in the current tab and does not carry new-tab hints.
 
 Links remain visibly underlined. Their default underline thickness is `0.08em`, with an offset of `0.2em`; hover increases thickness to `0.13em` on devices that support hover. Active links use the active action role, and visited links use the visited role.
 
@@ -199,11 +199,17 @@ The experience markup in the [homepage](src/pages/index.astro) is a semantic ord
 
 ### Footer identity and route access
 
-The footer retains Nibras's name and location as plain text, without navigation links or an unused main focus stop. There is no navbar or skip control. Nibras requested removal of the About page; `/about/` returns the authored 404 page. Its dedicated recovery actions retain Home and contact destinations.
+The footer retains Nibras's name and location as plain text, with one contextual link aligned to the right. It shows Privacy on the homepage and Home on other routes. The link has a 44px minimum target and uses the shared link and focus states. There is no navbar or skip control. The former About route returns the authored 404 page, whose recovery actions retain Home and contact destinations.
 
 ### Recovery links
 
 The 404 recovery area uses a bordered semantic list. Each whole link contains a mono label, a bold destination, and a secondary-ink explanation. Hover underlines the destination. The links stack on narrow screens and form two columns from the wide breakpoint, with a structural divider between them. The large 404 status is text, not decorative artwork.
+
+### Analytics exclusion control
+
+The privacy page uses a native checkbox inside a clickable label with a 44px minimum height. Its accent uses the existing action color, and keyboard focus uses the shared outline. JavaScript reveals the control after reading the saved browser preference. A polite status confirms exclusion or reports a storage failure. The unchecked control has no status copy. Without JavaScript, the notice remains readable and explains that analytics does not run.
+
+Keep the preference available even when collection is disabled, so a visitor can save an exclusion before activation. Tracking availability must not change native contact navigation, copy feedback, or footer access. Preserve these behaviors when refining the interface; follow [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md) for the measurement boundary and [the verification guide](CONTRIBUTING.md#verify-analytics) when diagnosing a stale or unstyled control.
 
 ### Shared focus behavior
 

@@ -27,7 +27,7 @@ test("the homepage introduces Nibras, experience, and contact", async ({
     "Jan 2026 — Present",
     "Jun 2025 — Sep 2025",
   ]);
-  await expect(page.getByRole("contentinfo")).toHaveText(
+  await expect(page.locator(".site-footer-location")).toHaveText(
     "Ahammed Nibras · Kozhikode, Kerala, India",
   );
 });
@@ -137,8 +137,11 @@ test("the homepage exposes a complete keyboard path", async ({
     page.getByRole("button", { name: "Copy email address" }),
     page.getByRole("link", { name: "Write in Gmail" }),
     page.getByRole("link", { name: "Open email app" }),
+    page
+      .getByRole("contentinfo")
+      .getByRole("link", { name: "Privacy", exact: true }),
   ];
-  await expect(page.locator("main a, main button:not([hidden])")).toHaveCount(
+  await expect(page.locator("a, button:not([hidden])")).toHaveCount(
     focusOrder.length,
   );
   for (const control of focusOrder) {

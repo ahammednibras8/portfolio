@@ -37,6 +37,7 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
       rel="noopener noreferrer"
       title="Opens in a new tab"
       aria-describedby="new-tab-hint"
+      data-contact-event="contact_gmail_clicked"
     >
       Write in Gmail
     </a>
@@ -46,6 +47,7 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
       rel="noopener noreferrer"
       title="Opens a new tab or your email app"
       aria-describedby="email-app-hint"
+      data-contact-event="contact_email_app_clicked"
     >
       Open email app
     </a>
@@ -57,9 +59,32 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
 </div>
 
 <script>
+  type ContactSignal =
+    | "contact_gmail_clicked"
+    | "contact_email_app_clicked"
+    | "contact_email_copied";
+
+  function recordContact(name: ContactSignal) {
+    document.dispatchEvent(
+      new CustomEvent("portfolio-contact", { detail: name }),
+    );
+  }
+
   for (const contact of document.querySelectorAll<HTMLElement>(
     "[data-email-contact]",
   )) {
+    for (const link of contact.querySelectorAll<HTMLAnchorElement>(
+      "a[data-contact-event]",
+    )) {
+      const name = link.dataset.contactEvent;
+      if (
+        name === "contact_gmail_clicked" ||
+        name === "contact_email_app_clicked"
+      ) {
+        link.addEventListener("click", () => recordContact(name));
+      }
+    }
+
     const address = contact
       .querySelector<HTMLElement>("[data-email-address]")
       ?.textContent?.trim();
@@ -127,6 +152,7 @@ const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURICompo
 
       try {
         await navigator.clipboard.writeText(address);
+        recordContact("contact_email_copied");
         status.textContent = "Email address copied.";
         if (!feedbackDismissed) {
           tooltip.hidden = false;

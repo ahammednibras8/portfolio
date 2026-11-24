@@ -13,7 +13,7 @@ Track completion and dated observations in [issue #63](https://github.com/ahamme
 3. Inspect the built microdata with a structured-data validator. Check the homepage's WebSite and Person. The Person identifier ends in `/#person`.
 4. Confirm page-specific canonical URLs, real HTML links, and sitemap membership. Do not put removed routes, 404, or preview URLs in the sitemap. Confirm `/about/` returns the authored 404 page.
 5. Run `pnpm run verify` with the pinned toolchain. Shared layout changes also need the full cross-browser checks in [CONTRIBUTING.md](../CONTRIBUTING.md).
-6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, confirm that the production policy allows only same-origin scripts and connections.
+6. Run Lighthouse against the production URL after deployment. The local static server does not apply Cloudflare's `_headers` rules. If the `robots.txt` audit reports a CSP violation, compare the production policy with `public/_headers`: same-origin scripts and connections plus the specific Umami SDK and collector paths in [ADR 0005](decisions/0005-hosted-portfolio-analytics.md). Preserve those narrow permissions and the block on inline scripts.
 
 Add a project route only when reviewed evidence is ready to publish, following [ADR 0002](decisions/0002-personal-design-direction.md). Add writing only when an article is ready.
 
@@ -83,5 +83,14 @@ Use fresh conversations with search enabled in ChatGPT and Claude, and comparabl
 Record date, product/model when shown, region, exact prompt, search use, correct person, official-domain link, supported factual claims, and namesake confusion. A clarifying question can be a good outcome for an ambiguous prompt. Check that each citation actually supports the claim.
 
 Compare at approximately 4, 8, and 12 weeks after rollout; these are review checkpoints, not a promise of improvement. Use existing referral reporting and qualified enquiries where available, remembering that mentions without clicks and missing referrers are not captured. Do not add a tracking application just to establish the baseline.
+
+When the approved Umami integration is active and aggregate reports are available,
+use its homepage visits, contact signals, and external-origin referrers alongside
+Search Console evidence. Follow [ADR 0005](decisions/0005-hosted-portfolio-analytics.md)
+and [the verification guide](../CONTRIBUTING.md#verify-analytics). The integration
+collects approved campaign labels for shared links and excludes search terms
+and visitor identifiers from the event payload. Its counts do not prove an AI
+citation or establish that a contact message was sent. Treat missing attribution
+as unknown and base observations on collected records.
 
 Google documents that Search ignores `llms.txt` and does not require a special AI writing format. Keep useful evidence readable in the normal pages rather than maintaining a crawler-specific version. See [Google's generative AI optimization guidance](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide).

@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-22
-- Updated: 2026-11-20
+- Updated: 2026-11-22
 
 ## Decision
 
@@ -21,6 +21,12 @@ Microdata describes the same identity that visitors can read without requiring J
 On 2026-11-17, Nibras requested a contact path that does not depend on a configured mail application. The shared email component progressively enhances a selectable address with a Clipboard API button. The static build remains complete without it. Permit only same-origin external scripts through `script-src 'self'`; keep inline and third-party scripts blocked, and keep all other CSP directives unchanged. This adds no framework or server. Reconsider the enhancement if it stops providing a useful fallback or needs broader script permissions.
 
 Set Vite's `assetsInlineLimit` to zero so Astro's small processed contact script stays external and can execute under that policy. Browser tests use the built site with Cloudflare's headers, including a real clipboard write and an assertion that no inline scripts are emitted.
+
+On 2026-11-22, [ADR 0005](0005-hosted-portfolio-analytics.md) adds a
+narrow exception to the same-origin script and connection policy for hosted
+analytics. The SDK and collection URLs are allowlisted by path. Inline scripts
+remain blocked. Analytics stays disabled until the documented rollout
+verification is complete.
 
 ## Evidence or source
 

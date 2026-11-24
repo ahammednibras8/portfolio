@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-for (const path of ["/", "/404.html"]) {
-  test(`${path} gives every link native new-tab behavior with advance hints`, async ({
+for (const path of ["/", "/privacy/", "/404.html"]) {
+  test(`${path} gives content links native new-tab behavior with advance hints`, async ({
     page,
   }) => {
     await page.goto(path);
-    const links = await page.locator("a").evaluateAll((anchors) =>
+    // Footer links have a separately tested same-tab navigation contract.
+    const links = await page.locator("main a").evaluateAll((anchors) =>
       anchors.map((anchor) => ({
         href: anchor.getAttribute("href"),
         target: anchor.getAttribute("target"),

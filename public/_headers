@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'none'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self'; style-src 'self'
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; connect-src 'self' https://gateway.umami.is/api/send; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' https://cloud.umami.is/script.js; style-src 'self'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

@@ -47,6 +47,17 @@ AI must not:
 
 Nibras chooses the direction, verifies the claims, reviews the result, and makes the final decision.
 
+## Preserve the analytics boundary
+
+- Read [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md) before changing measurement. It defines the approved provider, events, payload, and rollout conditions. Follow [the analytics verification guide](CONTRIBUTING.md#verify-analytics) for testing and debugging.
+- Reuse the existing Umami Cloud integration. A new provider, self-hosted service, event, or collected field requires a reviewed change to that decision and its tests.
+- Preserve the build-time switch, exact production-origin guard, published-route eligibility, and browser exclusion. Published pages opt in through the shared layout's `trackPage` prop. Unavailable or unreadable browser storage must keep collection off. Development, preview, and privacy pages intentionally make no analytics requests; do not weaken those guards to make a local Network tab show traffic.
+- Keep contact signals in `src/components/EmailContact.astro` and provider handling in `src/layouts/DocumentLayout.astro`. Preserve the `portfolio-contact` event contract, successful-write requirement for copy signals, and contact behavior when tracking fails. Never wait for analytics before following a link or completing a copy.
+- Keep `/privacy/`, its browser preference, and the contextual same-tab footer links usable. Update the notice, decision record, and tests when the data contract changes. A banner-free preference does not establish a consent exemption.
+- Distinguish source configuration, a deployed build, SDK compatibility, and records received by the provider. Neither a script tag nor a passing intercepted test proves that production collection is active. Verify deployment and dashboard evidence before claiming it works live.
+- Keep automated collection requests intercepted. Do not send test visits to the hosted dashboard or change the repository activation variable as a side effect of unrelated work.
+- Use authorized aggregate analytics as evidence for questions, alongside voluntary feedback and actual inquiries. Do not infer identities, sent messages, or visitor emotions from visit counts, contact clicks, or successful address copies. Keep private reports and inquiry records out of Git.
+
 ## Commands
 
 Use Node.js 24.21.0 and pnpm 12.5.1.

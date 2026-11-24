@@ -11,7 +11,12 @@ const description = profile.description;
 const canonical = new URL("/", Astro.site ?? Astro.url);
 ---
 
-<DocumentLayout title={title} description={description} canonical={canonical}>
+<DocumentLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  trackPage
+>
   <section
     class="introduction signature-band"
     aria-labelledby="introduction-heading"
@@ -42,6 +47,7 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
           aria-describedby="new-tab-hint"
           itemprop="sameAs"
           href={profile.github}
+          data-analytics-outbound="github_profile"
         >
           <GitHubIcon
             width="16"
@@ -60,6 +66,7 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
           aria-describedby="new-tab-hint"
           itemprop="sameAs"
           href={profile.linkedin}
+          data-analytics-outbound="linkedin_profile"
         >
           <LinkedInIcon
             width="16"
@@ -87,6 +94,7 @@ const canonical = new URL("/", Astro.site ?? Astro.url);
               title="Opens in a new tab"
               aria-describedby="new-tab-hint"
               href={entry.organizationUrl}
+              data-analytics-outbound={entry.organization}
             >
               {entry.organization}
             </a>

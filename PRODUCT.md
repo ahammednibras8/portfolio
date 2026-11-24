@@ -24,7 +24,7 @@ Nibras's published professional focus is AI product features, backend systems, i
 
 ## Operating Context
 
-The portfolio is a public website at [ahammednibras.com](https://ahammednibras.com/). Its published pages are the homepage and an authored 404 page with recovery links. Nibras requested removal of the About page; its former URL returns 404.
+The portfolio is a public website at [ahammednibras.com](https://ahammednibras.com/). The current source includes the homepage, a privacy notice at `/privacy/`, and an authored 404 page with recovery links. Nibras requested removal of the About page; its former URL returns 404.
 
 GitHub and LinkedIn are the public profile destinations. Email is a contact path for both roles and contract work. Visitors must be able to obtain the address without configuring a native mail application.
 
@@ -37,6 +37,7 @@ Nibras reviews factual claims and makes final design decisions. Codex in T3 Code
 - Do not introduce a client framework, server rendering, Pages Functions, a database, or an application server without a new accepted architecture decision.
 - Use Software developer as Nibras's general role. Preserve verified historical job titles when describing individual positions.
 - Keep public profile links focused on GitHub and LinkedIn. Nibras chose to omit the Google developer profile and proposed cloud-learning content from this change.
+- Reuse the optional hosted Umami integration within [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md). Its accepted expansion covers published production content, standard visitor context, generic campaigns, and bounded interaction signals. Preserve browser exclusion and independent contact paths.
 - Use the supported Node.js and pnpm versions and the quality gates defined in [AGENTS.md](AGENTS.md).
 - Keep architecture and substantial design decisions in the decision ledger, including [ADR 0001](docs/decisions/0001-static-astro-site.md) and [ADR 0002](docs/decisions/0002-personal-design-direction.md). This product record does not replace that ledger.
 
@@ -56,6 +57,17 @@ AI may review, challenge, and refine implementation. It must not invent project 
 - There is no currently approved replacement project case study following the removal recorded in ADR 0002. Missing work must not be replaced with placeholder projects or invented claims.
 - Employer-specific accomplishments, quantitative results, customer names, and credentials require verification before publication. An organization's repository or another contributor's commit is not evidence of Nibras's personal contribution.
 - Keep secrets, private client information, and unpublished evidence out of public content and Git. Follow the [evidence and disclosure rules](docs/content/evidence-and-disclosure.md).
+
+## Analytics and Evidence
+
+When enabled, Umami measures homepage visits, acquisition, visitor environments,
+section exposure, outbound link activations, and contact intent. Evaluate
+relevant role and project conversations using separately maintained private
+records. Published blog articles can opt in through the shared layout.
+
+Tracking code provides no traffic or conversion baseline by itself. Use authorized aggregate reports when a product decision depends on observed behavior, and state the reporting period, missing data, and uncertainty. Blocked tracking and missing referrers are unknowns. Do not infer a visitor's identity, employer, or emotions, or invent results when reports are unavailable.
+
+Check the deployed build and provider records before describing analytics as active. [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md) records the rollout conditions; [CONTRIBUTING.md](CONTRIBUTING.md#verify-analytics) describes verification. Measurement can inform Nibras's decisions without choosing a replacement visual direction or adding new tracking by default.
 
 ## Product Principles
 

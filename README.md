@@ -13,7 +13,7 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 - Shared profile and experience data keep the published name, role, location, and public links consistent.
 - The homepage includes Person and WebSite microdata in static HTML.
 - Important content and navigation work without JavaScript. A small same-origin script adds a copy icon beside the selectable email address where supported. Write in Gmail and Open email app remain ordinary links without JavaScript.
-- Site links request a new tab with `noopener noreferrer` and advance hints. Native email handling remains browser-dependent.
+- Main-content links request a new tab with `noopener noreferrer` and advance hints. Footer navigation opens in the current tab. Native email handling remains browser-dependent.
 - Copy success uses a brief tooltip and icon-only color flash on a transparent background, with a polite live announcement; failure keeps visible manual-copy guidance. A single optional touch vibration is requested on supporting browsers, never relied on for feedback.
 - There is no application server, database, or client framework.
 - GitHub/LinkedIn marks and the regular copy icon use [Font Awesome Free 7.3.1](https://github.com/FortAwesome/Font-Awesome/tree/7.3.1/svgs) by Fonticons, Inc., under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source SVGs retain their attribution; the site sizes and colors them with CSS.
@@ -25,9 +25,44 @@ Production: [ahammednibras.com](https://ahammednibras.com/)
 
 The main decisions are recorded in [ADR 0001](docs/decisions/0001-static-astro-site.md), [ADR 0002](docs/decisions/0002-personal-design-direction.md), [ADR 0003](docs/decisions/0003-cloudflare-pages-deployment.md), and [ADR 0004](docs/decisions/0004-workflow-dependency-lockfile.md).
 
+## Analytics
+
+An optional Umami Cloud Hobby integration measures homepage pageviews,
+exposure to the Experience and Contact headings, activations of profile and
+employer links, and three contact signals:
+`contact_gmail_clicked`, `contact_email_app_clicked`, and `contact_email_copied`.
+A copy signal requires a successful clipboard write. Use the contact signals
+to measure intent and keep confirmed inquiries in separate private records.
+
+Analytics requires `PUBLIC_ANALYTICS_ENABLED=true` at build time and an opted-in
+page on `https://ahammednibras.com`. The homepage opts in through the shared
+layout's `trackPage` prop. Collection remains disabled pending the rollout checks in
+[ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).
+
+GitHub builds read the repository Actions variable
+`PUBLIC_ANALYTICS_ENABLED`, defaulting to `false` when unset.
+Changing this variable takes effect on the next build and deployment.
+
+Event payloads include the page path and title, browser language, screen size,
+and approved campaign labels. The tracker drops other query parameters,
+fragments, custom identities, and free text.
+External HTTPS referrers are reduced to their origin. Contact controls remain
+usable when analytics is unavailable.
+
+Visit `/privacy/` and check **Exclude this browser from analytics** to save
+an exclusion for that browser profile and origin. Uncheck it to remove the
+exclusion. Open privacy tabs synchronize the preference automatically.
+
+Clearing site data resets the preference. It does not delete events already
+sent. Analytics stays off when browser storage cannot be read, and does not
+run without JavaScript.
+
+See [analytics verification](CONTRIBUTING.md#verify-analytics) for contributor
+testing, debugging, and rollout instructions.
+
 ## Finding the work
 
-- The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text without navigation links.
+- The [homepage](https://ahammednibras.com/) introduces Nibras with public profiles, experience, and contact options. The footer keeps plain identity text and a Privacy link. The `/privacy/` page explains analytics and provides a browser-specific exclusion control, with Home in its footer.
 - The former About route is removed and returns the authored 404 page with Home and contact recovery links.
 - Follow the [search discovery runbook](docs/search-discovery.md) for profile links, Search Console, crawler access, and spelling-aware measurement after deployment.
 

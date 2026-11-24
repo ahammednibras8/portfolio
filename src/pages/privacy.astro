@@ -1,0 +1,171 @@
+---
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+import { profile } from "../data/profile";
+
+const canonical = new URL("/privacy/", Astro.site ?? Astro.url);
+const analyticsEnabled = import.meta.env.PUBLIC_ANALYTICS_ENABLED === "true";
+---
+
+<DocumentLayout
+  title={`Privacy — ${profile.name}`}
+  description="How this portfolio handles analytics and contact information."
+  canonical={canonical}
+>
+  <section class="introduction" aria-labelledby="privacy-heading">
+    <h1 id="privacy-heading">Privacy</h1>
+    <p>
+      {analyticsEnabled
+        ? "Optional analytics is configured for the production homepage."
+        : "Analytics collection is currently disabled."}
+    </p>
+    <p>
+      This portfolio is hosted on Cloudflare Pages. The hosting provider
+      receives network request information to deliver and protect the site.
+    </p>
+  </section>
+
+  <section aria-labelledby="analytics-heading">
+    <h2 id="analytics-heading">Analytics</h2>
+    <div>
+      <p>
+        When enabled, Umami Cloud counts homepage visits and activations of
+        profile and employer links. For those links, it records a destination
+        label and where the link appears on the page. It also counts activations
+        of Write in Gmail and Open email app, and successful email address
+        copies.
+      </p>
+      <p>
+        On the homepage, Umami counts a section view when the Experience or
+        Contact heading stays fully in view for one second in a visible tab.
+        Each heading counts once per page load.
+      </p>
+      <p>
+        Pageviews include the page path and title, browser language, and screen
+        size. Umami derives browser, operating system, and approximate location
+        information from the request.
+      </p>
+      <p>
+        Analytics may include approved campaign labels that show where a shared
+        link was posted. It excludes other query parameters, URL fragments,
+        email addresses, and message contents. External referrers are reduced to
+        their website origin.
+      </p>
+      <p>
+        Umami processes IP addresses and browser information to group activity
+        using an identifier with a salt that rotates monthly. Cookie-free
+        tracking does not guarantee absolute anonymity.
+      </p>
+      <p>
+        The Hobby plan retains analytics records for six months. Operational
+        logs and backups may have different retention periods. Read{" "}
+        <a
+          href="https://umami.is/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens in a new tab"
+          aria-describedby="new-tab-hint"
+        >
+          Umami’s privacy notice
+        </a>{" "}
+        for provider information.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="analytics-choice-heading">
+    <h2 id="analytics-choice-heading">Your choice</h2>
+    <div>
+      <p>
+        This browser preference is saved for future visits. Clearing this site’s
+        browser data resets it. It does not delete events already sent.
+      </p>
+
+      <div data-analytics-preference hidden>
+        <label class="analytics-exclusion">
+          <input type="checkbox" data-analytics-exclusion />
+          Exclude this browser from analytics
+        </label>
+      </div>
+
+      <p role="status" data-analytics-preference-status></p>
+
+      <noscript>
+        <p>Analytics does not run when JavaScript is disabled.</p>
+      </noscript>
+    </div>
+  </section>
+
+  <section aria-labelledby="privacy-questions-heading">
+    <h2 id="privacy-questions-heading">Questions</h2>
+    <p>
+      For questions about this site’s privacy practices, email{" "}
+      <a
+        href={`mailto:${profile.email}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Opens an email app or a new tab"
+        aria-describedby="new-tab-hint"
+      >
+        {profile.email}
+      </a>
+      .
+    </p>
+  </section>
+  <script>
+    const controls = document.querySelector<HTMLElement>(
+      "[data-analytics-preference]",
+    );
+    const checkbox = document.querySelector<HTMLInputElement>(
+      "[data-analytics-exclusion]",
+    );
+    const preferenceStatus = document.querySelector<HTMLElement>(
+      "[data-analytics-preference-status]",
+    );
+
+    if (controls && checkbox && preferenceStatus) {
+      const storageKey = "umami.disabled";
+
+      const syncPreference = () => {
+        try {
+          checkbox.checked = window.localStorage.getItem(storageKey) !== null;
+          controls.hidden = false;
+          preferenceStatus.textContent = checkbox.checked
+            ? "This browser is excluded from analytics."
+            : "";
+          return true;
+        } catch {
+          controls.hidden = true;
+          preferenceStatus.textContent =
+            "Browser storage is unavailable. Analytics stays off while storage cannot be read.";
+          return false;
+        }
+      };
+
+      checkbox.addEventListener("change", () => {
+        try {
+          if (checkbox.checked) {
+            window.localStorage.setItem(storageKey, "1");
+          } else {
+            window.localStorage.removeItem(storageKey);
+          }
+        } catch {
+          if (syncPreference()) {
+            preferenceStatus.textContent =
+              "Couldn’t save your change. The saved preference is shown.";
+          }
+          return;
+        }
+
+        syncPreference();
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key === storageKey || event.key === null) {
+          syncPreference();
+        }
+      });
+
+      syncPreference();
+    }
+  </script>
+</DocumentLayout>
