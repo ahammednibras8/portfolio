@@ -93,7 +93,9 @@ test("the browser exclusion can be changed by keyboard and survives reload", asy
   const checkbox = page.getByRole("checkbox", {
     name: "Exclude this browser from analytics",
   });
+  const status = page.getByRole("status");
   await expect(checkbox).not.toBeChecked();
+  await expect(status).toBeEmpty();
   await pressTab(page, browserName);
   await expect(
     page.getByRole("link", { name: "Umami’s privacy notice" }),
@@ -107,21 +109,18 @@ test("the browser exclusion can be changed by keyboard and survives reload", asy
   ).toBe("1");
   await page.reload();
   await expect(checkbox).toBeChecked();
-  await expect(page.getByRole("status")).toHaveText(
-    "This browser is excluded from analytics.",
-  );
+  await expect(status).toHaveText("This browser is excluded from analytics.");
 
   // Clicking the label exercises its native association with the input.
   await page.locator("label.analytics-exclusion").click();
   await expect(checkbox).not.toBeChecked();
+  await expect(status).toBeEmpty();
   expect(
     await page.evaluate(() => window.localStorage.getItem("umami.disabled")),
   ).toBeNull();
   await page.reload();
   await expect(checkbox).not.toBeChecked();
-  await expect(page.getByRole("status")).toHaveText(
-    "This browser is not excluded from analytics.",
-  );
+  await expect(status).toBeEmpty();
 });
 
 for (const operation of ["setItem", "removeItem"] as const) {
@@ -195,9 +194,7 @@ test("other tabs update the preference and recover from unreadable storage", asy
     // Let the browser emit the real storage event for clearing site data.
     await other.evaluate(() => window.localStorage.clear());
     await expect(checkbox).not.toBeChecked();
-    await expect(page.getByRole("status")).toHaveText(
-      "This browser is not excluded from analytics.",
-    );
+    await expect(page.getByRole("status")).toBeEmpty();
     expect(errors).toEqual([]);
   } finally {
     await other.close();

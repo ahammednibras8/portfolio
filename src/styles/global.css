@@ -626,6 +626,6 @@ h2 + * {
   accent-color: var(--color-action);
 }
 
-[data-analytics-preference-status] {
+[data-analytics-preference-status]:not(:empty) {
   margin-block-start: var(--space-interface);
 }

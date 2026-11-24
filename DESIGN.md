@@ -207,7 +207,7 @@ The 404 recovery area uses a bordered semantic list. Each whole link contains a 
 
 ### Analytics exclusion control
 
-The privacy page uses a native checkbox inside a clickable label with a 44px minimum height. Its accent uses the existing action color, and keyboard focus uses the shared outline. JavaScript reveals the control after reading the saved browser preference. A polite status reports the preference or a storage failure. Without JavaScript, the notice remains readable and explains that analytics does not run.
+The privacy page uses a native checkbox inside a clickable label with a 44px minimum height. Its accent uses the existing action color, and keyboard focus uses the shared outline. JavaScript reveals the control after reading the saved browser preference. A polite status confirms exclusion or reports a storage failure. The unchecked control has no status copy. Without JavaScript, the notice remains readable and explains that analytics does not run.
 
 Keep the preference available even when collection is disabled, so a visitor can save an exclusion before activation. Tracking availability must not change native contact navigation, copy feedback, or footer access. Preserve these behaviors when refining the interface; follow [ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md) for the measurement boundary and [the verification guide](CONTRIBUTING.md#verify-analytics) when diagnosing a stale or unstyled control.
 

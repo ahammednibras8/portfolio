@@ -131,7 +131,7 @@ const analyticsEnabled = import.meta.env.PUBLIC_ANALYTICS_ENABLED === "true";
           controls.hidden = false;
           preferenceStatus.textContent = checkbox.checked
             ? "This browser is excluded from analytics."
-            : "This browser is not excluded from analytics.";
+            : "";
           return true;
         } catch {
           controls.hidden = true;
