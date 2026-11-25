@@ -36,8 +36,9 @@ to measure intent and keep confirmed inquiries in separate private records.
 
 Analytics requires `PUBLIC_ANALYTICS_ENABLED=true` at build time and an opted-in
 page on `https://ahammednibras.com`. The homepage opts in through the shared
-layout's `trackPage` prop. Collection remains disabled pending the rollout checks in
-[ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md).
+layout's `trackPage` prop. The production rollout is recorded in
+[ADR 0005](docs/decisions/0005-hosted-portfolio-analytics.md). The privacy page
+shows the setting built into the active deployment.
 
 GitHub builds read the repository Actions variable
 `PUBLIC_ANALYTICS_ENABLED`, defaulting to `false` when unset.
