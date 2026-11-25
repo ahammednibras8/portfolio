@@ -169,7 +169,15 @@ const personId = new URL("#person", homepage).href;
             const incoming = new URLSearchParams(window.location.search);
             const campaign = new URLSearchParams();
             const approved = {
-              utm_source: ["github", "linkedin"],
+              utm_source: [
+                "devto",
+                "discord",
+                "github",
+                "instagram",
+                "linkedin",
+                "medium",
+                "x",
+              ],
               utm_medium: ["referral", "social"],
               utm_campaign: ["portfolio_launch"],
               utm_content: ["profile", "readme"],

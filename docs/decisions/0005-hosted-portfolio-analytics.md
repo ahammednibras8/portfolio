@@ -1,8 +1,8 @@
 # 0005: Use hosted analytics for portfolio visitors and interactions
 
-- Status: Accepted for implementation; production collection pending verification
+- Status: Accepted; homepage enabled in production, pageview receipt verified
 - Date: 2026-11-21
-- Updated: 2026-11-22
+- Updated: 2026-11-25
 
 ## Decision
 
@@ -79,6 +79,7 @@ Operating an analytics application and database is unnecessary for this scope.
 - [Cloud pricing and limits](https://umami.is/pricing)
 - [Collected metrics and visitor grouping](https://docs.umami.is/docs/metric-definitions)
 - [Tracker configuration](https://docs.umami.is/docs/tracker-configuration)
+- [Umami Cloud data processing agreement](https://umami.is/dpa)
 - Nibras confirmed the Hobby plan and EU (Frankfurt) account region during setup. This is owner-supplied account information, not proof that every provider operation occurs in that region.
 
 ## Constraints
@@ -99,8 +100,20 @@ Operating an analytics application and database is unnecessary for this scope.
 - Allow only required script and collection destinations in the security policy.
 - Defer session replay, heatmaps, chatbots, and project-specific events.
 
-Production collection remains disabled until configuration, actual payloads,
-consent behavior, and failure cases have been verified.
+## Production rollout
+
+On 2026-11-25, Nibras approved enabling the existing homepage integration with
+the browser exclusion control on `/privacy/`. The rollout uses the existing
+payload and keeps internal automated test events out of the hosted dashboard.
+The Hobby plan lists six months of analytics retention. Umami's processing
+agreement leaves the applicable notice and consent requirements with the site
+operator.
+
+The enabled build reached production on 2026-11-25. A check of the live site
+with the hosted SDK verified a homepage pageview and browser exclusion with
+collector requests intercepted. Nibras separately confirmed that a visit
+through his LinkedIn profile link appeared under the `linkedin` UTM source
+in the hosted dashboard.
 
 ## Current event and payload contract
 
@@ -137,11 +150,13 @@ The before-send filter accepts only the `event` type and creates a fresh payload
   use `experience`.
   For `section_view`, send only `section` with `experience` or `contact`.
 
-The initial campaign labels are `github` or `linkedin` for `utm_source`,
-`referral` or `social` for `utm_medium`, `portfolio_launch` for `utm_campaign`,
-and `profile` or `readme` for `utm_content`. Drop a campaign field when its
-key occurs more than once. Rebuild the query from approved labels and omit
-the fragment.
+The approved `utm_source` values are `devto`, `discord`, `github`,
+`instagram`, `linkedin`, `medium`, and `x`. For the six profile links on DEV,
+Discord, Instagram, LinkedIn, Medium, and X, use `social` for `utm_medium`,
+`portfolio_launch` for `utm_campaign`, and `profile` for `utm_content`.
+The allowlist also accepts `referral` for `utm_medium` and `readme` for
+`utm_content`. Drop a campaign field when its key occurs more than once.
+Rebuild the query from approved labels and omit the fragment.
 
 Reject unknown signal names and other record types. Do not copy arbitrary SDK
 properties into the payload. Recheck the route, build switch, and browser
@@ -153,9 +168,6 @@ metadata received by the provider.
 Load the SDK from `https://cloud.umami.is/script.js`.
 Set `data-host-url` explicitly to `https://gateway.umami.is`.
 Allow collection requests only to `https://gateway.umami.is/api/send`.
-
-These security-policy permissions do not enable analytics.
-`PUBLIC_ANALYTICS_ENABLED` remains false pending rollout verification.
 
 ## Build and runtime gates
 

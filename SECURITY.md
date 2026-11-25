@@ -29,8 +29,9 @@ Never commit:
 
 If a secret is committed, deleting the file is not enough. Revoke or rotate the secret first. Then remove it from the repository and check whether it was used.
 
-The site has no login, database, or server function. Its optional Umami Cloud
-integration remains disabled pending rollout verification.
+The site has no login, database, or server function. Its Umami Cloud
+integration is configured for the production homepage. Visitors can exclude
+their browser through `/privacy/`.
 
 The security policy permits the analytics SDK at
 `https://cloud.umami.is/script.js` and collection at
