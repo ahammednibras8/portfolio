@@ -273,12 +273,29 @@ test("pageviews and successful copies keep approved campaign labels through the 
   await expect.poll(() => collected).toEqual([{ type: "event", payload }]);
   await page.getByRole("button", { name: "Copy email address" }).click();
   await expect(page.getByRole("status")).toHaveText("Email address copied.");
-  await expect
-    .poll(() => collected)
-    .toEqual([
-      { type: "event", payload },
-      { type: "event", payload: { ...payload, name: "contact_email_copied" } },
-    ]);
+  const expectedRecords = [
+    { type: "event", payload },
+    { type: "event", payload: { ...payload, name: "contact_email_copied" } },
+  ];
+  await expect.poll(() => collected).toEqual(expectedRecords);
+
+  for (const source of [
+    "devto",
+    "discord",
+    "github",
+    "instagram",
+    "medium",
+    "x",
+  ]) {
+    const url = `/?utm_source=${source}&utm_medium=social&utm_campaign=portfolio_launch&utm_content=profile`;
+    await page.goto(`https://ahammednibras.com${url}`);
+    expectedRecords.push({
+      type: "event",
+      payload: { ...homepagePayload, url },
+    });
+    await expect.poll(() => collected).toEqual(expectedRecords);
+  }
+
   expect(
     externalRequests.every((url) =>
       [
@@ -519,23 +536,25 @@ test.describe("analytics payload filter", () => {
   test("duplicate campaign keys and unapproved values are excluded", async ({
     page,
   }) => {
-    const result = await page.evaluate(() => {
+    const results = await page.evaluate(() => {
       const filter = (window as AnalyticsWindow).portfolioAnalyticsBeforeSend;
       if (!filter) throw new Error("Analytics filter was not registered.");
-      window.history.replaceState(
-        {},
-        "",
-        "/?utm_source=linkedin&utm_source=github&utm_medium=social&utm_medium=&utm_campaign=portfolio_launch&utm_content=recipient-123&utm_term=ignored#contact",
-      );
-      return filter("event", {
-        website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+      return [
+        "/?utm_source=linkedin&utm_source=instagram&utm_medium=social&utm_medium=&utm_campaign=portfolio_launch&utm_content=recipient-123&utm_term=ignored#contact",
+        "/?utm_source=instagram-recipient-123&utm_campaign=portfolio_launch",
+      ].map((url) => {
+        window.history.replaceState({}, "", url);
+        return filter("event", {
+          website: "994f1189-2ae4-48b0-9b15-6b8c6f5c785f",
+        });
       });
     });
 
-    expect(result).toEqual({
+    const approvedPayload = {
       ...homepagePayload,
       url: "/?utm_campaign=portfolio_launch",
-    });
+    };
+    expect(results).toEqual([approvedPayload, approvedPayload]);
   });
 
   test("referrers retain only external HTTPS origins", async ({ page }) => {

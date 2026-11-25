@@ -150,11 +150,13 @@ The before-send filter accepts only the `event` type and creates a fresh payload
   use `experience`.
   For `section_view`, send only `section` with `experience` or `contact`.
 
-The initial campaign labels are `github` or `linkedin` for `utm_source`,
-`referral` or `social` for `utm_medium`, `portfolio_launch` for `utm_campaign`,
-and `profile` or `readme` for `utm_content`. Drop a campaign field when its
-key occurs more than once. Rebuild the query from approved labels and omit
-the fragment.
+The approved `utm_source` values are `devto`, `discord`, `github`,
+`instagram`, `linkedin`, `medium`, and `x`. For the six profile links on DEV,
+Discord, Instagram, LinkedIn, Medium, and X, use `social` for `utm_medium`,
+`portfolio_launch` for `utm_campaign`, and `profile` for `utm_content`.
+The allowlist also accepts `referral` for `utm_medium` and `readme` for
+`utm_content`. Drop a campaign field when its key occurs more than once.
+Rebuild the query from approved labels and omit the fragment.
 
 Reject unknown signal names and other record types. Do not copy arbitrary SDK
 properties into the payload. Recheck the route, build switch, and browser
