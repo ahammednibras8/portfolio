@@ -64,13 +64,8 @@ jobs:
       - name: Install Firefox and WebKit
         run: pnpm exec playwright install --with-deps firefox webkit
 
-      - name: Run Firefox and WebKit end-to-end tests
-        run: pnpm run test:e2e --project=firefox --project=webkit
-        env:
-          PLAYWRIGHT_USE_EXISTING_BUILD: "true"
-
-      - name: Run Firefox and WebKit accessibility tests
-        run: pnpm run test:a11y --project=firefox --project=webkit
+      - name: Run Firefox and WebKit tests
+        run: pnpm exec playwright test tests/e2e tests/accessibility --project=firefox --project=webkit
         env:
           PLAYWRIGHT_USE_EXISTING_BUILD: "true"
 
