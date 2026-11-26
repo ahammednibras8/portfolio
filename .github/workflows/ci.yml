@@ -95,6 +95,8 @@ jobs:
     environment:
       name: pr-preview
       url: ${{ steps.deploy.outputs.deployment_url }}
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
 
     steps:
       - name: Checkout repository
@@ -186,3 +188,43 @@ jobs:
           printf -- '- Commit: `%s`\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+
+  preview-comment:
+    name: Post PR preview link
+    needs: preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Create or update the preview comment
+        shell: bash
+        run: |
+          repository="repos/$GITHUB_REPOSITORY"
+          current_head="$(gh api "$repository/pulls/$PR_NUMBER" --jq 'select(.state == "open") | .head.sha')"
+          if [[ "$current_head" != "$PR_HEAD_SHA" ]]; then
+            printf 'The pull request closed or moved to another revision. Skipping preview comment.\n'
+            exit 0
+          fi
+
+          comments="$repository/issues/$PR_NUMBER/comments"
+          comment_ids="$(gh api --paginate "$comments?per_page=100" --jq '
+            .[] | select(.user.login == "github-actions[bot]")
+            | select(.body | startswith("<!-- portfolio-pr-preview -->\n")) | .id
+          ')"
+
+          printf -v body '<!-- portfolio-pr-preview -->\n**Cloudflare Pages preview**\n\n[Open preview](%s)\n\nVerified build: `%s`\n' \
+            "$DEPLOYMENT_URL" "$GITHUB_SHA"
+
+          if [[ -n "$comment_ids" ]]; then
+            comment_id="${comment_ids%%$'\n'*}"
+            gh api --method PATCH "$repository/issues/comments/$comment_id" --raw-field "body=$body" >/dev/null
+          else
+            gh api --method POST "$comments" --raw-field "body=$body" >/dev/null
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DEPLOYMENT_URL: ${{ needs.preview.outputs.deployment_url }}

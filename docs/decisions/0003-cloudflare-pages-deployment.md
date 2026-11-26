@@ -52,7 +52,7 @@ On 2026-11-19, Nibras approved automatic deployment to remove the repeated produ
 
 ## Proposed pre-merge review for issue #64
 
-Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary. Use that same URL in Discord. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
+Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary and in one comment on the pull request. Update the comment when a newer revision passes. Use that same URL in Discord. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
 
 Anyone with the preview URL can open it without signing in. Serve only the verified static output and keep previews out of search indexes. Keep fork PR verification credential-free.
 
