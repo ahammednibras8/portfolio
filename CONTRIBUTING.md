@@ -269,6 +269,30 @@ changes. To disable collection in the published artifact, set the Actions
 variable to `false` and build and deploy again; the variable cannot modify an
 already published artifact.
 
+### Create campaign links
+
+Use Go 1.21 or newer for the local campaign link CLI. Run it from the repository
+root and answer the Source, Medium, Campaign, and optional Placement prompts.
+
+```sh
+go run scripts/campaign-link.go
+```
+
+For an event QR code, use short public labels such as `meetup`, `qr`,
+`community_talk`, and `slides`. For applications, use a label shared across the
+channel or placement. Keep names, recipient identifiers, and private application
+details out of the labels.
+
+The CLI prints the URL and adds new labels to `src/data/analytics-campaigns.json`.
+Review and commit the registry diff. Share the new link after deployment so the
+built site recognizes its labels. After a real click, check **Insights → UTM**
+in Umami for the campaign and source.
+
+```sh
+go vet scripts/campaign-link.go scripts/campaign-link_test.go
+go test scripts/campaign-link.go scripts/campaign-link_test.go
+```
+
 ## Open a pull request
 
 A pull request must:
