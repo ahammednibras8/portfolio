@@ -259,6 +259,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       actions: read
+      issues: read
       pull-requests: write
 
     steps:
@@ -367,18 +368,39 @@ jobs:
             exit 0
           fi
 
-          printf -v content '**PR #%s preview** · CI passed\n[Open preview](%s)' \
-            "$PR_NUMBER" "$DEPLOYMENT_URL"
-          if [[ -s "$RUNNER_TEMP/discord-lighthouse.txt" ]]; then
-            printf -v scores '\nLighthouse (Perf / A11y / Best practices / SEO): %s' \
-              "$(<"$RUNNER_TEMP/discord-lighthouse.txt")"
-            content+="$scores"
+          issue_number="$(jq -r '
+            (.pull_request.body // "")
+            | capture("(?im)^Related:[ \t]*#(?<number>[1-9][0-9]*)[ \t\r]*$").number
+          ' "$GITHUB_EVENT_PATH")"
+          related=""
+          if [[ -n "$issue_number" ]]; then
+            issue_title="$(gh api "repos/$GITHUB_REPOSITORY/issues/$issue_number" \
+              --jq '.title | sub("^\\[Feature\\]: "; "") | gsub("[\\[\\]()\\r\\n]"; " ")' 2>/dev/null || true)"
+            printf -v related 'Related to [#%s%s](%s/%s/issues/%s)\n\n' \
+              "$issue_number" "${issue_title:+ · $issue_title}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue_number"
           fi
-          printf -v summary '\n[GitHub summary](%s)' "$COMMENT_URL"
-          content+="$summary"
 
-          payload="$(jq -nc --arg content "$content" \
-            '{content: $content, allowed_mentions: {parse: []}, flags: 4}')"
+          printf -v description '%s**Preview ready · CI passed**\n[Open preview](%s) · [View checks and reports](%s)' \
+            "$related" "$DEPLOYMENT_URL" "$COMMENT_URL"
+          scores=""
+          if [[ -s "$RUNNER_TEMP/discord-lighthouse.txt" ]]; then
+            scores="$(<"$RUNNER_TEMP/discord-lighthouse.txt")"
+          fi
+          payload="$(jq -c --arg description "$description" --arg scores "$scores" '
+            ($scores | split(" / ")) as $score
+            | {
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  title: "PR #\(.pull_request.number) · \(.pull_request.title[:110])",
+                  url: .pull_request.html_url,
+                  description: $description,
+                  fields: (if ($score | length) == 4 then [{
+                    name: "Lighthouse · lowest scores across audited pages",
+                    value: "Performance **\($score[0])** · Accessibility **\($score[1])**\nBest practices **\($score[2])** · SEO **\($score[3])**"
+                  }] else [] end)
+                }]
+              }
+          ' "$GITHUB_EVENT_PATH")"
           if ! status="$(curl --silent --max-time 10 --output /dev/null \
             --write-out '%{http_code}' --json "$payload" --url-query 'wait=true' \
             --url "$DISCORD_WEBHOOK_URL")" || [[ "$status" != 200 ]]; then
@@ -387,6 +409,6 @@ jobs:
           fi
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
           DEPLOYMENT_URL: ${{ needs.preview.outputs.deployment_url }}
           COMMENT_URL: ${{ steps.comment.outputs.url }}
