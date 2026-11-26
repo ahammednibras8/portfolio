@@ -50,6 +50,14 @@ On 2026-11-19, Nibras approved automatic deployment to remove the repeated produ
 - The `feedback` environment is restricted to `main`, exposes deployment credentials only to the feedback job, and records the stable feedback alias as its deployment URL.
 - Cloudflare Pages project `ahammed-nibras` serves the canonical `https://ahammednibras.com/` origin. Its `pages.dev` host remains the Pages service hostname and preview namespace.
 
+## Proposed pre-merge review for issue #64
+
+Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary. Use that same URL in Discord. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
+
+Anyone with the preview URL can open it without signing in. Serve only the verified static output and keep previews out of search indexes. Keep fork PR verification credential-free.
+
+Merging remains the publishing decision. Production builds and verifies the resulting `main` commit and deploys the artifact from that verification run. The reviewed PR revision and resulting `main` commit may have different SHAs.
+
 ## Recovery and rollback
 
 Every successful production upload remains available as a Cloudflare Pages deployment. Follow the [production rollback runbook](../production-rollback.md) to choose, promote, verify, and communicate a last known-good deployment. Cloudflare documents the underlying promotion in its [rollback guide](https://developers.cloudflare.com/pages/configuration/rollbacks/).
