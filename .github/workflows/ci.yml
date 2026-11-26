@@ -287,6 +287,14 @@ jobs:
             | "| \($page) | \(.performance | pct) | \(.accessibility | pct) | \(.["best-practices"] | pct) | \(.seo | pct) |"
           ' "$reports_dir/$lighthouse/.lighthouseci/reports/manifest.json")"
 
+          jq -er '
+            [.[] | select(.isRepresentativeRun) | .summary] as $pages
+            | ["performance", "accessibility", "best-practices", "seo"]
+            | map(. as $category | [$pages[][$category]] | min * 100 | round)
+            | join(" / ")
+          ' "$reports_dir/$lighthouse/.lighthouseci/reports/manifest.json" \
+            > "$RUNNER_TEMP/discord-lighthouse.txt"
+
           artifacts="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts")"
           artifact_id() {
             jq -er --arg name "$1" \
@@ -308,6 +316,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Create or update the preview comment
+        id: comment
         shell: bash
         run: |
           repository="repos/$GITHUB_REPOSITORY"
@@ -332,14 +341,52 @@ jobs:
             body+=$'\nTest reports are unavailable for this run.\n'
           fi
 
+          method=POST
+          target="$comments"
           if [[ -n "$comment_ids" ]]; then
-            comment_id="${comment_ids%%$'\n'*}"
-            gh api --method PATCH "$repository/issues/comments/$comment_id" --raw-field "body=$body" >/dev/null
-          else
-            gh api --method POST "$comments" --raw-field "body=$body" >/dev/null
+            method=PATCH
+            target="$repository/issues/comments/${comment_ids%%$'\n'*}"
           fi
+
+          comment_url="$(gh api --method "$method" "$target" \
+            --raw-field "body=$body" --jq '.html_url')"
+          printf 'url=%s\n' "$comment_url" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           DEPLOYMENT_URL: ${{ needs.preview.outputs.deployment_url }}
+
+      - name: Notify Discord of the verified preview
+        if: ${{ steps.comment.outputs.url != '' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
+            printf 'Discord webhook is not configured.\n'
+            exit 0
+          fi
+
+          printf -v content '**PR #%s preview** · CI passed\n[Open preview](%s)' \
+            "$PR_NUMBER" "$DEPLOYMENT_URL"
+          if [[ -s "$RUNNER_TEMP/discord-lighthouse.txt" ]]; then
+            printf -v scores '\nLighthouse (Perf / A11y / Best practices / SEO): %s' \
+              "$(<"$RUNNER_TEMP/discord-lighthouse.txt")"
+            content+="$scores"
+          fi
+          printf -v summary '\n[GitHub summary](%s)' "$COMMENT_URL"
+          content+="$summary"
+
+          payload="$(jq -nc --arg content "$content" \
+            '{content: $content, allowed_mentions: {parse: []}, flags: 4}')"
+          if ! status="$(curl --silent --max-time 10 --output /dev/null \
+            --write-out '%{http_code}' --json "$payload" --url-query 'wait=true' \
+            --url "$DISCORD_WEBHOOK_URL")" || [[ "$status" != 200 ]]; then
+            printf '::warning::Discord preview notification failed.\n'
+            exit 1
+          fi
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEPLOYMENT_URL: ${{ needs.preview.outputs.deployment_url }}
+          COMMENT_URL: ${{ steps.comment.outputs.url }}

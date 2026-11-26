@@ -52,7 +52,9 @@ On 2026-11-19, Nibras approved automatic deployment to remove the repeated produ
 
 ## Proposed pre-merge review for issue #64
 
-Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary. Post the preview URL, CI result, test counts, Lighthouse scores, and report links in one pull request comment. Update the comment when a newer revision passes. If reports are unavailable, still post the verified preview URL and CI result. Use the same preview URL in Discord. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
+Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary. Post the preview URL, CI result, test counts, Lighthouse scores, and report links in one pull request comment. Update the comment when a newer revision passes. If reports are unavailable, still post the verified preview URL and CI result. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
+
+When the Discord webhook is configured, send one message after publishing the GitHub preview comment. Include the same preview URL, CI result, lowest Lighthouse score across the audited pages for each category, and a link to the GitHub comment. Log a warning if Discord delivery fails and keep the GitHub preview result available.
 
 Anyone with the preview URL can open it without signing in. Serve only the verified static output and keep previews out of search indexes. Keep fork PR verification credential-free.
 
