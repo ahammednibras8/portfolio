@@ -275,7 +275,7 @@ Use Go 1.21 or newer for the local campaign link CLI. Run it from the repository
 root and answer the Source, Medium, Campaign, and optional Placement prompts.
 
 ```sh
-go run scripts/campaign-link.go
+pnpm run generate-link
 ```
 
 For an event QR code, use short public labels such as `meetup`, `qr`,
