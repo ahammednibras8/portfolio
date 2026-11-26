@@ -56,6 +56,7 @@ jobs:
           output: .cache/lychee/setup.md
 
       - name: Check external links
+        id: external-links
         run: >-
           pnpm run test:links
           --format markdown
@@ -65,11 +66,13 @@ jobs:
         run: pnpm exec playwright install --with-deps firefox webkit
 
       - name: Run Firefox and WebKit tests
+        id: browser-tests
         run: pnpm exec playwright test tests/e2e tests/accessibility --project=firefox --project=webkit
         env:
           PLAYWRIGHT_USE_EXISTING_BUILD: "true"
 
       - name: Smoke test production
+        id: production-smoke
         if: env.PRODUCTION_URL != ''
         shell: bash
         run: |
@@ -89,9 +92,11 @@ jobs:
         run: echo "::notice::Production smoke testing is dormant until the PRODUCTION_URL repository variable is configured."
 
       - name: Audit dependencies
+        id: dependency-audit
         run: pnpm audit --audit-level high
 
       - name: Upload audit reports
+        id: audit-reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -102,3 +107,47 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Notify Discord of the weekly audit
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
+            printf 'Discord webhook is not configured.\n'
+            exit 0
+          fi
+
+          payload="$(jq -nc '
+            def status_text:
+              {"success":"Passed","failure":"Failed","skipped":"Skipped","cancelled":"Cancelled","":"Skipped"}[.] // "Unknown";
+            [
+              "**Firefox and WebKit** · \(env.BROWSER_STATUS | status_text)",
+              "**External links** · \(env.LINK_STATUS | status_text)",
+              "**Production smoke test** · \(env.SMOKE_STATUS | status_text)",
+              "**Dependencies** · \(env.DEPENDENCY_STATUS | status_text)"
+            ]
+            + (if env.AUDIT_REPORT_URL == "" then []
+               else ["", "[Download audit archive](\(env.AUDIT_REPORT_URL))"] end)
+            | {
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  title: "Weekly portfolio audit · \(env.AUDIT_STATUS | status_text)",
+                  description: (join("\n"))
+                }]
+              }
+          ')"
+          if ! status="$(curl --silent --max-time 10 --output /dev/null \
+            --write-out '%{http_code}' --json "$payload" --url-query 'wait=true' \
+            --url "$DISCORD_WEBHOOK_URL")" || [[ "$status" != 200 ]]; then
+            printf '::warning::Discord weekly audit notification failed.\n'
+            exit 1
+          fi
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          AUDIT_STATUS: ${{ job.status }}
+          BROWSER_STATUS: ${{ steps.browser-tests.outcome }}
+          LINK_STATUS: ${{ steps.external-links.outcome }}
+          SMOKE_STATUS: ${{ steps.production-smoke.outcome }}
+          DEPENDENCY_STATUS: ${{ steps.dependency-audit.outcome }}
+          AUDIT_REPORT_URL: ${{ steps.audit-reports.outputs.artifact-url }}
