@@ -258,9 +258,55 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
+      actions: read
       pull-requests: write
 
     steps:
+      - name: Collect test results for the PR comment
+        continue-on-error: true
+        shell: bash
+        run: |
+          reports_dir="$(mktemp -d "$RUNNER_TEMP/pr-reports.XXXXXX")"
+          chromium="ci-reports-Chromium-$GITHUB_SHA"
+          lighthouse="ci-reports-Lighthouse-$GITHUB_SHA"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name "$chromium" --name "$lighthouse" --dir "$reports_dir"
+
+          counts="$(jq -er '
+            [.suites[] | recurse(.suites[]?) | .specs[]? as $spec
+              | $spec.tests[] | select(any(.results[]; .status == "passed"))
+              | ($spec.file | split("/")[0])] as $passed
+            | "\($passed | map(select(. == "e2e")) | length) end-to-end, \($passed | map(select(. == "accessibility")) | length) accessibility"
+          ' "$reports_dir/$chromium/test-results/playwright.json")"
+
+          scores="$(jq -er '
+            def pct: . * 100 | round;
+            .[] | select(.isRepresentativeRun)
+            | (.url | sub("^https?://[^/]+"; "") | sub("/index\\.html$"; "/")) as $page
+            | .summary
+            | "| \($page) | \(.performance | pct) | \(.accessibility | pct) | \(.["best-practices"] | pct) | \(.seo | pct) |"
+          ' "$reports_dir/$lighthouse/.lighthouseci/reports/manifest.json")"
+
+          artifacts="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts")"
+          artifact_id() {
+            jq -er --arg name "$1" \
+              '.artifacts[] | select(.name == $name and .expired == false) | .id' \
+              <<< "$artifacts"
+          }
+          chromium_id="$(artifact_id "$chromium")"
+          lighthouse_id="$(artifact_id "$lighthouse")"
+          artifact_base="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts"
+
+          {
+            printf 'Chromium: %s passed ([Playwright report](%s/%s))\n\n' "$counts" "$artifact_base" "$chromium_id"
+            printf '[Lighthouse reports](%s/%s)\n\n' "$artifact_base" "$lighthouse_id"
+            printf '| Page | Performance | Accessibility | Best practices | SEO |\n'
+            printf '| --- | ---: | ---: | ---: | ---: |\n'
+            printf '%s\n' "$scores"
+          } > "$RUNNER_TEMP/pr-test-summary.md"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Create or update the preview comment
         shell: bash
         run: |
@@ -277,8 +323,14 @@ jobs:
             | select(.body | startswith("<!-- portfolio-pr-preview -->\n")) | .id
           ')"
 
-          printf -v body '<!-- portfolio-pr-preview -->\n**Cloudflare Pages preview**\n\n[Open preview](%s)\n\nVerified build: `%s`\n' \
-            "$DEPLOYMENT_URL" "$GITHUB_SHA"
+          printf -v body '<!-- portfolio-pr-preview -->\n**Cloudflare Pages preview**\n\n[Open preview](%s) · **CI passed**\n' \
+            "$DEPLOYMENT_URL"
+
+          if [[ -s "$RUNNER_TEMP/pr-test-summary.md" ]]; then
+            body+=$'\n'"$(cat "$RUNNER_TEMP/pr-test-summary.md")"$'\n'
+          else
+            body+=$'\nTest reports are unavailable for this run.\n'
+          fi
 
           if [[ -n "$comment_ids" ]]; then
             comment_id="${comment_ids%%$'\n'*}"
