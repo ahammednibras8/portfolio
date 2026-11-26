@@ -64,6 +64,8 @@ const personId = new URL("#person", homepage).href;
     <title>{title}</title>
 
     <script>
+      import approved from "../data/analytics-campaigns.json";
+
       function shouldLoadAnalytics() {
         if (
           import.meta.env.PUBLIC_ANALYTICS_ENABLED !== "true" ||
@@ -168,20 +170,6 @@ const personId = new URL("#person", homepage).href;
 
             const incoming = new URLSearchParams(window.location.search);
             const campaign = new URLSearchParams();
-            const approved = {
-              utm_source: [
-                "devto",
-                "discord",
-                "github",
-                "instagram",
-                "linkedin",
-                "medium",
-                "x",
-              ],
-              utm_medium: ["referral", "social"],
-              utm_campaign: ["portfolio_launch"],
-              utm_content: ["profile", "readme"],
-            };
 
             for (const [key, allowedValues] of Object.entries(approved)) {
               const [value, duplicate] = incoming.getAll(key);

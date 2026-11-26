@@ -2,7 +2,7 @@
 
 - Status: Accepted; homepage enabled in production, pageview receipt verified
 - Date: 2026-11-21
-- Updated: 2026-11-25
+- Updated: 2026-11-26
 
 ## Decision
 
@@ -150,13 +150,16 @@ The before-send filter accepts only the `event` type and creates a fresh payload
   use `experience`.
   For `section_view`, send only `section` with `experience` or `contact`.
 
-The approved `utm_source` values are `devto`, `discord`, `github`,
-`instagram`, `linkedin`, `medium`, and `x`. For the six profile links on DEV,
-Discord, Instagram, LinkedIn, Medium, and X, use `social` for `utm_medium`,
-`portfolio_launch` for `utm_campaign`, and `profile` for `utm_content`.
-The allowlist also accepts `referral` for `utm_medium` and `readme` for
-`utm_content`. Drop a campaign field when its key occurs more than once.
-Rebuild the query from approved labels and omit the fragment.
+The [campaign registry](../../src/data/analytics-campaigns.json) defines the
+approved values for `utm_source`, `utm_medium`, `utm_campaign`, and
+`utm_content`. The existing profile links use `social`, `portfolio_launch`,
+and `profile`. The Go CLI adds public labels for shared placements such as an
+event QR code or a résumé link. Review new labels before deployment because the
+registry is built into the public site. Use shared labels for each campaign and
+placement, as a visitor may forward a tagged link to someone else.
+
+Drop a campaign field when its key occurs more than once. Rebuild the query
+from approved labels and omit the fragment.
 
 Reject unknown signal names and other record types. Do not copy arbitrary SDK
 properties into the payload. Recheck the route, build switch, and browser
