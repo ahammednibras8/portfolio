@@ -72,12 +72,13 @@ and generate links for profiles, events, and applications.
 
 ## Deployment
 
-- Pull requests run the quality checks but do not create public preview deployments.
+- Pull requests run the quality checks. A verified pull request from this repository gets a Cloudflare preview and browser links to the available Playwright and Lighthouse reports.
 - A push to `main` runs the full verification suite and stores the exact build as a short-lived artifact. After the feedback deployment passes its smoke test, that same artifact is automatically uploaded to the `ahammed-nibras` Pages project. There is no separate production approval step.
 - Each deployment is identified by its Git commit SHA. Deploying a change does not require a version bump, tag, or GitHub release; named releases remain manually chosen milestones.
 - The production smoke test checks the homepage against the verified artifact, retrying HTTP failures and content mismatches up to six times. It fails if production never serves the expected bytes.
 - Cloudflare keeps each successful production deployment. Follow the [production rollback runbook](docs/production-rollback.md) when a release must be reverted.
 - The canonical public address is `ahammednibras.com`. The production `pages.dev` hostname redirects to it while immutable preview deployments remain available.
+- The weekly audit links to available browser reports in its GitHub Actions summary and its Discord notification. The full audit archive is available for 14 days.
 
 ## Run it locally
 

@@ -28,7 +28,11 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   ...(isCI ? { workers: 1 } : {}),
   reporter: isCI
-    ? [["github"], ["html", { open: "never" }]]
+    ? [
+        ["github"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "test-results/playwright.json" }],
+      ]
     : [["list"], ["html", { open: "never" }]],
 
   use: {
