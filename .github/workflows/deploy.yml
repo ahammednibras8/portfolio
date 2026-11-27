@@ -169,9 +169,11 @@ jobs:
       - name: Summarize verified feedback preview
         shell: bash
         run: |
-          printf '## Feedback preview\n\n' >> "$GITHUB_STEP_SUMMARY"
-          printf -- '- Preview: [%s](%s)\n' "$DEPLOYMENT_URL" "$DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
-          printf -- '- Commit: `%s`\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          {
+            printf '## Feedback preview\n\n'
+            printf -- '- Preview: [%s](%s)\n' "$DEPLOYMENT_URL" "$DEPLOYMENT_URL"
+            printf -- "- Commit: \`%s\`\n" "$GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
 
