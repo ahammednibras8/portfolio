@@ -64,7 +64,9 @@ Merging remains the publishing decision. Production builds and verifies the resu
 
 The weekly audit keeps its complete reports in a GitHub Actions artifact for 14 days. A separate publishing job uses the branch-restricted `ci-reports` environment and the `portfolio-ci-reports` Direct Upload project to serve the external-link totals and self-contained Playwright report.
 
-Anyone with the report URL can open it. Playwright reports with attachments and Lychee redirect details stay in the audit artifact. The publishing job checks the served HTML against the files it uploaded and verifies the `noindex` header before adding the exact deployment links to the run summary.
+Anyone with the report URL can open it. Failed audits can still publish the external-link totals if the link check produced a report. Failed Playwright reports, Playwright attachments, and Lychee redirect details stay in the audit artifact. The publishing job checks the served HTML against the files it uploaded and verifies the `noindex` header before adding the exact deployment links to the run summary.
+
+One Discord summary follows the audit and publishing jobs. It includes each verified browser link beside its check result and links to the audit archive when a browser report is unavailable.
 
 ## Recovery and rollback
 

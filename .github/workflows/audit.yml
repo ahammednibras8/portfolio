@@ -21,6 +21,12 @@ jobs:
     name: Cross-browser, links, dependencies, and production
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      browser_status: ${{ steps.browser-tests.outcome }}
+      link_status: ${{ steps.external-links.outcome }}
+      smoke_status: ${{ steps.production-smoke.outcome }}
+      dependency_status: ${{ steps.dependency-audit.outcome }}
+      archive_url: ${{ steps.audit-reports.outputs.artifact-url }}
 
     steps:
       - name: Checkout repository
@@ -108,56 +114,16 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Notify Discord of the weekly audit
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
-            printf 'Discord webhook is not configured.\n'
-            exit 0
-          fi
-
-          payload="$(jq -nc '
-            def status_text:
-              {"success":"Passed","failure":"Failed","skipped":"Skipped","cancelled":"Cancelled","":"Skipped"}[.] // "Unknown";
-            [
-              "**Firefox and WebKit** · \(env.BROWSER_STATUS | status_text)",
-              "**External links** · \(env.LINK_STATUS | status_text)",
-              "**Production smoke test** · \(env.SMOKE_STATUS | status_text)",
-              "**Dependencies** · \(env.DEPENDENCY_STATUS | status_text)"
-            ]
-            + (if env.AUDIT_REPORT_URL == "" then []
-               else ["", "[Download audit archive](\(env.AUDIT_REPORT_URL))"] end)
-            | {
-                allowed_mentions: {parse: []},
-                embeds: [{
-                  title: "Weekly portfolio audit · \(env.AUDIT_STATUS | status_text)",
-                  description: (join("\n"))
-                }]
-              }
-          ')"
-          if ! status="$(curl --silent --max-time 10 --output /dev/null \
-            --write-out '%{http_code}' --json "$payload" --url-query 'wait=true' \
-            --url "$DISCORD_WEBHOOK_URL")" || [[ "$status" != 200 ]]; then
-            printf '::warning::Discord weekly audit notification failed.\n'
-            exit 1
-          fi
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          AUDIT_STATUS: ${{ job.status }}
-          BROWSER_STATUS: ${{ steps.browser-tests.outcome }}
-          LINK_STATUS: ${{ steps.external-links.outcome }}
-          SMOKE_STATUS: ${{ steps.production-smoke.outcome }}
-          DEPENDENCY_STATUS: ${{ steps.dependency-audit.outcome }}
-          AUDIT_REPORT_URL: ${{ steps.audit-reports.outputs.artifact-url }}
-
   publish-reports:
     name: Publish weekly reports
     needs: audit
+    if: ${{ !cancelled() && needs.audit.outputs.archive_url != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: ci-reports
+    outputs:
+      playwright_url: ${{ steps.reports.outputs.playwright_url }}
+      links_url: ${{ steps.reports.outputs.links_url }}
 
     steps:
       - name: Checkout repository
@@ -182,12 +148,14 @@ jobs:
           path: ${{ runner.temp }}/audit-reports
 
       - name: Prepare browser reports
+        id: prepare
         shell: bash
         run: |
           archive="$RUNNER_TEMP/audit-reports"
           publish="$RUNNER_TEMP/publish-audit"
-          mkdir -p "$publish/external-links"
-          python3 - "$archive/.cache/lychee/external.md" > "$publish/external-links/index.html" <<'PY'
+          if [[ -s "$archive/.cache/lychee/external.md" ]]; then
+            mkdir -p "$publish/external-links"
+            python3 - "$archive/.cache/lychee/external.md" > "$publish/external-links/index.html" <<'PY'
           from html import escape
           from pathlib import Path
           import sys
@@ -206,17 +174,26 @@ jobs:
               print(f'<tr><th scope="row">{escape(status.strip())}</th><td>{escape(count.strip())}</td></tr>')
           print('</tbody></table></main></body></html>')
           PY
-
-          test -s "$archive/playwright-report/index.html"
-          if [[ -d "$archive/playwright-report/data" ]]; then
-            printf '::notice::The Playwright report has attachments and is available in the audit archive.\n'
-          else
-            mkdir -p "$publish/playwright"
-            cp "$archive/playwright-report/index.html" "$publish/playwright/index.html"
           fi
+
+          if [[ "$BROWSER_STATUS" == success && -s "$archive/playwright-report/index.html" ]]; then
+            if [[ -d "$archive/playwright-report/data" ]]; then
+              printf '::notice::The Playwright report has attachments and is available in the audit archive.\n'
+            else
+              mkdir -p "$publish/playwright"
+              cp "$archive/playwright-report/index.html" "$publish/playwright/index.html"
+            fi
+          fi
+
+          if [[ -d "$publish/external-links" || -d "$publish/playwright" ]]; then
+            printf 'has_reports=true\n' >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BROWSER_STATUS: ${{ needs.audit.outputs.browser_status }}
 
       - name: Upload weekly reports to Cloudflare Pages
         id: deploy
+        if: ${{ steps.prepare.outputs.has_reports == 'true' }}
         shell: bash
         run: |
           export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/audit-deploy.ndjson"
@@ -241,6 +218,8 @@ jobs:
           CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
 
       - name: Verify report URLs
+        id: reports
+        if: ${{ steps.deploy.outcome == 'success' }}
         shell: bash
         run: |
           for report in "$RUNNER_TEMP"/publish-audit/*/index.html; do
@@ -256,12 +235,81 @@ jobs:
             grep -Eiq '^x-robots-tag:[[:space:]]*noindex([[:space:]]|$)' "$RUNNER_TEMP/audit-report.headers"
           done
 
+          links_url=""
+          if [[ -d "$RUNNER_TEMP/publish-audit/external-links" ]]; then
+            links_url="$DEPLOYMENT_URL/external-links/"
+          fi
+          playwright_url=""
+          if [[ -d "$RUNNER_TEMP/publish-audit/playwright" ]]; then
+            playwright_url="$DEPLOYMENT_URL/playwright/"
+          fi
+
           {
             printf '## Weekly audit reports\n\n'
-            printf -- '- [External links](%s/external-links/)\n' "$DEPLOYMENT_URL"
-            if [[ -d "$RUNNER_TEMP/publish-audit/playwright" ]]; then
-              printf -- '- [Playwright](%s/playwright/)\n' "$DEPLOYMENT_URL"
+            if [[ -n "$links_url" ]]; then
+              printf -- '- [External links](%s)\n' "$links_url"
+            fi
+            if [[ -n "$playwright_url" ]]; then
+              printf -- '- [Playwright](%s)\n' "$playwright_url"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+          printf 'links_url=%s\nplaywright_url=%s\n' "$links_url" "$playwright_url" >> "$GITHUB_OUTPUT"
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+
+  notify:
+    name: Notify Discord
+    needs: [audit, publish-reports]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Send weekly audit summary
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
+            printf 'Discord webhook is not configured.\n'
+            exit 0
+          fi
+
+          payload="$(jq -nc '
+            def status_text:
+              {"success":"Passed","failure":"Failed","skipped":"Skipped","cancelled":"Cancelled","":"Skipped"}[.] // "Unknown";
+            def report_link($label; $url):
+              if $url == "" then "" else " · [\($label)](\($url))" end;
+            [
+              "**Firefox and WebKit** · \(env.BROWSER_STATUS | status_text)\(report_link("Playwright report"; env.PLAYWRIGHT_URL))",
+              "**External links** · \(env.LINK_STATUS | status_text)\(report_link("Link report"; env.LINKS_URL))",
+              "**Production smoke test** · \(env.SMOKE_STATUS | status_text)",
+              "**Dependencies** · \(env.DEPENDENCY_STATUS | status_text)"
+            ]
+            + (if env.AUDIT_REPORT_URL != "" and (env.PLAYWRIGHT_URL == "" or env.LINKS_URL == "")
+               then ["", "[Download audit archive](\(env.AUDIT_REPORT_URL))"] else [] end)
+            | {
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  title: "Weekly portfolio audit · \(env.AUDIT_STATUS | status_text)",
+                  description: (join("\n"))
+                }]
+              }
+          ')"
+          if ! status="$(curl --silent --max-time 10 --output /dev/null \
+            --write-out '%{http_code}' --json "$payload" --url-query 'wait=true' \
+            --url "$DISCORD_WEBHOOK_URL")" || [[ "$status" != 200 ]]; then
+            printf '::warning::Discord weekly audit notification failed.\n'
+            exit 1
+          fi
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          AUDIT_STATUS: ${{ needs.audit.result }}
+          BROWSER_STATUS: ${{ needs.audit.outputs.browser_status }}
+          LINK_STATUS: ${{ needs.audit.outputs.link_status }}
+          SMOKE_STATUS: ${{ needs.audit.outputs.smoke_status }}
+          DEPENDENCY_STATUS: ${{ needs.audit.outputs.dependency_status }}
+          AUDIT_REPORT_URL: ${{ needs.audit.outputs.archive_url }}
+          PLAYWRIGHT_URL: ${{ needs.publish-reports.outputs.playwright_url }}
+          LINKS_URL: ${{ needs.publish-reports.outputs.links_url }}
