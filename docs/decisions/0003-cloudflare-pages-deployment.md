@@ -38,12 +38,12 @@ On 2026-11-19, Nibras approved automatic deployment to remove the repeated produ
 - The `production` environment must not require reviewers or a wait timer. Production proceeds automatically only after repository verification and feedback verification pass. Keep the environment's deployment branch restriction set to `main`.
 - Use the repository-pinned Wrangler dependency. Do not depend on a global CLI or a second deployment action.
 - Do not add Pages Functions, Workers, R2, another server, or another build pipeline under this decision.
-- Pull requests do not receive public preview deployments. Feedback previews are created only after a change reaches `main`, remain outside search indexes, and do not receive production-environment credentials.
+- Preview deployments on pull requests are limited to verified branches from this repository. Feedback previews are created only after a change reaches `main`. Both use their own deployment environments and stay outside search indexes.
 - The apex `https://ahammednibras.com` is canonical. `www` and the production `ahammed-nibras.pages.dev` hostname must redirect permanently while preserving paths and query strings. Hashed Pages preview URLs must remain reachable.
 
 ## Where it is used
 
-- `.github/workflows/ci.yml` verifies pull requests without deployment credentials.
+- `.github/workflows/ci.yml` verifies pull requests without deployment credentials. Its separate preview job uses the `pr-preview` environment to deploy the verified build and its browser reports.
 - `.github/workflows/deploy.yml` verifies pushes to `main`, transfers the resulting `portfolio-dist-<commit>` artifact between jobs, stores reports separately, deploys and verifies the feedback preview, and automatically uploads the same site artifact to production.
 - The `PRODUCTION_URL` repository variable supplies the canonical site origin during the production build.
 - The `production` environment limits deployment to `main`, has no required reviewer or wait timer, and supplies `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_PAGES_PROJECT`, and `PRODUCTION_URL` to the deployment job. These protection settings are managed in GitHub, separately from the workflow file.
@@ -53,6 +53,8 @@ On 2026-11-19, Nibras approved automatic deployment to remove the repeated produ
 ## Proposed pre-merge review for issue #64
 
 Deploy verified builds from trusted same-repository pull requests before merge. After the preview passes its checks, record the full commit SHA and the deployment-specific URL returned by Cloudflare in the GitHub run summary. Post the preview URL, CI result, test counts, Lighthouse scores, and report links in one pull request comment. Update the comment when a newer revision passes. If reports are unavailable, still post the verified preview URL and CI result. A shared branch alias can move when another build uploads, so it cannot identify the revision under review.
+
+Publish the self-contained Playwright HTML and one representative Lighthouse report per audited page to the separate `portfolio-ci-reports` project. Use the verified deployment URLs in the pull request comment and Discord summary. Playwright diagnostics and the full Lighthouse output remain in GitHub Actions artifacts.
 
 When the Discord webhook is configured, send one message after publishing the GitHub preview comment. Link the pull request using its title and include a related issue when the PR description names one with `Related: #NUMBER`. Include the same preview URL, CI result, lowest Lighthouse score across the audited pages for each category, and a link to the GitHub comment. Log a warning if Discord delivery fails and keep the GitHub preview result available.
 
