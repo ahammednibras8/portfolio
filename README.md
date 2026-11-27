@@ -2,7 +2,7 @@
 
 This repository contains my personal engineering portfolio. It explains what I built, what I owned, the decisions I made, and the evidence behind the work.
 
-Current version: `v0.2.1`.
+Current version: `v0.2.2`.
 
 Production: [ahammednibras.com](https://ahammednibras.com/)
 
