@@ -78,6 +78,7 @@ and generate links for profiles, events, and applications.
 - The production smoke test checks the homepage against the verified artifact, retrying HTTP failures and content mismatches up to six times. It fails if production never serves the expected bytes.
 - Cloudflare keeps each successful production deployment. Follow the [production rollback runbook](docs/production-rollback.md) when a release must be reverted.
 - The canonical public address is `ahammednibras.com`. The production `pages.dev` hostname redirects to it while immutable preview deployments remain available.
+- A successful weekly audit links to the external-link totals and self-contained Playwright report in its GitHub Actions summary. The full audit archive is available for 14 days.
 
 ## Run it locally
 
