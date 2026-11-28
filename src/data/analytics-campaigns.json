@@ -3,16 +3,19 @@
     "devto",
     "discord",
     "github",
+    "google-job",
     "instagram",
     "linkedin",
     "medium",
     "x"
   ],
   "utm_medium": [
+    "google-careers",
     "referral",
     "social"
   ],
   "utm_campaign": [
+    "job",
     "portfolio_launch"
   ],
   "utm_content": [
